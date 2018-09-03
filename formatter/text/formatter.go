@@ -1,9 +1,9 @@
 package text
 
-import "strconv"
+import "fmt"
 
 type Formatter struct{}
 
-func (*Formatter) Format(i int) []byte {
-	return []byte(strconv.Itoa(i) + "\n")
+func (*Formatter) Format(record *Record) []byte {
+	return []byte(fmt.Sprint(record))
 }

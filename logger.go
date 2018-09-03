@@ -48,19 +48,19 @@ func (this *Logger) Unlink(f Formatter, w Writer) bool {
 	return false
 }
 
-func (this *Logger) UnlinkAll(f Formatter, w Writer) {
+func (this *Logger) UnlinkAll() {
 	this.links.Init()
 }
 
 func (this *Logger) Log() {
 	formatMap := make(map[Formatter][]byte)
-	i := this.gatherer.gather()
+	record := this.gatherer.gather()
 	for e := this.links.Front(); e != nil; e = e.Next() {
 		l := e.Value.(link)
 		formatter := l.f
 		format, ok := formatMap[formatter]
 		if !ok {
-			format = formatter.Format(i)
+			format = formatter.Format(record)
 			formatMap[formatter] = format
 		}
 		l.w.Write(format)

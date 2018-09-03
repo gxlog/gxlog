@@ -1,10 +1,7 @@
 package gxlog
 
-type gatherer struct {
-	seq int
-}
+type gatherer struct{}
 
-func (this *gatherer) gather() int {
-	this.seq++
-	return this.seq
+func (this *gatherer) gather() *Record {
+	return &Record{}
 }
