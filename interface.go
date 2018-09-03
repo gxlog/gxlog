@@ -18,25 +18,24 @@ const (
 
 type LeveledLogger interface {
 	Debug(args ...interface{})
-	Debugf(fmt string, args ...interface{})
+	Debugf(fmtstr string, args ...interface{})
 	Info(args ...interface{})
-	Infof(fmt string, args ...interface{})
+	Infof(fmtstr string, args ...interface{})
 	Warn(args ...interface{})
-	Warnf(fmt string, args ...interface{})
+	Warnf(fmtstr string, args ...interface{})
 	Error(args ...interface{})
-	Errorf(fmt string, args ...interface{})
+	Errorf(fmtstr string, args ...interface{})
 	Fatal(args ...interface{})
-	Fatalf(fmt string, args ...interface{})
+	Fatalf(fmtstr string, args ...interface{})
 }
 
 type Record struct {
-	Time  time.Time
-	Level LogLevel
-	Func  string
-	Line  int
-	Path  string
-	File  string
-	Msg   []byte
+	Time     time.Time
+	Level    LogLevel
+	Pathname string
+	Line     int
+	Func     string
+	Msg      []byte
 }
 
 type Formatter interface {
