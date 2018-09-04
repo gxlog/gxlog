@@ -56,46 +56,46 @@ func (this *Logger) UnlinkAll() {
 }
 
 func (this *Logger) Debug(args ...interface{}) {
-	this.log(LevelDebug, args)
+	this.Log(LevelDebug, args)
 }
 
 func (this *Logger) Debugf(fmtstr string, args ...interface{}) {
-	this.logf(LevelDebug, fmtstr, args)
+	this.Logf(LevelDebug, fmtstr, args)
 }
 
 func (this *Logger) Info(args ...interface{}) {
-	this.log(LevelInfo, args)
+	this.Log(LevelInfo, args)
 }
 
 func (this *Logger) Infof(fmtstr string, args ...interface{}) {
-	this.logf(LevelInfo, fmtstr, args)
+	this.Logf(LevelInfo, fmtstr, args)
 }
 
 func (this *Logger) Warn(args ...interface{}) {
-	this.log(LevelWarn, args)
+	this.Log(LevelWarn, args)
 }
 
 func (this *Logger) Warnf(fmtstr string, args ...interface{}) {
-	this.logf(LevelWarn, fmtstr, args)
+	this.Logf(LevelWarn, fmtstr, args)
 }
 
 func (this *Logger) Error(args ...interface{}) {
-	this.log(LevelError, args)
+	this.Log(LevelError, args)
 }
 
 func (this *Logger) Errorf(fmtstr string, args ...interface{}) {
-	this.logf(LevelError, fmtstr, args)
+	this.Logf(LevelError, fmtstr, args)
 }
 
 func (this *Logger) Fatal(args ...interface{}) {
-	this.log(LevelFatal, args)
+	this.Log(LevelFatal, args)
 }
 
 func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
-	this.logf(LevelFatal, fmtstr, args)
+	this.Logf(LevelFatal, fmtstr, args)
 }
 
-func (this *Logger) log(level LogLevel, args []interface{}) {
+func (this *Logger) Log(level LogLevel, args []interface{}) {
 	if this.level <= level {
 		var buf bytes.Buffer
 		fmt.Fprint(&buf, args...)
@@ -103,7 +103,7 @@ func (this *Logger) log(level LogLevel, args []interface{}) {
 	}
 }
 
-func (this *Logger) logf(level LogLevel, fmtstr string, args []interface{}) {
+func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
 	if this.level <= level {
 		var buf bytes.Buffer
 		fmt.Fprintf(&buf, fmtstr, args...)
