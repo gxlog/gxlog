@@ -1,7 +1,6 @@
 package text
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/gratonos/gxlog"
@@ -12,15 +11,15 @@ const (
 )
 
 type headerFormatter interface {
-	formatHeader(*gxlog.Record) []byte
+	formatHeader(buf []byte, record *gxlog.Record) []byte
 }
 
 type staticFormatter struct {
 	content []byte
 }
 
-func (this *staticFormatter) formatHeader(record *gxlog.Record) []byte {
-	return this.content
+func (this *staticFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+	return append(buf, this.content...)
 }
 
 type timeFormatter struct {
@@ -38,10 +37,8 @@ func createTimeFormatter(property, fmtspec string) *timeFormatter {
 	return &timeFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *timeFormatter) formatHeader(record *gxlog.Record) []byte {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, this.fmtspec, record.Time.Format(this.property))
-	return buf.Bytes()
+func (this *timeFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+	return append(buf, fmt.Sprintf(this.fmtspec, record.Time.Format(this.property))...)
 }
 
 type levelFormatter struct {
@@ -56,7 +53,7 @@ func createLevelFormatter(property, fmtspec string) *levelFormatter {
 	return &levelFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *levelFormatter) formatHeader(record *gxlog.Record) []byte {
+func (this *levelFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
 	var level string
 	switch record.Level {
 	case gxlog.LevelDebug:
@@ -70,9 +67,7 @@ func (this *levelFormatter) formatHeader(record *gxlog.Record) []byte {
 	case gxlog.LevelFatal:
 		level = "FATAL"
 	}
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, this.fmtspec, level)
-	return buf.Bytes()
+	return append(buf, fmt.Sprintf(this.fmtspec, level)...)
 }
 
 type pathnameFormatter struct {
@@ -87,10 +82,8 @@ func createPathnameFormatter(property, fmtspec string) *pathnameFormatter {
 	return &pathnameFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *pathnameFormatter) formatHeader(record *gxlog.Record) []byte {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, this.fmtspec, record.Pathname)
-	return buf.Bytes()
+func (this *pathnameFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+	return append(buf, fmt.Sprintf(this.fmtspec, record.Pathname)...)
 }
 
 type lineFormatter struct {
@@ -105,10 +98,8 @@ func createLineFormatter(property, fmtspec string) *lineFormatter {
 	return &lineFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *lineFormatter) formatHeader(record *gxlog.Record) []byte {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, this.fmtspec, record.Line)
-	return buf.Bytes()
+func (this *lineFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+	return append(buf, fmt.Sprintf(this.fmtspec, record.Line)...)
 }
 
 type funcFormatter struct {
@@ -123,10 +114,8 @@ func createFuncFormatter(property, fmtspec string) *funcFormatter {
 	return &funcFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *funcFormatter) formatHeader(record *gxlog.Record) []byte {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, this.fmtspec, record.Func)
-	return buf.Bytes()
+func (this *funcFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+	return append(buf, fmt.Sprintf(this.fmtspec, record.Func)...)
 }
 
 type msgFormatter struct {
@@ -141,8 +130,6 @@ func createMsgFormatter(property, fmtspec string) *msgFormatter {
 	return &msgFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *msgFormatter) formatHeader(record *gxlog.Record) []byte {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, this.fmtspec, record.Msg)
-	return buf.Bytes()
+func (this *msgFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+	return append(buf, fmt.Sprintf(this.fmtspec, record.Msg)...)
 }

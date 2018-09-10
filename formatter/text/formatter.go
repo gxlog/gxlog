@@ -1,7 +1,6 @@
 package text
 
 import (
-	"bytes"
 	"regexp"
 	"strings"
 
@@ -12,6 +11,7 @@ var headerRegexp = regexp.MustCompile("{{([^:%]+?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
 	headerFormatters []headerFormatter
+	buf              []byte
 }
 
 func New(header string) *Formatter {
@@ -41,11 +41,11 @@ func (this *Formatter) SetHeader(header string) {
 }
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
-	var buf bytes.Buffer
+	this.buf = this.buf[:0]
 	for _, f := range this.headerFormatters {
-		buf.Write(f.formatHeader(record))
+		this.buf = f.formatHeader(this.buf, record)
 	}
-	return buf.Bytes()
+	return this.buf
 }
 
 func (this *Formatter) addStaticFormatter(content string) {
