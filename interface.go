@@ -35,7 +35,7 @@ type Record struct {
 	Pathname string
 	Line     int
 	Func     string
-	Msg      []byte
+	Msg      string
 }
 
 type Formatter interface {

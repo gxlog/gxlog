@@ -7,7 +7,7 @@ import (
 
 type gatherer struct{}
 
-func (this *gatherer) gather(calldepth int, level LogLevel, msg []byte) *Record {
+func (this *gatherer) gather(calldepth int, level LogLevel, msg string) *Record {
 	now := time.Now()
 	var funcName string
 	pc, file, line, ok := runtime.Caller(calldepth)

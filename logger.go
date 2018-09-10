@@ -1,7 +1,6 @@
 package gxlog
 
 import (
-	"bytes"
 	"container/list"
 	"fmt"
 )
@@ -97,21 +96,17 @@ func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
 
 func (this *Logger) Log(level LogLevel, args []interface{}) {
 	if this.level <= level {
-		var buf bytes.Buffer
-		fmt.Fprint(&buf, args...)
-		this.write(level, buf.Bytes())
+		this.write(level, fmt.Sprint(args...))
 	}
 }
 
 func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
 	if this.level <= level {
-		var buf bytes.Buffer
-		fmt.Fprintf(&buf, fmtstr, args...)
-		this.write(level, buf.Bytes())
+		this.write(level, fmt.Sprintf(fmtstr, args...))
 	}
 }
 
-func (this *Logger) write(level LogLevel, msg []byte) {
+func (this *Logger) write(level LogLevel, msg string) {
 	formatMap := make(map[Formatter][]byte)
 	record := this.gatherer.gather(4, level, msg)
 	for e := this.links.Front(); e != nil; e = e.Next() {
