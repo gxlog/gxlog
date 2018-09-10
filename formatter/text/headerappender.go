@@ -10,50 +10,50 @@ const (
 	DefaultTimeLayout = "2006-01-02 15:04:05.000000"
 )
 
-type headerFormatter interface {
-	formatHeader(buf []byte, record *gxlog.Record) []byte
+type headerAppender interface {
+	appendHeader(buf []byte, record *gxlog.Record) []byte
 }
 
-type staticFormatter struct {
+type staticAppender struct {
 	content []byte
 }
 
-func (this *staticFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *staticAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	return append(buf, this.content...)
 }
 
-type timeFormatter struct {
+type timeAppender struct {
 	property string
 	fmtspec  string
 }
 
-func createTimeFormatter(property, fmtspec string) *timeFormatter {
+func createTimeAppender(property, fmtspec string) *timeAppender {
 	if property == "" {
 		property = DefaultTimeLayout
 	}
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}
-	return &timeFormatter{property: property, fmtspec: fmtspec}
+	return &timeAppender{property: property, fmtspec: fmtspec}
 }
 
-func (this *timeFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *timeAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	return append(buf, fmt.Sprintf(this.fmtspec, record.Time.Format(this.property))...)
 }
 
-type levelFormatter struct {
+type levelAppender struct {
 	property string
 	fmtspec  string
 }
 
-func createLevelFormatter(property, fmtspec string) *levelFormatter {
+func createLevelAppender(property, fmtspec string) *levelAppender {
 	if fmtspec == "" {
 		fmtspec = "%-5s"
 	}
-	return &levelFormatter{property: property, fmtspec: fmtspec}
+	return &levelAppender{property: property, fmtspec: fmtspec}
 }
 
-func (this *levelFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *levelAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	var level string
 	switch record.Level {
 	case gxlog.LevelDebug:
@@ -70,66 +70,66 @@ func (this *levelFormatter) formatHeader(buf []byte, record *gxlog.Record) []byt
 	return append(buf, fmt.Sprintf(this.fmtspec, level)...)
 }
 
-type pathnameFormatter struct {
+type pathnameAppender struct {
 	property string
 	fmtspec  string
 }
 
-func createPathnameFormatter(property, fmtspec string) *pathnameFormatter {
+func createPathnameAppender(property, fmtspec string) *pathnameAppender {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}
-	return &pathnameFormatter{property: property, fmtspec: fmtspec}
+	return &pathnameAppender{property: property, fmtspec: fmtspec}
 }
 
-func (this *pathnameFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *pathnameAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	return append(buf, fmt.Sprintf(this.fmtspec, record.Pathname)...)
 }
 
-type lineFormatter struct {
+type lineAppender struct {
 	property string
 	fmtspec  string
 }
 
-func createLineFormatter(property, fmtspec string) *lineFormatter {
+func createLineAppender(property, fmtspec string) *lineAppender {
 	if fmtspec == "" {
 		fmtspec = "%d"
 	}
-	return &lineFormatter{property: property, fmtspec: fmtspec}
+	return &lineAppender{property: property, fmtspec: fmtspec}
 }
 
-func (this *lineFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *lineAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	return append(buf, fmt.Sprintf(this.fmtspec, record.Line)...)
 }
 
-type funcFormatter struct {
+type funcAppender struct {
 	property string
 	fmtspec  string
 }
 
-func createFuncFormatter(property, fmtspec string) *funcFormatter {
+func createFuncAppender(property, fmtspec string) *funcAppender {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}
-	return &funcFormatter{property: property, fmtspec: fmtspec}
+	return &funcAppender{property: property, fmtspec: fmtspec}
 }
 
-func (this *funcFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *funcAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	return append(buf, fmt.Sprintf(this.fmtspec, record.Func)...)
 }
 
-type msgFormatter struct {
+type msgAppender struct {
 	property string
 	fmtspec  string
 }
 
-func createMsgFormatter(property, fmtspec string) *msgFormatter {
+func createMsgAppender(property, fmtspec string) *msgAppender {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}
-	return &msgFormatter{property: property, fmtspec: fmtspec}
+	return &msgAppender{property: property, fmtspec: fmtspec}
 }
 
-func (this *msgFormatter) formatHeader(buf []byte, record *gxlog.Record) []byte {
+func (this *msgAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
 	return append(buf, fmt.Sprintf(this.fmtspec, record.Msg)...)
 }

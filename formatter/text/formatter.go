@@ -10,8 +10,8 @@ import (
 var headerRegexp = regexp.MustCompile("{{([^:%]+?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
-	headerFormatters []headerFormatter
-	buf              []byte
+	headerAppenders []headerAppender
+	buf             []byte
 }
 
 func New(header string) *Formatter {
@@ -21,20 +21,20 @@ func New(header string) *Formatter {
 }
 
 func (this *Formatter) SetHeader(header string) {
-	this.headerFormatters = this.headerFormatters[:0]
+	this.headerAppenders = this.headerAppenders[:0]
 	for header != "" {
 		indexes := headerRegexp.FindStringSubmatchIndex(header)
 		if indexes == nil {
-			this.addStaticFormatter(header)
+			this.addStaticAppender(header)
 			return
 		}
 		begin, end := indexes[0], indexes[1]
 		if begin != 0 {
-			this.addStaticFormatter(header[:begin])
+			this.addStaticAppender(header[:begin])
 		}
 		element, property, fmtspec, ok := extractElement(indexes[2:], header)
 		if ok {
-			this.addFormatter(element, property, fmtspec)
+			this.addAppender(element, property, fmtspec)
 		}
 		header = header[end:]
 	}
@@ -42,35 +42,35 @@ func (this *Formatter) SetHeader(header string) {
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
 	this.buf = this.buf[:0]
-	for _, f := range this.headerFormatters {
-		this.buf = f.formatHeader(this.buf, record)
+	for _, f := range this.headerAppenders {
+		this.buf = f.appendHeader(this.buf, record)
 	}
 	return this.buf
 }
 
-func (this *Formatter) addStaticFormatter(content string) {
-	f := &staticFormatter{content: []byte(content)}
-	this.headerFormatters = append(this.headerFormatters, f)
+func (this *Formatter) addStaticAppender(content string) {
+	f := &staticAppender{content: []byte(content)}
+	this.headerAppenders = append(this.headerAppenders, f)
 }
 
-func (this *Formatter) addFormatter(element, property, fmtspec string) {
-	var f headerFormatter
+func (this *Formatter) addAppender(element, property, fmtspec string) {
+	var f headerAppender
 	switch element {
 	case "time":
-		f = createTimeFormatter(property, fmtspec)
+		f = createTimeAppender(property, fmtspec)
 	case "level":
-		f = createLevelFormatter(property, fmtspec)
+		f = createLevelAppender(property, fmtspec)
 	case "pathname":
-		f = createPathnameFormatter(property, fmtspec)
+		f = createPathnameAppender(property, fmtspec)
 	case "line":
-		f = createLineFormatter(property, fmtspec)
+		f = createLineAppender(property, fmtspec)
 	case "func":
-		f = createFuncFormatter(property, fmtspec)
+		f = createFuncAppender(property, fmtspec)
 	case "msg":
-		f = createMsgFormatter(property, fmtspec)
+		f = createMsgAppender(property, fmtspec)
 	}
 	if f != nil {
-		this.headerFormatters = append(this.headerFormatters, f)
+		this.headerAppenders = append(this.headerAppenders, f)
 	}
 }
 
