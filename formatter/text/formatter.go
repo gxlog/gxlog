@@ -11,6 +11,8 @@ var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
 	headerAppenders []headerAppender
+	prefix          []byte
+	suffix          []byte
 	buf             []byte
 }
 
@@ -22,20 +24,18 @@ func New(header string) *Formatter {
 
 func (this *Formatter) SetHeader(header string) {
 	this.headerAppenders = this.headerAppenders[:0]
+	this.prefix = this.prefix[:0]
+	this.suffix = this.suffix[:0]
 	for header != "" {
 		indexes := headerRegexp.FindStringSubmatchIndex(header)
 		if indexes == nil {
-			this.addStaticAppender(header)
-			return
+			this.suffix = append(this.prefix, header...)
+			break
 		}
 		begin, end := indexes[0], indexes[1]
-		if begin != 0 {
-			this.addStaticAppender(header[:begin])
-		}
-		element, property, fmtspec, ok := extractElement(indexes[2:], header)
-		if ok {
-			this.addAppender(element, property, fmtspec)
-		}
+		prefix := header[:begin]
+		element, property, fmtspec := extractElement(indexes, header)
+		this.addAppender(element, property, fmtspec, prefix)
 		header = header[end:]
 	}
 }
@@ -45,51 +45,46 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	for _, f := range this.headerAppenders {
 		this.buf = f.appendHeader(this.buf, record)
 	}
+	this.buf = append(this.buf, this.suffix...)
 	return this.buf
 }
 
-func (this *Formatter) addStaticAppender(content string) {
-	f := &staticAppender{content: []byte(content)}
-	this.headerAppenders = append(this.headerAppenders, f)
-}
-
-func (this *Formatter) addAppender(element, property, fmtspec string) {
+func (this *Formatter) addAppender(element, property, fmtspec, prefix string) {
+	this.prefix = append(this.prefix, prefix...)
 	var f headerAppender
 	switch element {
 	case "time":
-		f = createTimeAppender(property, fmtspec)
+		f = createTimeAppender(property, fmtspec, this.prefix)
 	case "level":
-		f = createLevelAppender(property, fmtspec)
+		f = createLevelAppender(property, fmtspec, this.prefix)
 	case "pathname":
-		f = createPathnameAppender(property, fmtspec)
+		f = createPathnameAppender(property, fmtspec, this.prefix)
 	case "line":
-		f = createLineAppender(property, fmtspec)
+		f = createLineAppender(property, fmtspec, this.prefix)
 	case "func":
-		f = createFuncAppender(property, fmtspec)
+		f = createFuncAppender(property, fmtspec, this.prefix)
 	case "msg":
-		f = createMsgAppender(property, fmtspec)
+		f = createMsgAppender(property, fmtspec, this.prefix)
 	}
 	if f != nil {
 		this.headerAppenders = append(this.headerAppenders, f)
+		this.prefix = this.prefix[:0]
 	}
 }
 
-func extractElement(indexes []int, header string) (element, property, fmtspec string, ok bool) {
-	begin, end := indexes[0], indexes[1]
-	if begin < end {
-		element = strings.TrimSpace(header[begin:end])
-	}
-	begin, end = indexes[2], indexes[3]
-	if begin < end {
-		property = strings.TrimSpace(header[begin:end])
-	}
-	begin, end = indexes[4], indexes[5]
-	if begin < end {
-		fmtspec = strings.TrimSpace(header[begin:end])
-	}
+func extractElement(indexes []int, header string) (element, property, fmtspec string) {
+	element = getField(header, indexes[2], indexes[3])
+	property = getField(header, indexes[4], indexes[5])
+	fmtspec = getField(header, indexes[6], indexes[7])
 	if fmtspec == "%" {
 		fmtspec = ""
 	}
-	ok = (element != "")
-	return
+	return element, property, fmtspec
+}
+
+func getField(str string, begin, end int) string {
+	if begin < end {
+		return strings.TrimSpace(str[begin:end])
+	}
+	return ""
 }
