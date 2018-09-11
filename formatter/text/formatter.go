@@ -7,7 +7,7 @@ import (
 	"github.com/gratonos/gxlog"
 )
 
-var headerRegexp = regexp.MustCompile("{{([^:%]+?)(?::([^%]*?))?(%.*?)?}}")
+var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
 	headerAppenders []headerAppender
