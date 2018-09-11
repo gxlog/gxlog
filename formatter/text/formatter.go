@@ -10,7 +10,7 @@ import (
 var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
-	headerAppenders []headerAppender
+	headerAppenders []*headerAppender
 	prefix          []byte
 	suffix          []byte
 	buf             []byte
@@ -42,8 +42,8 @@ func (this *Formatter) SetHeader(header string) {
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
 	this.buf = this.buf[:0]
-	for _, f := range this.headerAppenders {
-		this.buf = f.appendHeader(this.buf, record)
+	for _, appender := range this.headerAppenders {
+		this.buf = appender.appendHeader(this.buf, record)
 	}
 	this.buf = append(this.buf, this.suffix...)
 	return this.buf
@@ -51,29 +51,15 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 
 func (this *Formatter) addAppender(element, property, fmtspec, prefix string) {
 	this.prefix = append(this.prefix, prefix...)
-	var f headerAppender
-	switch element {
-	case "time":
-		f = createTimeAppender(property, fmtspec, this.prefix)
-	case "level":
-		f = createLevelAppender(property, fmtspec, this.prefix)
-	case "pathname":
-		f = createPathnameAppender(property, fmtspec, this.prefix)
-	case "line":
-		f = createLineAppender(property, fmtspec, this.prefix)
-	case "func":
-		f = createFuncAppender(property, fmtspec, this.prefix)
-	case "msg":
-		f = createMsgAppender(property, fmtspec, this.prefix)
-	}
-	if f != nil {
-		this.headerAppenders = append(this.headerAppenders, f)
+	appender := newHeaderAppender(element, property, fmtspec, prefix)
+	if appender != nil {
+		this.headerAppenders = append(this.headerAppenders, appender)
 		this.prefix = this.prefix[:0]
 	}
 }
 
 func extractElement(indexes []int, header string) (element, property, fmtspec string) {
-	element = getField(header, indexes[2], indexes[3])
+	element = strings.ToLower(getField(header, indexes[2], indexes[3]))
 	property = getField(header, indexes[4], indexes[5])
 	fmtspec = getField(header, indexes[6], indexes[7])
 	if fmtspec == "%" {
