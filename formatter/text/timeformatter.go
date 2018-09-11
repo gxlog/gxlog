@@ -26,5 +26,10 @@ func newTimeFormatter(property, fmtspec string) *timeFormatter {
 }
 
 func (this *timeFormatter) formatElement(record *gxlog.Record) string {
-	return fmt.Sprintf(this.fmtspec, record.Time.Format(this.property))
+	desc := record.Time.Format(this.property)
+	if this.fmtspec == "%s" {
+		return desc
+	} else {
+		return fmt.Sprintf(this.fmtspec, desc)
+	}
 }

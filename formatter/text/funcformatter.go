@@ -19,5 +19,9 @@ func newFuncFormatter(property, fmtspec string) *funcFormatter {
 }
 
 func (this *funcFormatter) formatElement(record *gxlog.Record) string {
-	return fmt.Sprintf(this.fmtspec, record.Func)
+	if this.fmtspec == "%s" {
+		return record.Func
+	} else {
+		return fmt.Sprintf(this.fmtspec, record.Func)
+	}
 }

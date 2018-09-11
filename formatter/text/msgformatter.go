@@ -19,5 +19,9 @@ func newMsgFormatter(property, fmtspec string) *msgFormatter {
 }
 
 func (this *msgFormatter) formatElement(record *gxlog.Record) string {
-	return fmt.Sprintf(this.fmtspec, record.Msg)
+	if this.fmtspec == "%s" {
+		return record.Msg
+	} else {
+		return fmt.Sprintf(this.fmtspec, record.Msg)
+	}
 }
