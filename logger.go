@@ -117,7 +117,7 @@ func (this *Logger) write(level LogLevel, msg string) {
 			format = formatter.Format(record)
 			formatMap[formatter] = format
 		}
-		l.w.Write(format)
+		l.w.Write(format, record)
 	}
 }
 

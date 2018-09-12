@@ -1,7 +1,6 @@
 package gxlog
 
 import (
-	"io"
 	"time"
 )
 
@@ -43,5 +42,5 @@ type Formatter interface {
 }
 
 type Writer interface {
-	io.Writer
+	Write(bs []byte, record *Record)
 }
