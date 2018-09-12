@@ -6,8 +6,8 @@ import (
 )
 
 type link struct {
-	f Formatter
-	w Writer
+	ft Formatter
+	wt Writer
 }
 
 type Logger struct {
@@ -16,33 +16,33 @@ type Logger struct {
 	gatherer gatherer
 }
 
-func (this *Logger) Link(f Formatter, w Writer) bool {
-	l := link{f, w}
-	if this.linkExists(l) {
+func (this *Logger) Link(ft Formatter, wt Writer) bool {
+	lnk := link{ft, wt}
+	if this.linkExists(lnk) {
 		return false
 	}
-	this.links.PushBack(l)
+	this.links.PushBack(lnk)
 	return true
 }
 
-func (this *Logger) LinkBefore(f Formatter, w Writer, mark link) bool {
-	l := link{f, w}
-	if this.linkExists(l) {
+func (this *Logger) LinkBefore(ft Formatter, wt Writer, mark link) bool {
+	lnk := link{ft, wt}
+	if this.linkExists(lnk) {
 		return false
 	}
 	for e := this.links.Front(); e != nil; e = e.Next() {
 		if e.Value.(link) == mark {
-			this.links.InsertBefore(l, e)
+			this.links.InsertBefore(lnk, e)
 			return true
 		}
 	}
 	return false
 }
 
-func (this *Logger) Unlink(f Formatter, w Writer) bool {
-	l := link{f, w}
+func (this *Logger) Unlink(ft Formatter, wt Writer) bool {
+	lnk := link{ft, wt}
 	for e := this.links.Front(); e != nil; e = e.Next() {
-		if e.Value.(link) == l {
+		if e.Value.(link) == lnk {
 			this.links.Remove(e)
 			return true
 		}
@@ -110,20 +110,20 @@ func (this *Logger) write(level LogLevel, msg string) {
 	formatMap := make(map[Formatter][]byte)
 	record := this.gatherer.gather(4, level, msg)
 	for e := this.links.Front(); e != nil; e = e.Next() {
-		l := e.Value.(link)
-		formatter := l.f
+		lnk := e.Value.(link)
+		formatter := lnk.ft
 		format, ok := formatMap[formatter]
 		if !ok {
 			format = formatter.Format(record)
 			formatMap[formatter] = format
 		}
-		l.w.Write(format, record)
+		lnk.wt.Write(format, record)
 	}
 }
 
-func (this *Logger) linkExists(l link) bool {
+func (this *Logger) linkExists(lnk link) bool {
 	for e := this.links.Front(); e != nil; e = e.Next() {
-		if e.Value.(link) == l {
+		if e.Value.(link) == lnk {
 			return true
 		}
 	}
