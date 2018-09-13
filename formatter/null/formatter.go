@@ -1,9 +1,8 @@
 package null
 
-import "github.com/gratonos/gxlog"
+import (
+	"github.com/gratonos/gxlog"
+	"github.com/gratonos/gxlog/formatter"
+)
 
-type Formatter struct{}
-
-func (Formatter) Format(*gxlog.Record) []byte {
-	return nil
-}
+var Formatter = formatter.FormatterFunc(func(*gxlog.Record) []byte { return nil })
