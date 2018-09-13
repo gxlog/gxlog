@@ -1,57 +1,35 @@
 package gxlog
 
 import (
-	"container/list"
 	"fmt"
 )
 
-type link struct {
-	ft Formatter
-	wt Writer
+type Link struct {
+	FT Formatter
+	WT Writer
 }
 
 type Logger struct {
 	level    LogLevel
-	links    list.List
+	links    []Link
 	gatherer gatherer
 }
 
-func (this *Logger) Link(ft Formatter, wt Writer) bool {
-	lnk := link{ft, wt}
-	if this.linkExists(lnk) {
-		return false
-	}
-	this.links.PushBack(lnk)
-	return true
+func (this *Logger) Link(ft Formatter, wt Writer) {
+	this.links = append(this.links, Link{ft, wt})
 }
 
-func (this *Logger) LinkBefore(ft Formatter, wt Writer, mark link) bool {
-	lnk := link{ft, wt}
-	if this.linkExists(lnk) {
-		return false
-	}
-	for e := this.links.Front(); e != nil; e = e.Next() {
-		if e.Value.(link) == mark {
-			this.links.InsertBefore(lnk, e)
-			return true
-		}
-	}
-	return false
-}
-
-func (this *Logger) Unlink(ft Formatter, wt Writer) bool {
-	lnk := link{ft, wt}
-	for e := this.links.Front(); e != nil; e = e.Next() {
-		if e.Value.(link) == lnk {
-			this.links.Remove(e)
-			return true
-		}
-	}
-	return false
+func (this *Logger) LinkAll(links []Link) {
+	this.links = append(this.links, links...)
 }
 
 func (this *Logger) UnlinkAll() {
-	this.links.Init()
+	this.links = nil
+}
+
+func (this *Logger) ResetAll(links []Link) {
+	this.links = make([]Link, len(links))
+	copy(this.links, links)
 }
 
 func (this *Logger) Debug(args ...interface{}) {
@@ -107,25 +85,8 @@ func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
 }
 
 func (this *Logger) write(level LogLevel, msg string) {
-	formatMap := make(map[Formatter][]byte)
 	record := this.gatherer.gather(4, level, msg)
-	for e := this.links.Front(); e != nil; e = e.Next() {
-		lnk := e.Value.(link)
-		formatter := lnk.ft
-		format, ok := formatMap[formatter]
-		if !ok {
-			format = formatter.Format(record)
-			formatMap[formatter] = format
-		}
-		lnk.wt.Write(format, record)
+	for _, ln := range this.links {
+		ln.WT.Write(ln.FT.Format(record), record)
 	}
-}
-
-func (this *Logger) linkExists(lnk link) bool {
-	for e := this.links.Front(); e != nil; e = e.Next() {
-		if e.Value.(link) == lnk {
-			return true
-		}
-	}
-	return false
 }

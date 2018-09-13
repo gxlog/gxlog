@@ -25,7 +25,7 @@ type Record struct {
 }
 
 type Formatter interface {
-	Format(*Record) []byte
+	Format(record *Record) []byte
 }
 
 type Writer interface {
