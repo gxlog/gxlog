@@ -1,7 +1,8 @@
 package null
 
-import "github.com/gratonos/gxlog"
+import (
+	"github.com/gratonos/gxlog"
+	"github.com/gratonos/gxlog/writer"
+)
 
-type Writer struct{}
-
-func (Writer) Write([]byte, *gxlog.Record) {}
+var Writer = writer.WriterFunc(func([]byte, *gxlog.Record) {})
