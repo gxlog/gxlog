@@ -4,32 +4,11 @@ import (
 	"fmt"
 )
 
-type Link struct {
-	FT Formatter
-	WT Writer
-}
-
 type Logger struct {
-	level    LogLevel
-	links    []Link
-	gatherer gatherer
-}
-
-func (this *Logger) Link(ft Formatter, wt Writer) {
-	this.links = append(this.links, Link{ft, wt})
-}
-
-func (this *Logger) LinkAll(links []Link) {
-	this.links = append(this.links, links...)
-}
-
-func (this *Logger) UnlinkAll() {
-	this.links = nil
-}
-
-func (this *Logger) ResetAll(links []Link) {
-	this.links = make([]Link, len(links))
-	copy(this.links, links)
+	linkSlots    [MaxLinkSlot]*link
+	compactSlots []*link
+	level        LogLevel
+	gatherer     gatherer
 }
 
 func (this *Logger) Debug(args ...interface{}) {
@@ -86,7 +65,7 @@ func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
 
 func (this *Logger) write(level LogLevel, msg string) {
 	record := this.gatherer.gather(4, level, msg)
-	for _, ln := range this.links {
-		ln.WT.Write(ln.FT.Format(record), record)
+	for _, ln := range this.compactSlots {
+		ln.wt.Write(ln.ft.Format(record), record)
 	}
 }

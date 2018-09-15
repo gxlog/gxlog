@@ -15,6 +15,20 @@ const (
 	LevelOff
 )
 
+type LinkSlot int
+
+const (
+	LinkSlot0 LinkSlot = iota
+	LinkSlot1
+	LinkSlot2
+	LinkSlot3
+	LinkSlot4
+	LinkSlot5
+	LinkSlot6
+	LinkSlot7
+	MaxLinkSlot
+)
+
 type Record struct {
 	Time     time.Time
 	Level    LogLevel
