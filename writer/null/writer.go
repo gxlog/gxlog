@@ -5,4 +5,8 @@ import (
 	"github.com/gratonos/gxlog/writer"
 )
 
-var Writer = writer.WriterFunc(func([]byte, *gxlog.Record) {})
+var nullWriter = writer.WriterFunc(func([]byte, *gxlog.Record) {})
+
+func Writer() gxlog.Writer {
+	return nullWriter
+}
