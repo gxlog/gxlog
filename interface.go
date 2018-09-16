@@ -7,10 +7,13 @@ import (
 type LogLevel int
 
 const (
-	LevelDebug LogLevel = iota
+	LevelTrace LogLevel = iota
+	LevelDebug
 	LevelInfo
-	LevelWarn
+	LevelNotice
+	LevelWarning
 	LevelError
+	LevelCritical
 	LevelFatal
 	LevelOff
 )

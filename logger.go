@@ -11,6 +11,14 @@ type Logger struct {
 	gatherer     gatherer
 }
 
+func (this *Logger) Trace(args ...interface{}) {
+	this.Log(LevelTrace, args)
+}
+
+func (this *Logger) Tracef(fmtstr string, args ...interface{}) {
+	this.Logf(LevelTrace, fmtstr, args)
+}
+
 func (this *Logger) Debug(args ...interface{}) {
 	this.Log(LevelDebug, args)
 }
@@ -27,12 +35,20 @@ func (this *Logger) Infof(fmtstr string, args ...interface{}) {
 	this.Logf(LevelInfo, fmtstr, args)
 }
 
+func (this *Logger) Notice(args ...interface{}) {
+	this.Log(LevelNotice, args)
+}
+
+func (this *Logger) Noticef(fmtstr string, args ...interface{}) {
+	this.Logf(LevelNotice, fmtstr, args)
+}
+
 func (this *Logger) Warn(args ...interface{}) {
-	this.Log(LevelWarn, args)
+	this.Log(LevelWarning, args)
 }
 
 func (this *Logger) Warnf(fmtstr string, args ...interface{}) {
-	this.Logf(LevelWarn, fmtstr, args)
+	this.Logf(LevelWarning, fmtstr, args)
 }
 
 func (this *Logger) Error(args ...interface{}) {
@@ -41,6 +57,14 @@ func (this *Logger) Error(args ...interface{}) {
 
 func (this *Logger) Errorf(fmtstr string, args ...interface{}) {
 	this.Logf(LevelError, fmtstr, args)
+}
+
+func (this *Logger) Critical(args ...interface{}) {
+	this.Log(LevelCritical, args)
+}
+
+func (this *Logger) Criticalf(fmtstr string, args ...interface{}) {
+	this.Logf(LevelCritical, fmtstr, args)
 }
 
 func (this *Logger) Fatal(args ...interface{}) {
