@@ -14,10 +14,14 @@ type Formatter struct {
 	prefix          []byte
 	suffix          []byte
 	buf             []byte
+	colors          *levelColors
+	enableColor     bool
 }
 
 func New(header string) *Formatter {
-	formatter := &Formatter{}
+	formatter := &Formatter{
+		colors: newLevelColors(),
+	}
 	formatter.SetHeader(header)
 	return formatter
 }
@@ -40,12 +44,38 @@ func (this *Formatter) SetHeader(header string) {
 	}
 }
 
+func (this *Formatter) EnableColor() {
+	this.enableColor = true
+}
+
+func (this *Formatter) DisableColor() {
+	this.enableColor = false
+}
+
+func (this *Formatter) GetColor(level gxlog.LogLevel) Color {
+	return this.colors.getColor(level)
+}
+
+func (this *Formatter) SetColor(level gxlog.LogLevel, color Color) {
+	this.colors.setColor(level, color)
+}
+
+func (this *Formatter) UpdateColors(colors map[gxlog.LogLevel]Color) {
+	this.colors.updateColors(colors)
+}
+
 func (this *Formatter) Format(record *gxlog.Record) []byte {
+	var left, right []byte
+	if this.enableColor {
+		left, right = this.colors.getColorEars(record.Level)
+	}
 	this.buf = this.buf[:0]
+	this.buf = append(this.buf, left...)
 	for _, appender := range this.headerAppenders {
 		this.buf = appender.appendHeader(this.buf, record)
 	}
 	this.buf = append(this.buf, this.suffix...)
+	this.buf = append(this.buf, right...)
 	return this.buf
 }
 
