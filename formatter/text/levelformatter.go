@@ -13,7 +13,7 @@ type levelFormatter struct {
 
 func newLevelFormatter(property, fmtspec string) *levelFormatter {
 	if fmtspec == "" {
-		fmtspec = "%-8s"
+		fmtspec = "%-5s"
 	}
 	return &levelFormatter{property: property, fmtspec: fmtspec}
 }
@@ -27,14 +27,10 @@ func (this *levelFormatter) formatElement(record *gxlog.Record) string {
 		level = "DEBUG"
 	case gxlog.LevelInfo:
 		level = "INFO"
-	case gxlog.LevelNotice:
-		level = "NOTICE"
-	case gxlog.LevelWarning:
-		level = "WARNING"
+	case gxlog.LevelWarn:
+		level = "WARN"
 	case gxlog.LevelError:
 		level = "ERROR"
-	case gxlog.LevelCritical:
-		level = "CRITICAL"
 	case gxlog.LevelFatal:
 		level = "FATAL"
 	}
