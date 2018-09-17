@@ -10,10 +10,8 @@ const (
 	LevelTrace LogLevel = iota
 	LevelDebug
 	LevelInfo
-	LevelNotice
-	LevelWarning
+	LevelWarn
 	LevelError
-	LevelCritical
 	LevelFatal
 	LevelOff
 )
