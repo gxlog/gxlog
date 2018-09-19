@@ -7,6 +7,8 @@ import (
 	"github.com/gratonos/gxlog"
 )
 
+const DefaultHeader = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} {{msg}}\n"
+
 var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
