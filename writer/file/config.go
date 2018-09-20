@@ -27,9 +27,9 @@ const (
 	DefaultPath          = "log"
 	DefaultBase          = ""
 	DefaultExt           = ".log"
+	DefaultSeparator     = "."
 	DefaultDateStyle     = DateStyleCompact
 	DefaultTimeStyle     = TimeStyleCompact
-	DefaultSeparator     = "."
 	DefaultMaxFileSize   = 20 * 1024 * 1024
 	DefaultCheckInterval = time.Second * 5
 	DefaultNewDirEachDay = true
@@ -39,9 +39,9 @@ type Config struct {
 	Path          string
 	Base          string
 	Ext           string
+	Separator     string
 	DateStyle     DateStyleID
 	TimeStyle     TimeStyleID
-	Separator     string
 	MaxFileSize   int64
 	CheckInterval time.Duration
 	NewDirEachDay bool
@@ -52,9 +52,9 @@ func NewConfig() *Config {
 		Path:          DefaultPath,
 		Base:          DefaultBase,
 		Ext:           DefaultExt,
+		Separator:     DefaultSeparator,
 		DateStyle:     DefaultDateStyle,
 		TimeStyle:     DefaultTimeStyle,
-		Separator:     DefaultSeparator,
 		MaxFileSize:   DefaultMaxFileSize,
 		CheckInterval: DefaultCheckInterval,
 		NewDirEachDay: DefaultNewDirEachDay,

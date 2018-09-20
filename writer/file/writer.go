@@ -19,11 +19,11 @@ type Writer struct {
 	fileSize  int64
 }
 
-func (this *Writer) Start(config *Config) {
-	this.config = *config
+func Open(config *Config) *Writer {
+	return &Writer{config: *config}
 }
 
-func (this *Writer) Stop() {
+func (this *Writer) Close() {
 	this.closeFile()
 }
 
