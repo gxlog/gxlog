@@ -37,6 +37,12 @@ func (this *Writer) Close() error {
 		return fmt.Errorf("socket.Close: %v", err)
 	}
 	this.wg.Wait()
+	this.lock.Lock()
+	for id, conn := range this.conns {
+		conn.Close()
+		delete(this.conns, id)
+	}
+	this.lock.Unlock()
 	return nil
 }
 
