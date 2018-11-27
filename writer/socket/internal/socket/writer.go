@@ -16,15 +16,10 @@ type Writer struct {
 	lock     sync.Mutex
 }
 
-func Open(network, addr string, hook func(net.Listener) error) (*Writer, error) {
+func Open(network, addr string) (*Writer, error) {
 	listener, err := net.Listen(network, addr)
 	if err != nil {
 		return nil, fmt.Errorf("socket.Open: %v", err)
-	}
-	if hook != nil {
-		if err := hook(listener); err != nil {
-			return nil, fmt.Errorf("socket.Open: %v", err)
-		}
 	}
 	wt := &Writer{
 		listener: listener,
