@@ -9,7 +9,6 @@ import (
 )
 
 type Writer struct {
-	config   Config
 	listener net.Listener
 	conns    map[int64]net.Conn
 	id       int64
@@ -17,13 +16,17 @@ type Writer struct {
 	lock     sync.Mutex
 }
 
-func Open(config *Config) (*Writer, error) {
-	listener, err := net.Listen(config.Network, config.Bind)
+func Open(network, addr string, hook func(net.Listener) error) (*Writer, error) {
+	listener, err := net.Listen(network, addr)
 	if err != nil {
 		return nil, fmt.Errorf("socket.Open: %v", err)
 	}
+	if hook != nil {
+		if err := hook(listener); err != nil {
+			return nil, fmt.Errorf("socket.Open: %v", err)
+		}
+	}
 	wt := &Writer{
-		config:   *config,
 		listener: listener,
 		conns:    make(map[int64]net.Conn),
 	}
