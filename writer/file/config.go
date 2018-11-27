@@ -24,7 +24,6 @@ const (
 )
 
 const (
-	DefaultPath          = "log"
 	DefaultBase          = ""
 	DefaultExt           = ".log"
 	DefaultSeparator     = "."
@@ -47,9 +46,9 @@ type Config struct {
 	NewDirEachDay bool
 }
 
-func NewConfig() *Config {
+func NewConfig(path string) *Config {
 	return &Config{
-		Path:          DefaultPath,
+		Path:          path,
 		Base:          DefaultBase,
 		Ext:           DefaultExt,
 		Separator:     DefaultSeparator,
