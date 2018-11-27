@@ -12,4 +12,4 @@
 *.out
 
 # emacs
-.marked-files.el
+.marked_files.el
