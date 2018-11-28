@@ -9,20 +9,20 @@ import (
 
 const DefaultHeader = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} {{msg}}\n"
 
-var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
+var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
 	headerAppenders []*headerAppender
 	prefix          []byte
 	suffix          []byte
 	buf             []byte
-	colors          *levelColors
+	colorMgr        *colorMgr
 	enableColor     bool
 }
 
 func New(header string) *Formatter {
 	formatter := &Formatter{
-		colors: newLevelColors(),
+		colorMgr: newColorMgr(),
 	}
 	formatter.SetHeader(header)
 	return formatter
@@ -33,7 +33,7 @@ func (this *Formatter) SetHeader(header string) {
 	this.prefix = this.prefix[:0]
 	this.suffix = this.suffix[:0]
 	for header != "" {
-		indexes := headerRegexp.FindStringSubmatchIndex(header)
+		indexes := gHeaderRegexp.FindStringSubmatchIndex(header)
 		if indexes == nil {
 			this.suffix = append(this.prefix, header...)
 			break
@@ -54,27 +54,27 @@ func (this *Formatter) DisableColor() {
 	this.enableColor = false
 }
 
-func (this *Formatter) GetColor(level gxlog.LogLevel) Color {
-	return this.colors.getColor(level)
+func (this *Formatter) GetColor(level gxlog.LogLevel) ColorID {
+	return this.colorMgr.GetColor(level)
 }
 
-func (this *Formatter) SetColor(level gxlog.LogLevel, color Color) {
-	this.colors.setColor(level, color)
+func (this *Formatter) SetColor(level gxlog.LogLevel, color ColorID) {
+	this.colorMgr.SetColor(level, color)
 }
 
-func (this *Formatter) UpdateColors(colors map[gxlog.LogLevel]Color) {
-	this.colors.updateColors(colors)
+func (this *Formatter) MapColors(colors map[gxlog.LogLevel]ColorID) {
+	this.colorMgr.MapColors(colors)
 }
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
 	var left, right []byte
 	if this.enableColor {
-		left, right = this.colors.getColorEars(record.Level)
+		left, right = this.colorMgr.GetColorEars(record.Level)
 	}
 	this.buf = this.buf[:0]
 	this.buf = append(this.buf, left...)
 	for _, appender := range this.headerAppenders {
-		this.buf = appender.appendHeader(this.buf, record)
+		this.buf = appender.AppendHeader(this.buf, record)
 	}
 	this.buf = append(this.buf, this.suffix...)
 	this.buf = append(this.buf, right...)

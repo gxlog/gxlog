@@ -7,13 +7,13 @@ import (
 )
 
 type Wrapper struct {
-	wt io.Writer
+	writer io.Writer
 }
 
 func (this *Wrapper) Write(bs []byte, _ *gxlog.Record) {
-	this.wt.Write(bs)
+	this.writer.Write(bs)
 }
 
 func Wrap(wt io.Writer) *Wrapper {
-	return &Wrapper{wt: wt}
+	return &Wrapper{writer: wt}
 }

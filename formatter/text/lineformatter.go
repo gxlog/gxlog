@@ -18,6 +18,6 @@ func newLineFormatter(property, fmtspec string) *lineFormatter {
 	return &lineFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *lineFormatter) formatElement(record *gxlog.Record) string {
+func (this *lineFormatter) FormatElement(record *gxlog.Record) string {
 	return fmt.Sprintf(this.fmtspec, record.Line)
 }

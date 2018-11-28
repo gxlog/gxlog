@@ -18,7 +18,7 @@ func newMsgFormatter(property, fmtspec string) *msgFormatter {
 	return &msgFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *msgFormatter) formatElement(record *gxlog.Record) string {
+func (this *msgFormatter) FormatElement(record *gxlog.Record) string {
 	if this.fmtspec == "%s" {
 		return record.Msg
 	} else {

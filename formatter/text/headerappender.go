@@ -5,7 +5,7 @@ import (
 )
 
 type elementFormatter interface {
-	formatElement(record *gxlog.Record) string
+	FormatElement(record *gxlog.Record) string
 }
 
 type headerAppender struct {
@@ -35,7 +35,7 @@ func newHeaderAppender(element, property, fmtspec, prefix string) *headerAppende
 	return nil
 }
 
-func (this *headerAppender) appendHeader(buf []byte, record *gxlog.Record) []byte {
-	str := this.formatter.formatElement(record)
+func (this *headerAppender) AppendHeader(buf []byte, record *gxlog.Record) []byte {
+	str := this.formatter.FormatElement(record)
 	return append(append(buf, this.prefix...), str...)
 }

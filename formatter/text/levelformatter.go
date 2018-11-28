@@ -18,7 +18,7 @@ func newLevelFormatter(property, fmtspec string) *levelFormatter {
 	return &levelFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *levelFormatter) formatElement(record *gxlog.Record) string {
+func (this *levelFormatter) FormatElement(record *gxlog.Record) string {
 	var level string
 	switch record.Level {
 	case gxlog.LevelTrace:

@@ -72,8 +72,8 @@ func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
 }
 
 func (this *Logger) write(level LogLevel, msg string) {
-	record := this.gatherer.gather(4, level, msg)
-	for _, ln := range this.compactSlots {
-		ln.wt.Write(ln.ft.Format(record), record)
+	record := this.gatherer.Gather(4, level, msg)
+	for _, lnk := range this.compactSlots {
+		lnk.writer.Write(lnk.formatter.Format(record), record)
 	}
 }

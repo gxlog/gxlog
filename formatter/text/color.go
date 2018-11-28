@@ -7,14 +7,14 @@ import (
 )
 
 const (
-	escSeq = "\033[%dm"
-	reset  = 0
+	cEscSeq = "\033[%dm"
+	cReset  = 0
 )
 
-type Color int
+type ColorID int
 
 const (
-	Black Color = iota + 30
+	Black ColorID = iota + 30
 	Red
 	Green
 	Yellow
@@ -33,15 +33,15 @@ const (
 	DefaultFatalColor = Purple
 )
 
-type levelColors struct {
-	colors    []Color
-	colorSeqs [][]byte
-	resetSeq  []byte
+type colorMgr struct {
+	colors       []ColorID
+	colorEscSeqs [][]byte
+	resetEscSeq  []byte
 }
 
-func newLevelColors() *levelColors {
-	colors := &levelColors{
-		colors: []Color{
+func newColorMgr() *colorMgr {
+	mgr := &colorMgr{
+		colors: []ColorID{
 			gxlog.LevelTrace: DefaultTraceColor,
 			gxlog.LevelDebug: DefaultDebugColor,
 			gxlog.LevelInfo:  DefaultInfoColor,
@@ -49,38 +49,38 @@ func newLevelColors() *levelColors {
 			gxlog.LevelError: DefaultErrorColor,
 			gxlog.LevelFatal: DefaultFatalColor,
 		},
-		resetSeq: []byte(fmt.Sprintf(escSeq, reset)),
+		resetEscSeq: []byte(fmt.Sprintf(cEscSeq, cReset)),
 	}
-	colors.initColorSeqs()
-	return colors
+	mgr.initColorSeqs()
+	return mgr
 }
 
-func (this *levelColors) initColorSeqs() {
-	this.colorSeqs = make([][]byte, len(this.colors))
+func (this *colorMgr) initColorSeqs() {
+	this.colorEscSeqs = make([][]byte, len(this.colors))
 	for i := range this.colors {
-		this.colorSeqs[i] = makeSeq(this.colors[i])
+		this.colorEscSeqs[i] = makeSeq(this.colors[i])
 	}
 }
 
-func (this *levelColors) getColor(level gxlog.LogLevel) Color {
+func (this *colorMgr) GetColor(level gxlog.LogLevel) ColorID {
 	return this.colors[level]
 }
 
-func (this *levelColors) setColor(level gxlog.LogLevel, color Color) {
+func (this *colorMgr) SetColor(level gxlog.LogLevel, color ColorID) {
 	this.colors[level] = color
-	this.colorSeqs[level] = makeSeq(color)
+	this.colorEscSeqs[level] = makeSeq(color)
 }
 
-func (this *levelColors) updateColors(colors map[gxlog.LogLevel]Color) {
+func (this *colorMgr) MapColors(colors map[gxlog.LogLevel]ColorID) {
 	for level, color := range colors {
-		this.setColor(level, color)
+		this.SetColor(level, color)
 	}
 }
 
-func (this *levelColors) getColorEars(level gxlog.LogLevel) ([]byte, []byte) {
-	return this.colorSeqs[level], this.resetSeq
+func (this *colorMgr) GetColorEars(level gxlog.LogLevel) ([]byte, []byte) {
+	return this.colorEscSeqs[level], this.resetEscSeq
 }
 
-func makeSeq(color Color) []byte {
-	return []byte(fmt.Sprintf(escSeq, color))
+func makeSeq(color ColorID) []byte {
+	return []byte(fmt.Sprintf(cEscSeq, color))
 }

@@ -7,16 +7,12 @@ import (
 	"github.com/gratonos/gxlog/writer/socket/internal/socket"
 )
 
-const (
-	defaultNetwork = "tcp"
-)
-
 type Writer struct {
 	writer *socket.Writer
 }
 
 func Open(config *Config) (*Writer, error) {
-	wt, err := socket.Open(defaultNetwork, config.Addr)
+	wt, err := socket.Open("tcp", config.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("tcp.Open: %v", err)
 	}
