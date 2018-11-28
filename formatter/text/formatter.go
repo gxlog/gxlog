@@ -7,8 +7,6 @@ import (
 	"github.com/gratonos/gxlog"
 )
 
-const DefaultHeader = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} {{msg}}\n"
-
 var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
@@ -19,11 +17,11 @@ type Formatter struct {
 	enableColor     bool
 }
 
-func New(header string) *Formatter {
+func New(config *Config) *Formatter {
 	formatter := &Formatter{
 		colorMgr: newColorMgr(),
 	}
-	formatter.SetHeader(header)
+	formatter.SetHeader(config.Header)
 	return formatter
 }
 
