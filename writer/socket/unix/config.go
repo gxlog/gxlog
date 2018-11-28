@@ -20,3 +20,13 @@ func NewConfig(pathname string) *Config {
 		Overwrite: DefaultOverwrite,
 	}
 }
+
+func (this *Config) WithPerm(perm os.FileMode) *Config {
+	this.Perm = perm
+	return this
+}
+
+func (this *Config) WithOverwrite(ok bool) *Config {
+	this.Overwrite = ok
+	return this
+}
