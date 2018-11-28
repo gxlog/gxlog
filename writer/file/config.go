@@ -1,6 +1,7 @@
 package file
 
 import (
+	"errors"
 	"time"
 )
 
@@ -92,4 +93,14 @@ func (this *Config) WithCheckInterval(interval time.Duration) *Config {
 func (this *Config) WithNewDirEachDay(ok bool) *Config {
 	this.NewDirEachDay = ok
 	return this
+}
+
+func (this *Config) Check() error {
+	if this.MaxFileSize <= 0 {
+		return errors.New("Config.MaxFileSize must be greater than 0")
+	}
+	if this.CheckInterval <= 0 {
+		return errors.New("Config.CheckInterval must be greater than 0")
+	}
+	return nil
 }

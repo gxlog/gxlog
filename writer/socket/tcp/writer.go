@@ -12,6 +12,9 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
+	if err := config.Check(); err != nil {
+		return nil, fmt.Errorf("tcp.Open: %v", err)
+	}
 	wt, err := socket.Open("tcp", config.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("tcp.Open: %v", err)

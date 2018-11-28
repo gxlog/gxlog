@@ -20,6 +20,9 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
+	if err := config.Check(); err != nil {
+		return nil, fmt.Errorf("file.Open: %v", err)
+	}
 	return &Writer{config: *config}, nil
 }
 

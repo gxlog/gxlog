@@ -13,6 +13,9 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
+	if err := config.Check(); err != nil {
+		return nil, fmt.Errorf("unix.Open: %v", err)
+	}
 	if config.Overwrite {
 		if err := checkAndRemove(config.Pathname); err != nil {
 			return nil, fmt.Errorf("unix.Open: %v", err)
