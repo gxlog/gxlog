@@ -24,7 +24,6 @@ const (
 )
 
 const (
-	DefaultBase          = ""
 	DefaultExt           = ".log"
 	DefaultSeparator     = "."
 	DefaultDateStyle     = DateStyleCompact
@@ -46,10 +45,10 @@ type Config struct {
 	NewDirEachDay bool
 }
 
-func NewConfig(path string) *Config {
+func NewConfig(path, base string) *Config {
 	return &Config{
 		Path:          path,
-		Base:          DefaultBase,
+		Base:          base,
 		Ext:           DefaultExt,
 		Separator:     DefaultSeparator,
 		DateStyle:     DefaultDateStyle,
