@@ -13,7 +13,6 @@ var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
 	headerAppenders []*headerAppender
-	prefix          []byte
 	suffix          []byte
 	buf             []byte
 	colorMgr        *colorMgr
@@ -30,20 +29,21 @@ func New(header string) *Formatter {
 
 func (this *Formatter) SetHeader(header string) {
 	this.headerAppenders = this.headerAppenders[:0]
-	this.prefix = this.prefix[:0]
-	this.suffix = this.suffix[:0]
+	var prefix string
 	for header != "" {
 		indexes := gHeaderRegexp.FindStringSubmatchIndex(header)
 		if indexes == nil {
-			this.suffix = append(this.prefix, header...)
 			break
 		}
 		begin, end := indexes[0], indexes[1]
-		prefix := header[:begin]
+		prefix += header[:begin]
 		element, property, fmtspec := extractElement(indexes, header)
-		this.addAppender(element, property, fmtspec, prefix)
+		if this.addAppender(element, property, fmtspec, prefix) {
+			prefix = ""
+		}
 		header = header[end:]
 	}
+	this.suffix = []byte(prefix + header)
 }
 
 func (this *Formatter) EnableColor() {
@@ -81,13 +81,13 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	return this.buf
 }
 
-func (this *Formatter) addAppender(element, property, fmtspec, prefix string) {
-	this.prefix = append(this.prefix, prefix...)
+func (this *Formatter) addAppender(element, property, fmtspec, prefix string) bool {
 	appender := newHeaderAppender(element, property, fmtspec, prefix)
-	if appender != nil {
-		this.headerAppenders = append(this.headerAppenders, appender)
-		this.prefix = this.prefix[:0]
+	if appender == nil {
+		return false
 	}
+	this.headerAppenders = append(this.headerAppenders, appender)
+	return true
 }
 
 func extractElement(indexes []int, header string) (element, property, fmtspec string) {
