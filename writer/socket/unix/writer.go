@@ -30,7 +30,10 @@ func Open(config *Config) (*Writer, error) {
 }
 
 func (this *Writer) Close() error {
-	return this.writer.Close()
+	if err := this.writer.Close(); err != nil {
+		return fmt.Errorf("unix.Close: %v", err)
+	}
+	return nil
 }
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {

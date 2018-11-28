@@ -19,12 +19,15 @@ type Writer struct {
 	fileSize  int64
 }
 
-func Open(config *Config) *Writer {
-	return &Writer{config: *config}
+func Open(config *Config) (*Writer, error) {
+	return &Writer{config: *config}, nil
 }
 
-func (this *Writer) Close() {
-	this.closeFile()
+func (this *Writer) Close() error {
+	if err := this.closeFile(); err != nil {
+		return fmt.Errorf("file.Close: %v", err)
+	}
+	return nil
 }
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
@@ -49,7 +52,9 @@ func (this *Writer) checkFile(record *gxlog.Record) error {
 }
 
 func (this *Writer) createFile(record *gxlog.Record) error {
-	this.closeFile()
+	if err := this.closeFile(); err != nil {
+		return err
+	}
 
 	path := this.formatPath(record.Time)
 	if err := os.MkdirAll(path, 0777); err != nil {
@@ -71,11 +76,14 @@ func (this *Writer) createFile(record *gxlog.Record) error {
 	return nil
 }
 
-func (this *Writer) closeFile() {
+func (this *Writer) closeFile() error {
 	if this.file != nil {
-		this.file.Close()
+		if err := this.file.Close(); err != nil {
+			return err
+		}
 		this.file = nil
 	}
+	return nil
 }
 
 func (this *Writer) formatPath(tm time.Time) string {
