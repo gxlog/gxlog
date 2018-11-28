@@ -126,7 +126,7 @@ func (this *Writer) formatTime(tm time.Time) string {
 	hour := fmt.Sprintf("%02d", tm.Hour())
 	minute := fmt.Sprintf("%02d", tm.Minute())
 	second := fmt.Sprintf("%02d", tm.Second())
-	milli := fmt.Sprintf("%09d", tm.Nanosecond())[:3]
+	micro := fmt.Sprintf("%09d", tm.Nanosecond())[:6]
 	sep := ""
 	switch this.config.TimeStyle {
 	case TimeStyleDash:
@@ -138,5 +138,5 @@ func (this *Writer) formatTime(tm time.Time) string {
 	case TimeStyleColon:
 		sep = ":"
 	}
-	return strings.Join([]string{hour, minute, second}, sep) + "." + milli
+	return strings.Join([]string{hour, minute, second}, sep) + "." + micro
 }
