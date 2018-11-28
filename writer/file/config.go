@@ -58,3 +58,38 @@ func NewConfig(path, base string) *Config {
 		NewDirEachDay: DefaultNewDirEachDay,
 	}
 }
+
+func (this *Config) WithExt(ext string) *Config {
+	this.Ext = ext
+	return this
+}
+
+func (this *Config) WithSeparator(sep string) *Config {
+	this.Separator = sep
+	return this
+}
+
+func (this *Config) WithDateStyle(style DateStyleID) *Config {
+	this.DateStyle = style
+	return this
+}
+
+func (this *Config) WithTimeStyle(style TimeStyleID) *Config {
+	this.TimeStyle = style
+	return this
+}
+
+func (this *Config) WithMaxFileSize(size int64) *Config {
+	this.MaxFileSize = size
+	return this
+}
+
+func (this *Config) WithCheckInterval(interval time.Duration) *Config {
+	this.CheckInterval = interval
+	return this
+}
+
+func (this *Config) WithNewDirEachDay(ok bool) *Config {
+	this.NewDirEachDay = ok
+	return this
+}
