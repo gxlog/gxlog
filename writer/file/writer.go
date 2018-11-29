@@ -40,6 +40,29 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	}
 }
 
+func (this *Writer) GetConfig() Config {
+	return this.config
+}
+
+func (this *Writer) SetConfig(config *Config) error {
+	if err := config.Check(); err != nil {
+		return err
+	}
+	if this.needNewFile(config) {
+		if err := this.closeFile(); err != nil {
+			return err
+		}
+	}
+	this.config = *config
+	return nil
+}
+
+func (this *Writer) UpdateConfig(fn func(*Config)) error {
+	config := this.config
+	fn(&config)
+	return this.SetConfig(&config)
+}
+
 func (this *Writer) checkFile(record *gxlog.Record) error {
 	if this.file == nil ||
 		this.day != record.Time.YearDay() ||
@@ -142,4 +165,17 @@ func (this *Writer) formatTime(tm time.Time) string {
 		sep = ":"
 	}
 	return strings.Join([]string{hour, minute, second}, sep) + "." + micro
+}
+
+func (this *Writer) needNewFile(config *Config) bool {
+	if config.Path != this.config.Path ||
+		config.Base != this.config.Base ||
+		config.Ext != this.config.Ext ||
+		config.Separator != this.config.Separator ||
+		config.DateStyle != this.config.DateStyle ||
+		config.TimeStyle != this.config.TimeStyle ||
+		config.NewDirEachDay != this.config.NewDirEachDay {
+		return true
+	}
+	return false
 }
