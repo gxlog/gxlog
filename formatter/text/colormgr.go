@@ -71,8 +71,8 @@ func (this *colorMgr) SetColor(level gxlog.LogLevel, color ColorID) {
 	this.colorEscSeqs[level] = makeSeq(color)
 }
 
-func (this *colorMgr) MapColors(colors map[gxlog.LogLevel]ColorID) {
-	for level, color := range colors {
+func (this *colorMgr) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
+	for level, color := range colorMap {
 		this.SetColor(level, color)
 	}
 }

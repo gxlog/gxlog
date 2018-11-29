@@ -22,6 +22,8 @@ func New(config *Config) *Formatter {
 		colorMgr: newColorMgr(),
 	}
 	formatter.SetHeader(config.Header)
+	formatter.MapColors(config.ColorMap)
+	formatter.enableColor = config.EnableColor
 	return formatter
 }
 
@@ -60,8 +62,8 @@ func (this *Formatter) SetColor(level gxlog.LogLevel, color ColorID) {
 	this.colorMgr.SetColor(level, color)
 }
 
-func (this *Formatter) MapColors(colors map[gxlog.LogLevel]ColorID) {
-	this.colorMgr.MapColors(colors)
+func (this *Formatter) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
+	this.colorMgr.MapColors(colorMap)
 }
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
