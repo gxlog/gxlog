@@ -10,6 +10,7 @@ import (
 var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
+	header          string
 	headerAppenders []*headerAppender
 	suffix          []byte
 	buf             []byte
@@ -27,7 +28,12 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
+func (this *Formatter) GetHeader() string {
+	return this.header
+}
+
 func (this *Formatter) SetHeader(header string) {
+	this.header = header
 	this.headerAppenders = this.headerAppenders[:0]
 	var staticText string
 	for header != "" {
@@ -58,9 +64,9 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	var left, right []byte
 	if this.enableColor {
 		if record.Marked {
-			left, right = this.colorMgr.getMarkedColorEars()
+			left, right = this.getMarkedColorEars()
 		} else {
-			left, right = this.colorMgr.getColorEars(record.Level)
+			left, right = this.getColorEars(record.Level)
 		}
 	}
 	this.buf = this.buf[:0]
