@@ -24,7 +24,7 @@ func Open(config *Config) (*Writer, error) {
 
 func (this *Writer) Close() error {
 	if err := this.writer.Close(); err != nil {
-		return nil, fmt.Errorf("tcp.Close: %v", err)
+		return fmt.Errorf("tcp.Close: %v", err)
 	}
 	return nil
 }
