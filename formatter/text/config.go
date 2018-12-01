@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	DefaultHeader      = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} {{msg}}\n"
+	DefaultHeader      = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} {{prefix}}{{msg}}\n"
 	DefaultEnableColor = true
 )
 
