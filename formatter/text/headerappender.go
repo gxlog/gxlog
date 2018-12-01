@@ -30,6 +30,8 @@ func newHeaderAppender(element, property, fmtspec, prefix string) *headerAppende
 		formatter = newMsgFormatter(property, fmtspec)
 	case "prefix":
 		formatter = newPrefixFormatter(property, fmtspec)
+	case "context":
+		formatter = newContextFormatter(property, fmtspec)
 	}
 	if formatter != nil {
 		return &headerAppender{formatter: formatter, prefix: []byte(prefix)}
