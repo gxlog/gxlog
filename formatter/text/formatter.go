@@ -29,21 +29,21 @@ func New(config *Config) *Formatter {
 
 func (this *Formatter) SetHeader(header string) {
 	this.headerAppenders = this.headerAppenders[:0]
-	var prefix string
+	var staticText string
 	for header != "" {
 		indexes := gHeaderRegexp.FindStringSubmatchIndex(header)
 		if indexes == nil {
 			break
 		}
 		begin, end := indexes[0], indexes[1]
-		prefix += header[:begin]
+		staticText += header[:begin]
 		element, property, fmtspec := extractElement(indexes, header)
-		if this.addAppender(element, property, fmtspec, prefix) {
-			prefix = ""
+		if this.addAppender(element, property, fmtspec, staticText) {
+			staticText = ""
 		}
 		header = header[end:]
 	}
-	this.suffix = []byte(prefix + header)
+	this.suffix = []byte(staticText + header)
 }
 
 func (this *Formatter) EnableColor() {
@@ -81,8 +81,8 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	return this.buf
 }
 
-func (this *Formatter) addAppender(element, property, fmtspec, prefix string) bool {
-	appender := newHeaderAppender(element, property, fmtspec, prefix)
+func (this *Formatter) addAppender(element, property, fmtspec, staticText string) bool {
+	appender := newHeaderAppender(element, property, fmtspec, staticText)
 	if appender == nil {
 		return false
 	}

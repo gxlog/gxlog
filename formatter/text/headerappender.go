@@ -9,11 +9,11 @@ type elementFormatter interface {
 }
 
 type headerAppender struct {
-	formatter elementFormatter
-	prefix    []byte
+	formatter  elementFormatter
+	staticText []byte
 }
 
-func newHeaderAppender(element, property, fmtspec, prefix string) *headerAppender {
+func newHeaderAppender(element, property, fmtspec, staticText string) *headerAppender {
 	var formatter elementFormatter
 	switch element {
 	case "time":
@@ -34,12 +34,12 @@ func newHeaderAppender(element, property, fmtspec, prefix string) *headerAppende
 		formatter = newContextFormatter(property, fmtspec)
 	}
 	if formatter != nil {
-		return &headerAppender{formatter: formatter, prefix: []byte(prefix)}
+		return &headerAppender{formatter: formatter, staticText: []byte(staticText)}
 	}
 	return nil
 }
 
 func (this *headerAppender) AppendHeader(buf []byte, record *gxlog.Record) []byte {
 	str := this.formatter.FormatElement(record)
-	return append(append(buf, this.prefix...), str...)
+	return append(append(buf, this.staticText...), str...)
 }
