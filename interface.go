@@ -37,6 +37,7 @@ type Record struct {
 	Line     int
 	Func     string
 	Msg      string
+	Prefix   string
 }
 
 type Formatter interface {

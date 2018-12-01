@@ -49,9 +49,9 @@ func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
 }
 
 func (this *Logger) Log(level LogLevel, args []interface{}) {
-	this.logger.Log(level, args)
+	this.logger.Log(level, this.actions, args)
 }
 
 func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
-	this.logger.Logf(level, fmtstr, args)
+	this.logger.Logf(level, this.actions, fmtstr, args)
 }
