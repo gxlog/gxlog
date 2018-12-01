@@ -13,8 +13,8 @@ type Formatter struct {
 	headerAppenders []*headerAppender
 	suffix          []byte
 	buf             []byte
-	colorMgr        *colorMgr
-	enableColor     bool
+	*colorMgr
+	enableColor bool
 }
 
 func New(config *Config) *Formatter {
@@ -54,22 +54,14 @@ func (this *Formatter) DisableColor() {
 	this.enableColor = false
 }
 
-func (this *Formatter) GetColor(level gxlog.LogLevel) ColorID {
-	return this.colorMgr.GetColor(level)
-}
-
-func (this *Formatter) SetColor(level gxlog.LogLevel, color ColorID) {
-	this.colorMgr.SetColor(level, color)
-}
-
-func (this *Formatter) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
-	this.colorMgr.MapColors(colorMap)
-}
-
 func (this *Formatter) Format(record *gxlog.Record) []byte {
 	var left, right []byte
 	if this.enableColor {
-		left, right = this.colorMgr.GetColorEars(record.Level)
+		if record.Marked {
+			left, right = this.colorMgr.getMarkedColorEars()
+		} else {
+			left, right = this.colorMgr.getColorEars(record.Level)
+		}
 	}
 	this.buf = this.buf[:0]
 	this.buf = append(this.buf, left...)

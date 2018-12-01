@@ -25,18 +25,21 @@ const (
 )
 
 const (
-	DefaultTraceColor = Green
-	DefaultDebugColor = Cyan
-	DefaultInfoColor  = Blue
-	DefaultWarnColor  = Yellow
-	DefaultErrorColor = Red
-	DefaultFatalColor = Purple
+	DefaultTraceColor  = Green
+	DefaultDebugColor  = Cyan
+	DefaultInfoColor   = Blue
+	DefaultWarnColor   = Yellow
+	DefaultErrorColor  = Red
+	DefaultFatalColor  = Purple
+	DefaultMarkedColor = Purple
 )
 
 type colorMgr struct {
 	colors       []ColorID
 	colorEscSeqs [][]byte
 	resetEscSeq  []byte
+	markedColor  ColorID
+	markedEscSeq []byte
 }
 
 func newColorMgr() *colorMgr {
@@ -49,17 +52,12 @@ func newColorMgr() *colorMgr {
 			gxlog.LevelError: DefaultErrorColor,
 			gxlog.LevelFatal: DefaultFatalColor,
 		},
-		resetEscSeq: []byte(fmt.Sprintf(cEscSeq, cReset)),
+		resetEscSeq:  makeSeq(0),
+		markedColor:  DefaultMarkedColor,
+		markedEscSeq: makeSeq(DefaultMarkedColor),
 	}
 	mgr.initColorSeqs()
 	return mgr
-}
-
-func (this *colorMgr) initColorSeqs() {
-	this.colorEscSeqs = make([][]byte, len(this.colors))
-	for i := range this.colors {
-		this.colorEscSeqs[i] = makeSeq(this.colors[i])
-	}
 }
 
 func (this *colorMgr) GetColor(level gxlog.LogLevel) ColorID {
@@ -77,8 +75,28 @@ func (this *colorMgr) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
 	}
 }
 
-func (this *colorMgr) GetColorEars(level gxlog.LogLevel) ([]byte, []byte) {
+func (this *colorMgr) GetMarkedColor() ColorID {
+	return this.markedColor
+}
+
+func (this *colorMgr) SetMarkedColor(color ColorID) {
+	this.markedColor = color
+	this.markedEscSeq = makeSeq(color)
+}
+
+func (this *colorMgr) initColorSeqs() {
+	this.colorEscSeqs = make([][]byte, len(this.colors))
+	for i := range this.colors {
+		this.colorEscSeqs[i] = makeSeq(this.colors[i])
+	}
+}
+
+func (this *colorMgr) getColorEars(level gxlog.LogLevel) ([]byte, []byte) {
 	return this.colorEscSeqs[level], this.resetEscSeq
+}
+
+func (this *colorMgr) getMarkedColorEars() ([]byte, []byte) {
+	return this.markedEscSeq, this.resetEscSeq
 }
 
 func makeSeq(color ColorID) []byte {
