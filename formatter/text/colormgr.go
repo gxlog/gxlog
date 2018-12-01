@@ -26,12 +26,12 @@ const (
 
 const (
 	DefaultTraceColor  = Green
-	DefaultDebugColor  = Cyan
-	DefaultInfoColor   = Blue
+	DefaultDebugColor  = Green
+	DefaultInfoColor   = Green
 	DefaultWarnColor   = Yellow
 	DefaultErrorColor  = Red
 	DefaultFatalColor  = Purple
-	DefaultMarkedColor = Purple
+	DefaultMarkedColor = Blue
 )
 
 type colorMgr struct {

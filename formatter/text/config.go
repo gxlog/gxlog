@@ -7,7 +7,7 @@ import (
 const (
 	DefaultHeader = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} " +
 		"{{prefix}}{{context}} {{msg}}\n"
-	DefaultEnableColor = true
+	DefaultEnableColor = false
 )
 
 type Config struct {
