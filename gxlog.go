@@ -44,6 +44,16 @@ func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	}
 }
 
+func (this *Logger) WithMark() *Logger {
+	actions := copyAppend(this.actions, func(record *Record) {
+		record.Marked = true
+	})
+	return &Logger{
+		logger:  this.logger,
+		actions: actions,
+	}
+}
+
 func copyAppend(actions []Action, action Action) []Action {
 	newActions := make([]Action, 0, len(actions)+1)
 	newActions = append(newActions, actions...)

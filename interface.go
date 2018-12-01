@@ -44,6 +44,7 @@ type Record struct {
 	Msg      string
 	Prefix   string
 	Contexts []Context
+	Marked   bool
 }
 
 type Formatter interface {

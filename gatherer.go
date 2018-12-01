@@ -29,6 +29,7 @@ func (this *gatherer) Gather(calldepth int, level LogLevel, msg string) *Record 
 
 	this.record.Prefix = ""
 	this.record.Contexts = this.record.Contexts[:0]
+	this.record.Marked = false
 
 	return &this.record
 }
