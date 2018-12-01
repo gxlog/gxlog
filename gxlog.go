@@ -1,8 +1,14 @@
 package gxlog
 
+import (
+	"fmt"
+)
+
+type Action func(*Record)
+
 type Logger struct {
 	*logger
-	actions []func(*Record)
+	actions []Action
 }
 
 func New() *Logger {
@@ -12,13 +18,35 @@ func New() *Logger {
 }
 
 func (this *Logger) WithPrefix(prefix string) *Logger {
-	actions := make([]func(*Record), 0, len(this.actions)+1)
-	actions = append(actions, this.actions...)
-	actions = append(actions, func(record *Record) {
+	actions := copyAppend(this.actions, func(record *Record) {
 		record.Prefix = prefix
 	})
 	return &Logger{
 		logger:  this.logger,
 		actions: actions,
 	}
+}
+
+func (this *Logger) WithContext(kvs ...interface{}) *Logger {
+	contexts := make([]Context, 0, len(kvs)/2)
+	for len(kvs) >= 2 {
+		key := fmt.Sprint(kvs[0])
+		value := fmt.Sprint(kvs[1])
+		contexts = append(contexts, Context{key, value})
+		kvs = kvs[2:]
+	}
+	actions := copyAppend(this.actions, func(record *Record) {
+		record.Contexts = append(record.Contexts, contexts...)
+	})
+	return &Logger{
+		logger:  this.logger,
+		actions: actions,
+	}
+}
+
+func copyAppend(actions []Action, action Action) []Action {
+	newActions := make([]Action, 0, len(actions)+1)
+	newActions = append(newActions, actions...)
+	newActions = append(newActions, action)
+	return newActions
 }

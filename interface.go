@@ -30,6 +30,11 @@ const (
 	MaxLinkSlot
 )
 
+type Context struct {
+	Key   string
+	Value string
+}
+
 type Record struct {
 	Time     time.Time
 	Level    LogLevel
@@ -38,6 +43,7 @@ type Record struct {
 	Func     string
 	Msg      string
 	Prefix   string
+	Contexts []Context
 }
 
 type Formatter interface {

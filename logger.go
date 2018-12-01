@@ -15,20 +15,19 @@ type logger struct {
 	gatherer     gatherer
 }
 
-func (this *logger) Log(level LogLevel, actions []func(*Record), args []interface{}) {
+func (this *logger) Log(level LogLevel, actions []Action, args []interface{}) {
 	if this.level <= level {
 		this.write(level, actions, fmt.Sprint(args...))
 	}
 }
 
-func (this *logger) Logf(level LogLevel, actions []func(*Record),
-	fmtstr string, args []interface{}) {
+func (this *logger) Logf(level LogLevel, actions []Action, fmtstr string, args []interface{}) {
 	if this.level <= level {
 		this.write(level, actions, fmt.Sprintf(fmtstr, args...))
 	}
 }
 
-func (this *logger) write(level LogLevel, actions []func(*Record), msg string) {
+func (this *logger) write(level LogLevel, actions []Action, msg string) {
 	record := this.gatherer.Gather(cCallDepth, level, msg)
 	for _, action := range actions {
 		action(record)
