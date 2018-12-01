@@ -11,9 +11,12 @@ type Logger struct {
 	actions []Action
 }
 
-func New() *Logger {
+func New(config *Config) *Logger {
 	return &Logger{
-		logger: &logger{},
+		logger: &logger{
+			level:       config.Level,
+			exitOnFatal: config.ExitOnFatal,
+		},
 	}
 }
 

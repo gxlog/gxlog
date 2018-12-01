@@ -2,6 +2,7 @@ package gxlog
 
 import (
 	"fmt"
+	"os"
 )
 
 const (
@@ -11,13 +12,17 @@ const (
 type logger struct {
 	linkSlots    [MaxLinkSlot]*link
 	compactSlots []*link
-	level        LogLevel
 	gatherer     gatherer
+	level        LogLevel
+	exitOnFatal  bool
 }
 
 func (this *logger) Log(level LogLevel, actions []Action, args []interface{}) {
 	if this.level <= level {
 		this.write(level, actions, fmt.Sprint(args...))
+	}
+	if this.exitOnFatal && level == LevelFatal {
+		os.Exit(1)
 	}
 }
 
@@ -25,6 +30,25 @@ func (this *logger) Logf(level LogLevel, actions []Action, fmtstr string, args [
 	if this.level <= level {
 		this.write(level, actions, fmt.Sprintf(fmtstr, args...))
 	}
+	if this.exitOnFatal && level == LevelFatal {
+		os.Exit(1)
+	}
+}
+
+func (this *logger) GetLevel() LogLevel {
+	return this.level
+}
+
+func (this *logger) SetLevel(level LogLevel) {
+	this.level = level
+}
+
+func (this *logger) GetExitOnFatal() bool {
+	return this.exitOnFatal
+}
+
+func (this *logger) SetExitOnFatal(ok bool) {
+	this.exitOnFatal = ok
 }
 
 func (this *logger) write(level LogLevel, actions []Action, msg string) {
