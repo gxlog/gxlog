@@ -6,6 +6,15 @@ import (
 	"github.com/gratonos/gxlog"
 )
 
+var levelDesc = []string{
+	gxlog.LevelTrace: "TRACE",
+	gxlog.LevelDebug: "DEBUG",
+	gxlog.LevelInfo:  "INFO",
+	gxlog.LevelWarn:  "WARN",
+	gxlog.LevelError: "ERROR",
+	gxlog.LevelFatal: "FATAL",
+}
+
 type levelFormatter struct {
 	property string
 	fmtspec  string
@@ -19,20 +28,5 @@ func newLevelFormatter(property, fmtspec string) *levelFormatter {
 }
 
 func (this *levelFormatter) FormatElement(record *gxlog.Record) string {
-	var level string
-	switch record.Level {
-	case gxlog.LevelTrace:
-		level = "TRACE"
-	case gxlog.LevelDebug:
-		level = "DEBUG"
-	case gxlog.LevelInfo:
-		level = "INFO"
-	case gxlog.LevelWarn:
-		level = "WARN"
-	case gxlog.LevelError:
-		level = "ERROR"
-	case gxlog.LevelFatal:
-		level = "FATAL"
-	}
-	return fmt.Sprintf(this.fmtspec, level)
+	return fmt.Sprintf(this.fmtspec, levelDesc[record.Level])
 }
