@@ -2,6 +2,7 @@ package text
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gratonos/gxlog"
 )
@@ -19,5 +20,9 @@ func newLineFormatter(property, fmtspec string) *lineFormatter {
 }
 
 func (this *lineFormatter) FormatElement(record *gxlog.Record) string {
-	return fmt.Sprintf(this.fmtspec, record.Line)
+	if this.fmtspec == "%d" {
+		return strconv.Itoa(record.Line)
+	} else {
+		return fmt.Sprintf(this.fmtspec, record.Line)
+	}
 }
