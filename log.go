@@ -1,51 +1,51 @@
 package gxlog
 
 func (this *Logger) Trace(args ...interface{}) {
-	this.Log(LevelTrace, args)
+	this.logger.Log(LevelTrace, this.actions, args)
 }
 
 func (this *Logger) Tracef(fmtstr string, args ...interface{}) {
-	this.Logf(LevelTrace, fmtstr, args)
+	this.logger.Logf(LevelTrace, this.actions, fmtstr, args)
 }
 
 func (this *Logger) Debug(args ...interface{}) {
-	this.Log(LevelDebug, args)
+	this.logger.Log(LevelDebug, this.actions, args)
 }
 
 func (this *Logger) Debugf(fmtstr string, args ...interface{}) {
-	this.Logf(LevelDebug, fmtstr, args)
+	this.logger.Logf(LevelDebug, this.actions, fmtstr, args)
 }
 
 func (this *Logger) Info(args ...interface{}) {
-	this.Log(LevelInfo, args)
+	this.logger.Log(LevelInfo, this.actions, args)
 }
 
 func (this *Logger) Infof(fmtstr string, args ...interface{}) {
-	this.Logf(LevelInfo, fmtstr, args)
+	this.logger.Logf(LevelInfo, this.actions, fmtstr, args)
 }
 
 func (this *Logger) Warn(args ...interface{}) {
-	this.Log(LevelWarn, args)
+	this.logger.Log(LevelWarn, this.actions, args)
 }
 
 func (this *Logger) Warnf(fmtstr string, args ...interface{}) {
-	this.Logf(LevelWarn, fmtstr, args)
+	this.logger.Logf(LevelWarn, this.actions, fmtstr, args)
 }
 
 func (this *Logger) Error(args ...interface{}) {
-	this.Log(LevelError, args)
+	this.logger.Log(LevelError, this.actions, args)
 }
 
 func (this *Logger) Errorf(fmtstr string, args ...interface{}) {
-	this.Logf(LevelError, fmtstr, args)
+	this.logger.Logf(LevelError, this.actions, fmtstr, args)
 }
 
 func (this *Logger) Fatal(args ...interface{}) {
-	this.Log(LevelFatal, args)
+	this.logger.Log(LevelFatal, this.actions, args)
 }
 
 func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
-	this.Logf(LevelFatal, fmtstr, args)
+	this.logger.Logf(LevelFatal, this.actions, fmtstr, args)
 }
 
 func (this *Logger) Panic(args ...interface{}) {

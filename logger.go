@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	cCallDepth = 5
+	cCallDepth = 4
 )
 
 type logger struct {
