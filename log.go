@@ -48,10 +48,18 @@ func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
 	this.Logf(LevelFatal, fmtstr, args)
 }
 
-func (this *Logger) Log(level LogLevel, args []interface{}) {
+func (this *Logger) Panic(args ...interface{}) {
+	this.logger.Panic(this.actions, args)
+}
+
+func (this *Logger) Panicf(fmtstr string, args ...interface{}) {
+	this.logger.Panicf(this.actions, fmtstr, args)
+}
+
+func (this *Logger) Log(level LogLevel, args ...interface{}) {
 	this.logger.Log(level, this.actions, args)
 }
 
-func (this *Logger) Logf(level LogLevel, fmtstr string, args []interface{}) {
+func (this *Logger) Logf(level LogLevel, fmtstr string, args ...interface{}) {
 	this.logger.Logf(level, this.actions, fmtstr, args)
 }

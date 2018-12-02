@@ -35,6 +35,22 @@ func (this *logger) Logf(level LogLevel, actions []Action, fmtstr string, args [
 	}
 }
 
+func (this *logger) Panic(actions []Action, args []interface{}) {
+	msg := fmt.Sprint(args...)
+	if this.level <= LevelFatal {
+		this.write(LevelFatal, actions, msg)
+	}
+	panic(msg)
+}
+
+func (this *logger) Panicf(actions []Action, fmtstr string, args []interface{}) {
+	msg := fmt.Sprintf(fmtstr, args...)
+	if this.level <= LevelFatal {
+		this.write(LevelFatal, actions, msg)
+	}
+	panic(msg)
+}
+
 func (this *logger) GetLevel() LogLevel {
 	return this.level
 }
