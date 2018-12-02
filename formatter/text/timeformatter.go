@@ -23,11 +23,11 @@ func newTimeFormatter(property, fmtspec string) *timeFormatter {
 	return &timeFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *timeFormatter) FormatElement(record *gxlog.Record) string {
+func (this *timeFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	desc := record.Time.Format(this.property)
 	if this.fmtspec == "%s" {
-		return desc
+		return append(buf, desc...)
 	} else {
-		return fmt.Sprintf(this.fmtspec, desc)
+		return append(buf, fmt.Sprintf(this.fmtspec, desc)...)
 	}
 }

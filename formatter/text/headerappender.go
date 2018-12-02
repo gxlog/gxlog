@@ -5,12 +5,12 @@ import (
 )
 
 type elementFormatter interface {
-	FormatElement(record *gxlog.Record) string
+	FormatElement(buf []byte, record *gxlog.Record) []byte
 }
 
 type headerAppender struct {
 	formatter  elementFormatter
-	staticText []byte
+	staticText string
 }
 
 func newHeaderAppender(element, property, fmtspec, staticText string) *headerAppender {
@@ -34,12 +34,12 @@ func newHeaderAppender(element, property, fmtspec, staticText string) *headerApp
 		formatter = newContextFormatter(property, fmtspec)
 	}
 	if formatter != nil {
-		return &headerAppender{formatter: formatter, staticText: []byte(staticText)}
+		return &headerAppender{formatter: formatter, staticText: staticText}
 	}
 	return nil
 }
 
 func (this *headerAppender) AppendHeader(buf []byte, record *gxlog.Record) []byte {
-	str := this.formatter.FormatElement(record)
-	return append(append(buf, this.staticText...), str...)
+	buf = append(buf, this.staticText...)
+	return this.formatter.FormatElement(buf, record)
 }

@@ -18,10 +18,10 @@ func newFuncFormatter(property, fmtspec string) *funcFormatter {
 	return &funcFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *funcFormatter) FormatElement(record *gxlog.Record) string {
+func (this *funcFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if this.fmtspec == "%s" {
-		return record.Func
+		return append(buf, record.Func...)
 	} else {
-		return fmt.Sprintf(this.fmtspec, record.Func)
+		return append(buf, fmt.Sprintf(this.fmtspec, record.Func)...)
 	}
 }

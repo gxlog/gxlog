@@ -18,10 +18,10 @@ func newPathnameFormatter(property, fmtspec string) *pathnameFormatter {
 	return &pathnameFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *pathnameFormatter) FormatElement(record *gxlog.Record) string {
+func (this *pathnameFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if this.fmtspec == "%s" {
-		return record.Pathname
+		return append(buf, record.Pathname...)
 	} else {
-		return fmt.Sprintf(this.fmtspec, record.Pathname)
+		return append(buf, fmt.Sprintf(this.fmtspec, record.Pathname)...)
 	}
 }

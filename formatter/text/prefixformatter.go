@@ -18,10 +18,10 @@ func newPrefixFormatter(property, fmtspec string) *prefixFormatter {
 	return &prefixFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *prefixFormatter) FormatElement(record *gxlog.Record) string {
+func (this *prefixFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if this.fmtspec == "%s" {
-		return record.Prefix
+		return append(buf, record.Prefix...)
 	} else {
-		return fmt.Sprintf(this.fmtspec, record.Prefix)
+		return append(buf, fmt.Sprintf(this.fmtspec, record.Prefix)...)
 	}
 }

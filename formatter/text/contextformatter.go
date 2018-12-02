@@ -19,26 +19,29 @@ func newContextFormatter(property, fmtspec string) *contextFormatter {
 	return &contextFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *contextFormatter) FormatElement(record *gxlog.Record) string {
-	this.buf = this.buf[:0]
-
-	if len(record.Contexts) != 0 {
-		this.buf = append(this.buf, '[')
-	}
-	for _, ctx := range record.Contexts {
-		this.buf = append(this.buf, '(')
-		this.buf = append(this.buf, ctx.Key...)
-		this.buf = append(this.buf, ':')
-		this.buf = append(this.buf, ctx.Value...)
-		this.buf = append(this.buf, ')')
-	}
-	if len(record.Contexts) != 0 {
-		this.buf = append(this.buf, ']')
-	}
-
+func (this *contextFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if this.fmtspec == "%s" {
-		return string(this.buf)
+		return this.format(buf, record.Contexts)
 	} else {
-		return fmt.Sprintf(this.fmtspec, this.buf)
+		this.buf = this.buf[:0]
+		this.buf = this.format(this.buf, record.Contexts)
+		return append(buf, fmt.Sprintf(this.fmtspec, this.buf)...)
 	}
+}
+
+func (this *contextFormatter) format(buf []byte, contexts []gxlog.Context) []byte {
+	if len(contexts) != 0 {
+		buf = append(buf, '[')
+	}
+	for _, ctx := range contexts {
+		buf = append(buf, '(')
+		buf = append(buf, ctx.Key...)
+		buf = append(buf, ':')
+		buf = append(buf, ctx.Value...)
+		buf = append(buf, ')')
+	}
+	if len(contexts) != 0 {
+		buf = append(buf, ']')
+	}
+	return buf
 }

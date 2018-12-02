@@ -27,10 +27,11 @@ func newLevelFormatter(property, fmtspec string) *levelFormatter {
 	return &levelFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *levelFormatter) FormatElement(record *gxlog.Record) string {
+func (this *levelFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+	desc := levelDesc[record.Level]
 	if this.fmtspec == "%s" {
-		return levelDesc[record.Level]
+		return append(buf, desc...)
 	} else {
-		return fmt.Sprintf(this.fmtspec, levelDesc[record.Level])
+		return append(buf, fmt.Sprintf(this.fmtspec, desc)...)
 	}
 }
