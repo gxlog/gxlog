@@ -17,18 +17,19 @@ type logger struct {
 	exitOnFatal  bool
 }
 
-func (this *logger) Log(level LogLevel, actions []Action, args []interface{}) {
+func (this *logger) Log(calldepth int, level LogLevel, actions []Action, args []interface{}) {
 	if this.level <= level {
-		this.write(level, actions, fmt.Sprint(args...))
+		this.write(calldepth, level, actions, fmt.Sprint(args...))
 	}
 	if this.exitOnFatal && level == LevelFatal {
 		os.Exit(1)
 	}
 }
 
-func (this *logger) Logf(level LogLevel, actions []Action, fmtstr string, args []interface{}) {
+func (this *logger) Logf(calldepth int, level LogLevel, actions []Action,
+	fmtstr string, args []interface{}) {
 	if this.level <= level {
-		this.write(level, actions, fmt.Sprintf(fmtstr, args...))
+		this.write(calldepth, level, actions, fmt.Sprintf(fmtstr, args...))
 	}
 	if this.exitOnFatal && level == LevelFatal {
 		os.Exit(1)
@@ -38,7 +39,7 @@ func (this *logger) Logf(level LogLevel, actions []Action, fmtstr string, args [
 func (this *logger) Panic(actions []Action, args []interface{}) {
 	msg := fmt.Sprint(args...)
 	if this.level <= LevelFatal {
-		this.write(LevelFatal, actions, msg)
+		this.write(0, LevelFatal, actions, msg)
 	}
 	panic(msg)
 }
@@ -46,7 +47,7 @@ func (this *logger) Panic(actions []Action, args []interface{}) {
 func (this *logger) Panicf(actions []Action, fmtstr string, args []interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
 	if this.level <= LevelFatal {
-		this.write(LevelFatal, actions, msg)
+		this.write(0, LevelFatal, actions, msg)
 	}
 	panic(msg)
 }
@@ -67,8 +68,8 @@ func (this *logger) SetExitOnFatal(ok bool) {
 	this.exitOnFatal = ok
 }
 
-func (this *logger) write(level LogLevel, actions []Action, msg string) {
-	record := this.gatherer.Gather(cCallDepth, level, msg)
+func (this *logger) write(calldepth int, level LogLevel, actions []Action, msg string) {
+	record := this.gatherer.Gather(calldepth+cCallDepth, level, msg)
 	for _, action := range actions {
 		action(record)
 	}
