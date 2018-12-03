@@ -3,6 +3,7 @@ package text
 import (
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/gratonos/gxlog"
 )
@@ -10,12 +11,15 @@ import (
 var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
-	header          string
+	header      string
+	enableColor bool
+
+	colorMgr        *colorMgr
 	headerAppenders []*headerAppender
 	suffix          []byte
 	buf             []byte
-	*colorMgr
-	enableColor bool
+
+	lock sync.Mutex
 }
 
 func New(config *Config) *Formatter {
@@ -23,16 +27,22 @@ func New(config *Config) *Formatter {
 		colorMgr: newColorMgr(),
 	}
 	formatter.SetHeader(config.Header)
-	formatter.MapColors(config.ColorMap)
 	formatter.enableColor = config.EnableColor
+	formatter.MapColors(config.ColorMap)
 	return formatter
 }
 
-func (this *Formatter) GetHeader() string {
-	return this.header
+func (this *Formatter) GetHeader() (header string) {
+	this.lock.Lock()
+	header = this.header
+	this.lock.Unlock()
+
+	return header
 }
 
 func (this *Formatter) SetHeader(header string) {
+	this.lock.Lock()
+
 	this.header = header
 	this.headerAppenders = this.headerAppenders[:0]
 	var staticText string
@@ -50,23 +60,65 @@ func (this *Formatter) SetHeader(header string) {
 		header = header[end:]
 	}
 	this.suffix = []byte(staticText + header)
+
+	this.lock.Unlock()
 }
 
 func (this *Formatter) EnableColor() {
+	this.lock.Lock()
 	this.enableColor = true
+	this.lock.Unlock()
 }
 
 func (this *Formatter) DisableColor() {
+	this.lock.Lock()
 	this.enableColor = false
+	this.lock.Unlock()
+}
+
+func (this *Formatter) GetColor(level gxlog.LogLevel) (color ColorID) {
+	this.lock.Lock()
+	color = this.colorMgr.GetColor(level)
+	this.lock.Unlock()
+
+	return color
+}
+
+func (this *Formatter) SetColor(level gxlog.LogLevel, color ColorID) {
+	this.lock.Lock()
+	this.colorMgr.SetColor(level, color)
+	this.lock.Unlock()
+}
+
+func (this *Formatter) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
+	this.lock.Lock()
+	this.colorMgr.MapColors(colorMap)
+	this.lock.Unlock()
+}
+
+func (this *Formatter) GetMarkedColor() (color ColorID) {
+	this.lock.Lock()
+	color = this.colorMgr.GetMarkedColor()
+	this.lock.Unlock()
+
+	return color
+}
+
+func (this *Formatter) SetMarkedColor(color ColorID) {
+	this.lock.Lock()
+	this.colorMgr.SetMarkedColor(color)
+	this.lock.Unlock()
 }
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
+	this.lock.Lock()
+
 	var left, right []byte
 	if this.enableColor {
 		if record.Marked {
-			left, right = this.getMarkedColorEars()
+			left, right = this.colorMgr.GetMarkedColorEars()
 		} else {
-			left, right = this.getColorEars(record.Level)
+			left, right = this.colorMgr.GetColorEars(record.Level)
 		}
 	}
 	this.buf = this.buf[:0]
@@ -76,6 +128,9 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	}
 	this.buf = append(this.buf, this.suffix...)
 	this.buf = append(this.buf, right...)
+
+	this.lock.Unlock()
+
 	return this.buf
 }
 
