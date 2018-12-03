@@ -16,7 +16,7 @@ type Formatter struct {
 
 	colorMgr        *colorMgr
 	headerAppenders []*headerAppender
-	suffix          []byte
+	suffix          string
 	buf             []byte
 
 	lock sync.Mutex
@@ -59,7 +59,7 @@ func (this *Formatter) SetHeader(header string) {
 		}
 		header = header[end:]
 	}
-	this.suffix = []byte(staticText + header)
+	this.suffix = staticText + header
 
 	this.lock.Unlock()
 }
