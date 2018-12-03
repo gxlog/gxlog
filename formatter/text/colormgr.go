@@ -35,28 +35,30 @@ const (
 )
 
 type colorMgr struct {
-	colors       []ColorID
+	colors      []ColorID
+	markedColor ColorID
+
 	colorEscSeqs [][]byte
-	resetEscSeq  []byte
-	markedColor  ColorID
 	markedEscSeq []byte
+	resetEscSeq  []byte
 }
 
 func newColorMgr() *colorMgr {
-	mgr := &colorMgr{
-		colors: []ColorID{
-			gxlog.LevelTrace: DefaultTraceColor,
-			gxlog.LevelDebug: DefaultDebugColor,
-			gxlog.LevelInfo:  DefaultInfoColor,
-			gxlog.LevelWarn:  DefaultWarnColor,
-			gxlog.LevelError: DefaultErrorColor,
-			gxlog.LevelFatal: DefaultFatalColor,
-		},
-		resetEscSeq:  makeSeq(0),
-		markedColor:  DefaultMarkedColor,
-		markedEscSeq: makeSeq(DefaultMarkedColor),
+	colors := []ColorID{
+		gxlog.LevelTrace: DefaultTraceColor,
+		gxlog.LevelDebug: DefaultDebugColor,
+		gxlog.LevelInfo:  DefaultInfoColor,
+		gxlog.LevelWarn:  DefaultWarnColor,
+		gxlog.LevelError: DefaultErrorColor,
+		gxlog.LevelFatal: DefaultFatalColor,
 	}
-	mgr.initColorSeqs()
+	mgr := &colorMgr{
+		colors:       colors,
+		markedColor:  DefaultMarkedColor,
+		colorEscSeqs: initColorSeqs(colors),
+		markedEscSeq: makeSeq(DefaultMarkedColor),
+		resetEscSeq:  makeSeq(0),
+	}
 	return mgr
 }
 
@@ -84,19 +86,20 @@ func (this *colorMgr) SetMarkedColor(color ColorID) {
 	this.markedEscSeq = makeSeq(color)
 }
 
-func (this *colorMgr) initColorSeqs() {
-	this.colorEscSeqs = make([][]byte, len(this.colors))
-	for i := range this.colors {
-		this.colorEscSeqs[i] = makeSeq(this.colors[i])
-	}
-}
-
-func (this *colorMgr) getColorEars(level gxlog.LogLevel) ([]byte, []byte) {
+func (this *colorMgr) GetColorEars(level gxlog.LogLevel) ([]byte, []byte) {
 	return this.colorEscSeqs[level], this.resetEscSeq
 }
 
-func (this *colorMgr) getMarkedColorEars() ([]byte, []byte) {
+func (this *colorMgr) GetMarkedColorEars() ([]byte, []byte) {
 	return this.markedEscSeq, this.resetEscSeq
+}
+
+func initColorSeqs(colors []ColorID) [][]byte {
+	colorEscSeqs := make([][]byte, len(colors))
+	for i := range colors {
+		colorEscSeqs[i] = makeSeq(colors[i])
+	}
+	return colorEscSeqs
 }
 
 func makeSeq(color ColorID) []byte {
