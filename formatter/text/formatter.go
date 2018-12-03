@@ -128,10 +128,11 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	}
 	this.buf = append(this.buf, this.suffix...)
 	this.buf = append(this.buf, right...)
+	buf := this.buf
 
 	this.lock.Unlock()
 
-	return this.buf
+	return buf
 }
 
 func (this *Formatter) addAppender(element, property, fmtspec, staticText string) bool {
