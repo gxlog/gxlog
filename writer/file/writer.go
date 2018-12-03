@@ -149,38 +149,31 @@ func (this *Writer) formatFilename(tm time.Time) string {
 }
 
 func (this *Writer) formatDate(tm time.Time) string {
-	year := fmt.Sprintf("%04d", tm.Year())
-	month := fmt.Sprintf("%02d", tm.Month())
-	day := fmt.Sprintf("%02d", tm.Day())
-	sep := ""
+	fmtstr := "%04d%02d%02d"
 	switch this.config.DateStyle {
 	case DateStyleDash:
-		sep = "-"
+		fmtstr = "%04d-%02d-%02d"
 	case DateStyleUnderscore:
-		sep = "_"
+		fmtstr = "%04d_%02d_%02d"
 	case DateStyleDot:
-		sep = "."
+		fmtstr = "%04d.%02d.%02d"
 	}
-	return strings.Join([]string{year, month, day}, sep)
+	return fmt.Sprintf(fmtstr, tm.Year(), tm.Month(), tm.Day())
 }
 
 func (this *Writer) formatTime(tm time.Time) string {
-	hour := fmt.Sprintf("%02d", tm.Hour())
-	minute := fmt.Sprintf("%02d", tm.Minute())
-	second := fmt.Sprintf("%02d", tm.Second())
-	micro := fmt.Sprintf("%09d", tm.Nanosecond())[:6]
-	sep := ""
+	fmtstr := "%02d%02d%02d.%06d"
 	switch this.config.TimeStyle {
 	case TimeStyleDash:
-		sep = "-"
+		fmtstr = "%02d-%02d-%02d-%06d"
 	case TimeStyleUnderscore:
-		sep = "_"
+		fmtstr = "%02d_%02d_%02d_%06d"
 	case TimeStyleDot:
-		sep = "."
+		fmtstr = "%02d.%02d.%02d.%06d"
 	case TimeStyleColon:
-		sep = ":"
+		fmtstr = "%02d:%02d:%02d.%06d"
 	}
-	return strings.Join([]string{hour, minute, second}, sep) + "." + micro
+	return fmt.Sprintf(fmtstr, tm.Hour(), tm.Minute(), tm.Second(), tm.Nanosecond()/1000)
 }
 
 func (this *Writer) needNewFile(config *Config) bool {
