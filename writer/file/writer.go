@@ -5,18 +5,22 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gratonos/gxlog"
 )
 
 type Writer struct {
-	config    Config
+	config Config
+
 	file      *os.File
 	pathname  string
 	checkTime time.Time
 	day       int
 	fileSize  int64
+
+	lock sync.Mutex
 }
 
 func Open(config *Config) (*Writer, error) {
@@ -27,6 +31,9 @@ func Open(config *Config) (*Writer, error) {
 }
 
 func (this *Writer) Close() error {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	if err := this.closeFile(); err != nil {
 		return fmt.Errorf("file.Close: %v", err)
 	}
@@ -34,33 +41,42 @@ func (this *Writer) Close() error {
 }
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
+	this.lock.Lock()
+
 	if err := this.checkFile(record); err == nil {
 		n, _ := this.file.Write(bs)
 		this.fileSize += int64(n)
 	}
+
+	this.lock.Unlock()
 }
 
-func (this *Writer) GetConfig() Config {
-	return this.config
+func (this *Writer) GetConfig() (config Config) {
+	this.lock.Lock()
+	config = this.config
+	this.lock.Unlock()
+
+	return config
 }
 
-func (this *Writer) SetConfig(config *Config) error {
-	if err := config.Check(); err != nil {
-		return err
-	}
-	if this.needNewFile(config) {
-		if err := this.closeFile(); err != nil {
-			return err
-		}
-	}
-	this.config = *config
-	return nil
+func (this *Writer) SetConfig(config *Config) (err error) {
+	this.lock.Lock()
+	err = this.setConfig(config)
+	this.lock.Unlock()
+
+	return err
 }
 
-func (this *Writer) UpdateConfig(fn func(*Config)) error {
+func (this *Writer) UpdateConfig(fn func(*Config)) (err error) {
+	this.lock.Lock()
+
 	config := this.config
 	fn(&config)
-	return this.SetConfig(&config)
+	err = this.setConfig(&config)
+
+	this.lock.Unlock()
+
+	return err
 }
 
 func (this *Writer) checkFile(record *gxlog.Record) error {
@@ -178,4 +194,17 @@ func (this *Writer) needNewFile(config *Config) bool {
 		return true
 	}
 	return false
+}
+
+func (this *Writer) setConfig(config *Config) error {
+	if err := config.Check(); err != nil {
+		return err
+	}
+	if this.needNewFile(config) {
+		if err := this.closeFile(); err != nil {
+			return err
+		}
+	}
+	this.config = *config
+	return nil
 }
