@@ -8,6 +8,7 @@ type Action func(*Record)
 
 type Logger struct {
 	*logger
+
 	actions []Action
 }
 

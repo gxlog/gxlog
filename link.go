@@ -7,60 +7,99 @@ type link struct {
 }
 
 func (this *logger) Link(ft Formatter, wt Writer, slot LinkSlot) {
+	this.lock.Lock()
+
 	this.linkSlots[slot] = &link{
 		formatter: ft,
 		writer:    wt,
 		enable:    true,
 	}
 	this.updateCompactSlots()
+
+	this.lock.Unlock()
 }
 
 func (this *logger) Unlink(slot LinkSlot) {
+	this.lock.Lock()
+
 	this.linkSlots[slot] = nil
 	this.updateCompactSlots()
+
+	this.lock.Unlock()
 }
 
 func (this *logger) UnlinkAll() {
+	this.lock.Lock()
+
 	for i := range this.linkSlots {
 		this.linkSlots[i] = nil
 	}
 	this.updateCompactSlots()
+
+	this.lock.Unlock()
 }
 
 func (this *logger) CopyLink(src, dst LinkSlot) {
+	this.lock.Lock()
+
 	this.linkSlots[dst] = this.linkSlots[src]
 	this.updateCompactSlots()
+
+	this.lock.Unlock()
 }
 
 func (this *logger) MoveLink(from, to LinkSlot) {
+	this.lock.Lock()
+
 	this.linkSlots[to] = this.linkSlots[from]
 	this.linkSlots[from] = nil
 	this.updateCompactSlots()
+
+	this.lock.Unlock()
 }
 
 func (this *logger) SwapLink(left, right LinkSlot) {
+	this.lock.Lock()
+
 	this.linkSlots[left], this.linkSlots[right] = this.linkSlots[right], this.linkSlots[left]
 	this.updateCompactSlots()
+
+	this.lock.Unlock()
 }
 
-func (this *logger) HasLink(slot LinkSlot) bool {
-	return this.linkSlots[slot] != nil
+func (this *logger) HasLink(slot LinkSlot) (ok bool) {
+	this.lock.Lock()
+	ok = (this.linkSlots[slot] != nil)
+	this.lock.Unlock()
+
+	return ok
 }
 
-func (this *logger) GetLink(slot LinkSlot) (Formatter, Writer, bool) {
+func (this *logger) GetLink(slot LinkSlot) (ft Formatter, wt Writer, ok bool) {
+	this.lock.Lock()
+
 	lnk := this.linkSlots[slot]
-	if lnk == nil {
-		return nil, nil, false
+	if lnk != nil {
+		ft, wt, ok = lnk.formatter, lnk.writer, true
+	} else {
+		ft, wt, ok = nil, nil, false
 	}
-	return lnk.formatter, lnk.writer, true
+
+	this.lock.Unlock()
+
+	return ft, wt, ok
 }
 
 func (this *logger) EnableLink(slot LinkSlot) {
+	this.lock.Lock()
 	this.setLinkEnable(slot, true)
+	this.lock.Unlock()
 }
 
 func (this *logger) DisableLink(slot LinkSlot) {
+	this.lock.Lock()
 	this.setLinkEnable(slot, false)
+	this.lock.Unlock()
 }
 
 func (this *logger) setLinkEnable(slot LinkSlot, enable bool) {
