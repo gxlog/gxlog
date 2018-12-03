@@ -90,6 +90,14 @@ func (this *logger) GetLink(slot LinkSlot) (ft Formatter, wt Writer, ok bool) {
 	return ft, wt, ok
 }
 
+func (this *logger) MustGetLink(slot LinkSlot) (ft Formatter, wt Writer) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	lnk := this.linkSlots[slot]
+	return lnk.formatter, lnk.writer
+}
+
 func (this *logger) EnableLink(slot LinkSlot) {
 	this.lock.Lock()
 	this.setLinkEnable(slot, true)
