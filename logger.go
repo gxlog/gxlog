@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 )
 
 const (
@@ -70,6 +71,34 @@ func (this *logger) Panicf(actions []Action, fmtstr string, args []interface{}) 
 	panic(msg)
 }
 
+func (this *logger) Time(actions []Action, args []interface{}) func() {
+	done := func() {}
+
+	this.lock.Lock()
+
+	if this.level <= LevelTrace {
+		done = this.genDone(actions, fmt.Sprint(args...))
+	}
+
+	this.lock.Unlock()
+
+	return done
+}
+
+func (this *logger) Timef(actions []Action, fmtstr string, args []interface{}) func() {
+	done := func() {}
+
+	this.lock.Lock()
+
+	if this.level <= LevelTrace {
+		done = this.genDone(actions, fmt.Sprintf(fmtstr, args...))
+	}
+
+	this.lock.Unlock()
+
+	return done
+}
+
 func (this *logger) GetLevel() (level LogLevel) {
 	this.lock.Lock()
 	level = this.level
@@ -105,5 +134,15 @@ func (this *logger) write(calldepth int, level LogLevel, actions []Action, msg s
 	}
 	for _, lnk := range this.compactSlots {
 		lnk.writer.Write(lnk.formatter.Format(record), record)
+	}
+}
+
+func (this *logger) genDone(actions []Action, msg string) func() {
+	now := time.Now()
+	return func() {
+		costs := time.Since(now)
+		this.lock.Lock()
+		this.write(-1, LevelTrace, actions, fmt.Sprintf("%s (costs: %v)", msg, costs))
+		this.lock.Unlock()
 	}
 }

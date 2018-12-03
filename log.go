@@ -63,3 +63,11 @@ func (this *Logger) Log(calldepth int, level LogLevel, args ...interface{}) {
 func (this *Logger) Logf(calldepth int, level LogLevel, fmtstr string, args ...interface{}) {
 	this.logger.Logf(calldepth, level, this.actions, fmtstr, args)
 }
+
+func (this *Logger) Time(args ...interface{}) func() {
+	return this.logger.Time(this.actions, args)
+}
+
+func (this *Logger) Timef(fmtstr string, args ...interface{}) func() {
+	return this.logger.Timef(this.actions, fmtstr, args)
+}
