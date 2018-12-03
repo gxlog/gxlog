@@ -13,7 +13,8 @@ type Writer struct {
 	conns    map[int64]net.Conn
 	id       int64
 	wg       sync.WaitGroup
-	lock     sync.Mutex
+
+	lock sync.Mutex
 }
 
 func Open(network, addr string) (*Writer, error) {
@@ -34,24 +35,31 @@ func (this *Writer) Close() error {
 	if err := this.listener.Close(); err != nil {
 		return fmt.Errorf("socket.Close: %v", err)
 	}
+
 	this.wg.Wait()
+
 	this.lock.Lock()
+
 	for id, conn := range this.conns {
 		conn.Close()
 		delete(this.conns, id)
 	}
+
 	this.lock.Unlock()
+
 	return nil
 }
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	this.lock.Lock()
+
 	for id, conn := range this.conns {
 		if _, err := conn.Write(bs); err != nil {
 			conn.Close()
 			delete(this.conns, id)
 		}
 	}
+
 	this.lock.Unlock()
 }
 
@@ -61,10 +69,13 @@ func (this *Writer) serve() {
 		if err != nil {
 			break
 		}
+
 		this.lock.Lock()
+
 		id := this.id
 		this.id++
 		this.conns[id] = conn
+
 		this.lock.Unlock()
 	}
 	this.wg.Done()
