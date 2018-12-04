@@ -6,14 +6,14 @@ import (
 	"github.com/gratonos/gxlog"
 )
 
-type Wrapper struct {
+type wrapper struct {
 	writer io.Writer
 }
 
-func (this *Wrapper) Write(bs []byte, _ *gxlog.Record) {
-	this.writer.Write(bs)
+func Wrap(wt io.Writer) gxlog.Writer {
+	return &wrapper{writer: wt}
 }
 
-func Wrap(wt io.Writer) *Wrapper {
-	return &Wrapper{writer: wt}
+func (this *wrapper) Write(bs []byte, _ *gxlog.Record) {
+	this.writer.Write(bs)
 }
