@@ -5,31 +5,41 @@ import (
 	"time"
 )
 
+const (
+	cBatchRecordCount = 16
+)
+
 type gatherer struct {
-	record Record
+	records []Record
 }
 
 func (this *gatherer) Gather(calldepth int, level LogLevel, msg string) *Record {
-	this.record.Time = time.Now()
-	this.record.Level = level
-	this.record.Msg = msg
+	record := this.getRecord()
+	record.Time = time.Now()
+	record.Level = level
+	record.Msg = msg
 
 	var funcName string
 	pc, file, line, ok := runtime.Caller(calldepth)
-	if !ok {
-		file = "?"
-		line = -1
-		funcName = "?"
-	} else {
+	if ok {
 		funcName = runtime.FuncForPC(pc).Name()
+	} else {
+		file = "?file?"
+		line = -1
+		funcName = "?func?"
 	}
-	this.record.Pathname = file
-	this.record.Line = line
-	this.record.Func = funcName
+	record.Pathname = file
+	record.Line = line
+	record.Func = funcName
 
-	this.record.Prefix = ""
-	this.record.Contexts = this.record.Contexts[:0]
-	this.record.Marked = false
+	return record
+}
 
-	return &this.record
+func (this *gatherer) getRecord() *Record {
+	if len(this.records) == 0 {
+		this.records = make([]Record, cBatchRecordCount)
+	}
+	record := &this.records[0]
+	this.records = this.records[1:]
+	return record
 }

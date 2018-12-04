@@ -36,7 +36,7 @@ func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	for len(kvs) >= 2 {
 		key := fmt.Sprint(kvs[0])
 		value := fmt.Sprint(kvs[1])
-		contexts = append(contexts, Context{key, value})
+		contexts = append(contexts, Context{Key: key, Value: value})
 		kvs = kvs[2:]
 	}
 	actions := copyAppend(this.actions, func(record *Record) {
