@@ -17,18 +17,19 @@ type Formatter struct {
 	colorMgr        *colorMgr
 	headerAppenders []*headerAppender
 	suffix          string
-	buf             []byte
+	buf             buffer
 
 	lock sync.Mutex
 }
 
 func New(config *Config) *Formatter {
 	formatter := &Formatter{
-		colorMgr: newColorMgr(),
+		enableColor: config.EnableColor,
+		colorMgr:    newColorMgr(),
 	}
 	formatter.SetHeader(config.Header)
-	formatter.enableColor = config.EnableColor
 	formatter.MapColors(config.ColorMap)
+	formatter.buf.SetConfig(config.MinBufSize, config.BatchBufCount)
 	return formatter
 }
 
@@ -61,6 +62,20 @@ func (this *Formatter) SetHeader(header string) {
 	}
 	this.suffix = staticText + header
 
+	this.lock.Unlock()
+}
+
+func (this *Formatter) GetBufConfig() (minBufSize, batchBufCount int) {
+	this.lock.Lock()
+	minBufSize, batchBufCount = this.buf.GetConfig()
+	this.lock.Unlock()
+
+	return minBufSize, batchBufCount
+}
+
+func (this *Formatter) SetBufConfig(minBufSize, batchBufCount int) {
+	this.lock.Lock()
+	this.buf.SetConfig(minBufSize, batchBufCount)
 	this.lock.Unlock()
 }
 
@@ -121,14 +136,14 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 			left, right = this.colorMgr.GetColorEars(record.Level)
 		}
 	}
-	this.buf = this.buf[:0]
-	this.buf = append(this.buf, left...)
+
+	buf := this.buf.Get()
+	buf = append(buf, left...)
 	for _, appender := range this.headerAppenders {
-		this.buf = appender.AppendHeader(this.buf, record)
+		buf = appender.AppendHeader(buf, record)
 	}
-	this.buf = append(this.buf, this.suffix...)
-	this.buf = append(this.buf, right...)
-	buf := this.buf
+	buf = append(buf, this.suffix...)
+	buf = append(buf, right...)
 
 	this.lock.Unlock()
 
