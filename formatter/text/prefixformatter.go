@@ -20,8 +20,8 @@ func newPrefixFormatter(property, fmtspec string) *prefixFormatter {
 
 func (this *prefixFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if this.fmtspec == "%s" {
-		return append(buf, record.Prefix...)
+		return append(buf, record.Aux.Prefix...)
 	} else {
-		return append(buf, fmt.Sprintf(this.fmtspec, record.Prefix)...)
+		return append(buf, fmt.Sprintf(this.fmtspec, record.Aux.Prefix)...)
 	}
 }

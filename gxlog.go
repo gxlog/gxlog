@@ -4,12 +4,10 @@ import (
 	"fmt"
 )
 
-type Action func(*Record)
-
 type Logger struct {
 	*logger
 
-	actions []Action
+	aux Auxiliary
 }
 
 func New(config *Config) *Logger {
@@ -22,45 +20,31 @@ func New(config *Config) *Logger {
 }
 
 func (this *Logger) WithPrefix(prefix string) *Logger {
-	actions := copyAppend(this.actions, func(record *Record) {
-		record.Prefix = prefix
-	})
-	return &Logger{
-		logger:  this.logger,
-		actions: actions,
-	}
+	clone := *this
+	clone.aux.Prefix = prefix
+	return &clone
 }
 
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
-	contexts := make([]Context, 0, len(kvs)/2)
+	clone := *this
+	clone.aux.Contexts = copyAppendContexts(clone.aux.Contexts, kvs)
+	return &clone
+}
+
+func (this *Logger) WithMark(ok bool) *Logger {
+	clone := *this
+	clone.aux.Marked = ok
+	return &clone
+}
+
+func copyAppendContexts(dst []Context, kvs []interface{}) []Context {
+	contexts := make([]Context, 0, len(dst)+len(kvs)/2)
+	contexts = append(contexts, dst...)
 	for len(kvs) >= 2 {
 		key := fmt.Sprint(kvs[0])
 		value := fmt.Sprint(kvs[1])
 		contexts = append(contexts, Context{Key: key, Value: value})
 		kvs = kvs[2:]
 	}
-	actions := copyAppend(this.actions, func(record *Record) {
-		record.Contexts = append(record.Contexts, contexts...)
-	})
-	return &Logger{
-		logger:  this.logger,
-		actions: actions,
-	}
-}
-
-func (this *Logger) WithMark() *Logger {
-	actions := copyAppend(this.actions, func(record *Record) {
-		record.Marked = true
-	})
-	return &Logger{
-		logger:  this.logger,
-		actions: actions,
-	}
-}
-
-func copyAppend(actions []Action, action Action) []Action {
-	newActions := make([]Action, 0, len(actions)+1)
-	newActions = append(newActions, actions...)
-	newActions = append(newActions, action)
-	return newActions
+	return contexts
 }

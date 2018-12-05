@@ -130,7 +130,7 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 
 	var left, right []byte
 	if this.enableColor {
-		if record.Marked {
+		if record.Aux.Marked {
 			left, right = this.colorMgr.GetMarkedColorEars()
 		} else {
 			left, right = this.colorMgr.GetColorEars(record.Level)

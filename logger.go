@@ -22,55 +22,55 @@ type logger struct {
 	lock sync.Mutex
 }
 
-func (this *logger) Log(calldepth int, level LogLevel, actions []Action, args []interface{}) {
+func (this *logger) Log(calldepth int, level LogLevel, aux *Auxiliary, args []interface{}) {
 	thisLevel, exitOnFatal := this.getLevelAndExitOnFatal()
 	if thisLevel <= level {
-		this.write(calldepth, level, actions, fmt.Sprint(args...))
+		this.write(calldepth, level, aux, fmt.Sprint(args...))
 	}
 	if exitOnFatal && level == LevelFatal {
 		os.Exit(1)
 	}
 }
 
-func (this *logger) Logf(calldepth int, level LogLevel, actions []Action,
+func (this *logger) Logf(calldepth int, level LogLevel, aux *Auxiliary,
 	fmtstr string, args []interface{}) {
 	thisLevel, exitOnFatal := this.getLevelAndExitOnFatal()
 	if thisLevel <= level {
-		this.write(calldepth, level, actions, fmt.Sprintf(fmtstr, args...))
+		this.write(calldepth, level, aux, fmt.Sprintf(fmtstr, args...))
 	}
 	if exitOnFatal && level == LevelFatal {
 		os.Exit(1)
 	}
 }
 
-func (this *logger) Panic(actions []Action, args []interface{}) {
+func (this *logger) Panic(aux *Auxiliary, args []interface{}) {
 	msg := fmt.Sprint(args...)
 	if this.GetLevel() <= LevelFatal {
-		this.write(0, LevelFatal, actions, msg)
+		this.write(0, LevelFatal, aux, msg)
 	}
 	panic(msg)
 }
 
-func (this *logger) Panicf(actions []Action, fmtstr string, args []interface{}) {
+func (this *logger) Panicf(aux *Auxiliary, fmtstr string, args []interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
 	if this.GetLevel() <= LevelFatal {
-		this.write(0, LevelFatal, actions, msg)
+		this.write(0, LevelFatal, aux, msg)
 	}
 	panic(msg)
 }
 
-func (this *logger) Time(actions []Action, args []interface{}) func() {
+func (this *logger) Time(aux *Auxiliary, args []interface{}) func() {
 	done := func() {}
 	if this.GetLevel() <= LevelTrace {
-		done = this.genDone(actions, fmt.Sprint(args...))
+		done = this.genDone(aux, fmt.Sprint(args...))
 	}
 	return done
 }
 
-func (this *logger) Timef(actions []Action, fmtstr string, args []interface{}) func() {
+func (this *logger) Timef(aux *Auxiliary, fmtstr string, args []interface{}) func() {
 	done := func() {}
 	if this.GetLevel() <= LevelTrace {
-		done = this.genDone(actions, fmt.Sprintf(fmtstr, args...))
+		done = this.genDone(aux, fmt.Sprintf(fmtstr, args...))
 	}
 	return done
 }
@@ -112,7 +112,7 @@ func (this *logger) getLevelAndExitOnFatal() (level LogLevel, exitOnFatal bool) 
 	return level, exitOnFatal
 }
 
-func (this *logger) write(calldepth int, level LogLevel, actions []Action, msg string) {
+func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg string) {
 	file, line, funcName := getRuntime(calldepth + cCallDepth)
 
 	this.lock.Lock()
@@ -124,9 +124,7 @@ func (this *logger) write(calldepth int, level LogLevel, actions []Action, msg s
 		Line:     line,
 		Func:     funcName,
 		Msg:      msg,
-	}
-	for _, action := range actions {
-		action(record)
+		Aux:      *aux,
 	}
 	for _, lnk := range this.compactSlots {
 		lnk.writer.Write(lnk.formatter.Format(record), record)
@@ -135,12 +133,12 @@ func (this *logger) write(calldepth int, level LogLevel, actions []Action, msg s
 	this.lock.Unlock()
 }
 
-func (this *logger) genDone(actions []Action, msg string) func() {
+func (this *logger) genDone(aux *Auxiliary, msg string) func() {
 	now := time.Now()
 	return func() {
 		costs := time.Since(now)
 		if this.GetLevel() <= LevelTrace {
-			this.write(-1, LevelTrace, actions, fmt.Sprintf("%s (costs: %v)", msg, costs))
+			this.write(-1, LevelTrace, aux, fmt.Sprintf("%s (costs: %v)", msg, costs))
 		}
 	}
 }
