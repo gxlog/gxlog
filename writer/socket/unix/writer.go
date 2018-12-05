@@ -29,7 +29,7 @@ func Open(config *Config) (*Writer, error) {
 		wt.Close()
 		return nil, fmt.Errorf("unix.Open: %v", err)
 	}
-	return &Writer{wt}, nil
+	return &Writer{writer: wt}, nil
 }
 
 func (this *Writer) Close() error {

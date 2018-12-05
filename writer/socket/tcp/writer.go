@@ -19,7 +19,7 @@ func Open(config *Config) (*Writer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("tcp.Open: %v", err)
 	}
-	return &Writer{wt}, nil
+	return &Writer{writer: wt}, nil
 }
 
 func (this *Writer) Close() error {
