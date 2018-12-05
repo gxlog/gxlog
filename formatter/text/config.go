@@ -7,25 +7,22 @@ import (
 const (
 	DefaultHeader = "{{time}} {{level}} {{pathname}}:{{line}} {{func}} " +
 		"{{prefix}}{{context}} {{msg}}\n"
-	DefaultMinBufSize    = 256
-	DefaultBatchBufCount = 16
-	DefaultEnableColor   = false
+	DefaultMinBufSize  = 256
+	DefaultEnableColor = false
 )
 
 type Config struct {
-	Header        string
-	MinBufSize    int
-	BatchBufCount int
-	ColorMap      map[gxlog.LogLevel]ColorID
-	EnableColor   bool
+	Header      string
+	MinBufSize  int
+	ColorMap    map[gxlog.LogLevel]ColorID
+	EnableColor bool
 }
 
 func NewConfig() *Config {
 	return &Config{
-		Header:        DefaultHeader,
-		MinBufSize:    DefaultMinBufSize,
-		BatchBufCount: DefaultBatchBufCount,
-		EnableColor:   DefaultEnableColor,
+		Header:      DefaultHeader,
+		MinBufSize:  DefaultMinBufSize,
+		EnableColor: DefaultEnableColor,
 	}
 }
 
@@ -34,9 +31,8 @@ func (this *Config) WithHeader(header string) *Config {
 	return this
 }
 
-func (this *Config) WithBufConfig(minBufSize, batchBufCount int) *Config {
-	this.MinBufSize = minBufSize
-	this.BatchBufCount = batchBufCount
+func (this *Config) WithMinBufSize(size int) *Config {
+	this.MinBufSize = size
 	return this
 }
 

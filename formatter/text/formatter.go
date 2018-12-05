@@ -12,24 +12,24 @@ var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
 type Formatter struct {
 	header      string
+	minBufSize  int
 	enableColor bool
 
 	colorMgr        *colorMgr
 	headerAppenders []*headerAppender
 	suffix          string
-	buf             buffer
 
 	lock sync.Mutex
 }
 
 func New(config *Config) *Formatter {
 	formatter := &Formatter{
+		minBufSize:  config.MinBufSize,
 		enableColor: config.EnableColor,
 		colorMgr:    newColorMgr(),
 	}
 	formatter.SetHeader(config.Header)
 	formatter.MapColors(config.ColorMap)
-	formatter.buf.SetConfig(config.MinBufSize, config.BatchBufCount)
 	return formatter
 }
 
@@ -65,17 +65,17 @@ func (this *Formatter) SetHeader(header string) {
 	this.lock.Unlock()
 }
 
-func (this *Formatter) GetBufConfig() (minBufSize, batchBufCount int) {
+func (this *Formatter) GetMinBufSize() (size int) {
 	this.lock.Lock()
-	minBufSize, batchBufCount = this.buf.GetConfig()
+	size = this.minBufSize
 	this.lock.Unlock()
 
-	return minBufSize, batchBufCount
+	return size
 }
 
-func (this *Formatter) SetBufConfig(minBufSize, batchBufCount int) {
+func (this *Formatter) SetMinBufSize(size int) {
 	this.lock.Lock()
-	this.buf.SetConfig(minBufSize, batchBufCount)
+	this.minBufSize = size
 	this.lock.Unlock()
 }
 
@@ -137,7 +137,7 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 		}
 	}
 
-	buf := this.buf.Get()
+	buf := make([]byte, 0, this.minBufSize)
 	buf = append(buf, left...)
 	for _, appender := range this.headerAppenders {
 		buf = appender.AppendHeader(buf, record)
