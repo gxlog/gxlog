@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	cCallDepth        = 4
-	cBatchRecordCount = 16
+	cCallDepth = 4
 )
 
 type logger struct {
@@ -19,7 +18,6 @@ type logger struct {
 
 	linkSlots    [MaxLinkSlot]*link
 	compactSlots []*link
-	records      []Record
 
 	lock sync.Mutex
 }
@@ -119,18 +117,17 @@ func (this *logger) write(calldepth int, level LogLevel, actions []Action, msg s
 
 	this.lock.Lock()
 
-	record := this.getRecord()
-	record.Time = time.Now()
-	record.Level = level
-	record.Pathname = file
-	record.Line = line
-	record.Func = funcName
-	record.Msg = msg
-
+	record := &Record{
+		Time:     time.Now(),
+		Level:    level,
+		Pathname: file,
+		Line:     line,
+		Func:     funcName,
+		Msg:      msg,
+	}
 	for _, action := range actions {
 		action(record)
 	}
-
 	for _, lnk := range this.compactSlots {
 		lnk.writer.Write(lnk.formatter.Format(record), record)
 	}
@@ -146,15 +143,6 @@ func (this *logger) genDone(actions []Action, msg string) func() {
 			this.write(-1, LevelTrace, actions, fmt.Sprintf("%s (costs: %v)", msg, costs))
 		}
 	}
-}
-
-func (this *logger) getRecord() *Record {
-	if len(this.records) == 0 {
-		this.records = make([]Record, cBatchRecordCount)
-	}
-	record := &this.records[0]
-	this.records = this.records[1:]
-	return record
 }
 
 func getRuntime(calldepth int) (file string, line int, funcName string) {
