@@ -24,6 +24,8 @@ func newHeaderAppender(element, property, fmtspec, staticText string) *headerApp
 		formatter = newPathnameFormatter(property, fmtspec)
 	case "line":
 		formatter = newLineFormatter(property, fmtspec)
+	case "pkg":
+		formatter = newPkgFormatter(property, fmtspec)
 	case "func":
 		formatter = newFuncFormatter(property, fmtspec)
 	case "msg":
