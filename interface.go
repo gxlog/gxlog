@@ -46,6 +46,7 @@ type Record struct {
 	Level    LogLevel
 	Pathname string
 	Line     int
+	Pkg      string
 	Func     string
 	Msg      string
 	Aux      Auxiliary

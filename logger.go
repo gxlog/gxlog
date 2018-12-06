@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -113,7 +114,7 @@ func (this *logger) getLevelAndExitOnFatal() (level LogLevel, exitOnFatal bool) 
 }
 
 func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg string) {
-	file, line, funcName := getRuntime(calldepth + cCallDepth)
+	file, line, pkg, fn := getRuntime(calldepth + cCallDepth)
 
 	this.lock.Lock()
 
@@ -122,7 +123,8 @@ func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg str
 		Level:    level,
 		Pathname: file,
 		Line:     line,
-		Func:     funcName,
+		Pkg:      pkg,
+		Func:     fn,
 		Msg:      msg,
 		Aux:      *aux,
 	}
@@ -143,16 +145,28 @@ func (this *logger) genDone(aux *Auxiliary, msg string) func() {
 	}
 }
 
-func getRuntime(calldepth int) (file string, line int, funcName string) {
+func getRuntime(calldepth int) (file string, line int, pkg, fn string) {
 	var pc uintptr
 	var ok bool
 	pc, file, line, ok = runtime.Caller(calldepth)
 	if ok {
-		funcName = runtime.FuncForPC(pc).Name()
+		name := runtime.FuncForPC(pc).Name()
+		pkg, fn = splitPkgAndFunc(name)
 	} else {
 		file = "?file?"
 		line = -1
-		funcName = "?func?"
+		pkg = "?pkg?"
+		fn = "?func?"
 	}
-	return file, line, funcName
+	return file, line, pkg, fn
+}
+
+func splitPkgAndFunc(name string) (string, string) {
+	lastSlash := strings.LastIndexByte(name, '/')
+	nextDot := strings.IndexByte(name[lastSlash+1:], '.')
+	if nextDot < 0 {
+		return "?pkg?", "?func?"
+	}
+	nextDot += (lastSlash + 1)
+	return name[:nextDot], name[nextDot+1:]
 }
