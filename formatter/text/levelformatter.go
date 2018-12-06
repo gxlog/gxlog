@@ -2,11 +2,12 @@ package text
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gratonos/gxlog"
 )
 
-var levelDesc = []string{
+var gLevelDesc = []string{
 	gxlog.LevelTrace: "TRACE",
 	gxlog.LevelDebug: "DEBUG",
 	gxlog.LevelInfo:  "INFO ",
@@ -15,8 +16,17 @@ var levelDesc = []string{
 	gxlog.LevelFatal: "FATAL",
 }
 
+var gLevelDescChar = []string{
+	gxlog.LevelTrace: "T",
+	gxlog.LevelDebug: "D",
+	gxlog.LevelInfo:  "I",
+	gxlog.LevelWarn:  "W",
+	gxlog.LevelError: "E",
+	gxlog.LevelFatal: "F",
+}
+
 type levelFormatter struct {
-	property string
+	descList []string
 	fmtspec  string
 }
 
@@ -24,14 +34,24 @@ func newLevelFormatter(property, fmtspec string) *levelFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}
-	return &levelFormatter{property: property, fmtspec: fmtspec}
+	return &levelFormatter{
+		descList: selectDescList(property),
+		fmtspec:  fmtspec,
+	}
 }
 
 func (this *levelFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	desc := levelDesc[record.Level]
+	desc := this.descList[record.Level]
 	if this.fmtspec == "%s" {
 		return append(buf, desc...)
 	} else {
 		return append(buf, fmt.Sprintf(this.fmtspec, desc)...)
 	}
+}
+
+func selectDescList(property string) []string {
+	if strings.ToLower(property) == "char" {
+		return gLevelDescChar
+	}
+	return gLevelDesc
 }
