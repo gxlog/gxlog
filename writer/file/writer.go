@@ -40,6 +40,18 @@ func (this *Writer) Close() error {
 	return nil
 }
 
+func (this *Writer) Sync() (err error) {
+	this.lock.Lock()
+
+	if this.file != nil {
+		err = this.file.Sync()
+	}
+
+	this.lock.Unlock()
+
+	return err
+}
+
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	this.lock.Lock()
 
