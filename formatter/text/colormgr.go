@@ -25,8 +25,8 @@ const (
 	DefaultInfoColor   = Green
 	DefaultWarnColor   = Yellow
 	DefaultErrorColor  = Red
-	DefaultFatalColor  = Purple
-	DefaultMarkedColor = Blue
+	DefaultFatalColor  = Red
+	DefaultMarkedColor = Purple
 )
 
 const (
