@@ -4,15 +4,17 @@ type link struct {
 	formatter Formatter
 	writer    Writer
 	level     LogLevel
+	filter    Filter
 }
 
-func (this *logger) Link(slot LinkSlot, ft Formatter, wt Writer, level LogLevel) {
+func (this *logger) Link(slot LinkSlot, ft Formatter, wt Writer, level LogLevel, filter Filter) {
 	this.lock.Lock()
 
 	this.linkSlots[slot] = &link{
 		formatter: ft,
 		writer:    wt,
 		level:     level,
+		filter:    filter,
 	}
 	this.updateCompactSlots()
 
@@ -120,6 +122,30 @@ func (this *logger) SetLinkLevel(slot LinkSlot, level LogLevel) {
 	if lnk != nil && lnk.level != level {
 		lnk.level = level
 		this.updateCompactSlots()
+	}
+
+	this.lock.Unlock()
+}
+
+func (this *logger) GetLinkFilter(slot LinkSlot) (filter Filter) {
+	this.lock.Lock()
+
+	lnk := this.linkSlots[slot]
+	if lnk != nil {
+		filter = lnk.filter
+	}
+
+	this.lock.Unlock()
+
+	return filter
+}
+
+func (this *logger) SetLinkFilter(slot LinkSlot, filter Filter) {
+	this.lock.Lock()
+
+	lnk := this.linkSlots[slot]
+	if lnk != nil {
+		lnk.filter = filter
 	}
 
 	this.lock.Unlock()
