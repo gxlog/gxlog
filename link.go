@@ -39,7 +39,7 @@ func (this *logger) UnlinkAll() {
 	this.lock.Unlock()
 }
 
-func (this *logger) CopyLink(src, dst LinkSlot) {
+func (this *logger) CopyLink(dst, src LinkSlot) {
 	this.lock.Lock()
 
 	this.linkSlots[dst] = this.linkSlots[src]
@@ -48,7 +48,7 @@ func (this *logger) CopyLink(src, dst LinkSlot) {
 	this.lock.Unlock()
 }
 
-func (this *logger) MoveLink(from, to LinkSlot) {
+func (this *logger) MoveLink(to, from LinkSlot) {
 	this.lock.Lock()
 
 	this.linkSlots[to] = this.linkSlots[from]
