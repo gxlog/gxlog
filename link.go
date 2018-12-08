@@ -3,16 +3,16 @@ package gxlog
 type link struct {
 	formatter Formatter
 	writer    Writer
-	enable    bool
+	level     LogLevel
 }
 
-func (this *logger) Link(ft Formatter, wt Writer, slot LinkSlot) {
+func (this *logger) Link(slot LinkSlot, ft Formatter, wt Writer, level LogLevel) {
 	this.lock.Lock()
 
 	this.linkSlots[slot] = &link{
 		formatter: ft,
 		writer:    wt,
-		enable:    true,
+		level:     level,
 	}
 	this.updateCompactSlots()
 
@@ -98,31 +98,38 @@ func (this *logger) MustGetLink(slot LinkSlot) (ft Formatter, wt Writer) {
 	return lnk.formatter, lnk.writer
 }
 
-func (this *logger) EnableLink(slot LinkSlot) {
+func (this *logger) GetLinkLevel(slot LinkSlot) (level LogLevel) {
 	this.lock.Lock()
-	this.setLinkEnable(slot, true)
-	this.lock.Unlock()
-}
 
-func (this *logger) DisableLink(slot LinkSlot) {
-	this.lock.Lock()
-	this.setLinkEnable(slot, false)
-	this.lock.Unlock()
-}
-
-func (this *logger) setLinkEnable(slot LinkSlot, enable bool) {
 	lnk := this.linkSlots[slot]
-	if lnk != nil && lnk.enable != enable {
-		lnk.enable = enable
+	if lnk != nil {
+		level = lnk.level
+	} else {
+		level = LevelOff
+	}
+
+	this.lock.Unlock()
+
+	return level
+}
+
+func (this *logger) SetLinkLevel(slot LinkSlot, level LogLevel) {
+	this.lock.Lock()
+
+	lnk := this.linkSlots[slot]
+	if lnk != nil && lnk.level != level {
+		lnk.level = level
 		this.updateCompactSlots()
 	}
+
+	this.lock.Unlock()
 }
 
 func (this *logger) updateCompactSlots() {
 	this.compactSlots = this.compactSlots[:0]
 	for i := range this.linkSlots {
 		lnk := this.linkSlots[i]
-		if lnk != nil && lnk.enable {
+		if lnk != nil && lnk.level != LevelOff {
 			this.compactSlots = append(this.compactSlots, lnk)
 		}
 	}

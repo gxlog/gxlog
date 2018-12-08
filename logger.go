@@ -129,7 +129,9 @@ func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg str
 		Aux:   *aux,
 	}
 	for _, lnk := range this.compactSlots {
-		lnk.writer.Write(lnk.formatter.Format(record), record)
+		if lnk.level <= level {
+			lnk.writer.Write(lnk.formatter.Format(record), record)
+		}
 	}
 
 	this.lock.Unlock()
