@@ -15,9 +15,9 @@ type Formatter struct {
 	minBufSize  int
 	enableColor bool
 
-	colorMgr        *colorMgr
-	headerAppenders []*headerAppender
-	suffix          string
+	colorMgr  *colorMgr
+	appenders []*headerAppender
+	suffix    string
 
 	lock sync.Mutex
 }
@@ -45,7 +45,7 @@ func (this *Formatter) SetHeader(header string) {
 	this.lock.Lock()
 
 	this.header = header
-	this.headerAppenders = this.headerAppenders[:0]
+	this.appenders = this.appenders[:0]
 	var staticText string
 	for header != "" {
 		indexes := gHeaderRegexp.FindStringSubmatchIndex(header)
@@ -91,7 +91,7 @@ func (this *Formatter) DisableColor() {
 	this.lock.Unlock()
 }
 
-func (this *Formatter) GetColor(level gxlog.LogLevel) (color ColorID) {
+func (this *Formatter) GetColor(level gxlog.Level) (color ColorID) {
 	this.lock.Lock()
 	color = this.colorMgr.GetColor(level)
 	this.lock.Unlock()
@@ -99,13 +99,13 @@ func (this *Formatter) GetColor(level gxlog.LogLevel) (color ColorID) {
 	return color
 }
 
-func (this *Formatter) SetColor(level gxlog.LogLevel, color ColorID) {
+func (this *Formatter) SetColor(level gxlog.Level, color ColorID) {
 	this.lock.Lock()
 	this.colorMgr.SetColor(level, color)
 	this.lock.Unlock()
 }
 
-func (this *Formatter) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
+func (this *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 	this.lock.Lock()
 	this.colorMgr.MapColors(colorMap)
 	this.lock.Unlock()
@@ -139,7 +139,7 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 
 	buf := make([]byte, 0, this.minBufSize)
 	buf = append(buf, left...)
-	for _, appender := range this.headerAppenders {
+	for _, appender := range this.appenders {
 		buf = appender.AppendHeader(buf, record)
 	}
 	buf = append(buf, this.suffix...)
@@ -155,7 +155,7 @@ func (this *Formatter) addAppender(element, property, fmtspec, staticText string
 	if appender == nil {
 		return false
 	}
-	this.headerAppenders = append(this.headerAppenders, appender)
+	this.appenders = append(this.appenders, appender)
 	return true
 }
 

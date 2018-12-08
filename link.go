@@ -1,16 +1,30 @@
 package gxlog
 
+type Slot int
+
+const (
+	Slot0 Slot = iota
+	Slot1
+	Slot2
+	Slot3
+	Slot4
+	Slot5
+	Slot6
+	Slot7
+	MaxSlot
+)
+
 type link struct {
 	formatter Formatter
 	writer    Writer
-	level     LogLevel
+	level     Level
 	filter    Filter
 }
 
-func (this *logger) Link(slot LinkSlot, ft Formatter, wt Writer, level LogLevel, filter Filter) {
+func (this *logger) Link(slot Slot, ft Formatter, wt Writer, level Level, filter Filter) {
 	this.lock.Lock()
 
-	this.linkSlots[slot] = &link{
+	this.slots[slot] = &link{
 		formatter: ft,
 		writer:    wt,
 		level:     level,
@@ -21,10 +35,10 @@ func (this *logger) Link(slot LinkSlot, ft Formatter, wt Writer, level LogLevel,
 	this.lock.Unlock()
 }
 
-func (this *logger) Unlink(slot LinkSlot) {
+func (this *logger) Unlink(slot Slot) {
 	this.lock.Lock()
 
-	this.linkSlots[slot] = nil
+	this.slots[slot] = nil
 	this.updateCompactSlots()
 
 	this.lock.Unlock()
@@ -33,54 +47,54 @@ func (this *logger) Unlink(slot LinkSlot) {
 func (this *logger) UnlinkAll() {
 	this.lock.Lock()
 
-	for i := range this.linkSlots {
-		this.linkSlots[i] = nil
+	for i := range this.slots {
+		this.slots[i] = nil
 	}
 	this.updateCompactSlots()
 
 	this.lock.Unlock()
 }
 
-func (this *logger) CopyLink(dst, src LinkSlot) {
+func (this *logger) CopyLink(dst, src Slot) {
 	this.lock.Lock()
 
-	this.linkSlots[dst] = this.linkSlots[src]
+	this.slots[dst] = this.slots[src]
 	this.updateCompactSlots()
 
 	this.lock.Unlock()
 }
 
-func (this *logger) MoveLink(to, from LinkSlot) {
+func (this *logger) MoveLink(to, from Slot) {
 	this.lock.Lock()
 
-	this.linkSlots[to] = this.linkSlots[from]
-	this.linkSlots[from] = nil
+	this.slots[to] = this.slots[from]
+	this.slots[from] = nil
 	this.updateCompactSlots()
 
 	this.lock.Unlock()
 }
 
-func (this *logger) SwapLink(left, right LinkSlot) {
+func (this *logger) SwapLink(left, right Slot) {
 	this.lock.Lock()
 
-	this.linkSlots[left], this.linkSlots[right] = this.linkSlots[right], this.linkSlots[left]
+	this.slots[left], this.slots[right] = this.slots[right], this.slots[left]
 	this.updateCompactSlots()
 
 	this.lock.Unlock()
 }
 
-func (this *logger) HasLink(slot LinkSlot) (ok bool) {
+func (this *logger) HasLink(slot Slot) (ok bool) {
 	this.lock.Lock()
-	ok = (this.linkSlots[slot] != nil)
+	ok = (this.slots[slot] != nil)
 	this.lock.Unlock()
 
 	return ok
 }
 
-func (this *logger) GetLink(slot LinkSlot) (ft Formatter, wt Writer, ok bool) {
+func (this *logger) GetLink(slot Slot) (ft Formatter, wt Writer, ok bool) {
 	this.lock.Lock()
 
-	lnk := this.linkSlots[slot]
+	lnk := this.slots[slot]
 	if lnk != nil {
 		ft, wt, ok = lnk.formatter, lnk.writer, true
 	} else {
@@ -92,18 +106,18 @@ func (this *logger) GetLink(slot LinkSlot) (ft Formatter, wt Writer, ok bool) {
 	return ft, wt, ok
 }
 
-func (this *logger) MustGetLink(slot LinkSlot) (ft Formatter, wt Writer) {
+func (this *logger) MustGetLink(slot Slot) (ft Formatter, wt Writer) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	lnk := this.linkSlots[slot]
+	lnk := this.slots[slot]
 	return lnk.formatter, lnk.writer
 }
 
-func (this *logger) GetLinkLevel(slot LinkSlot) (level LogLevel) {
+func (this *logger) GetLinkLevel(slot Slot) (level Level) {
 	this.lock.Lock()
 
-	lnk := this.linkSlots[slot]
+	lnk := this.slots[slot]
 	if lnk != nil {
 		level = lnk.level
 	} else {
@@ -115,10 +129,10 @@ func (this *logger) GetLinkLevel(slot LinkSlot) (level LogLevel) {
 	return level
 }
 
-func (this *logger) SetLinkLevel(slot LinkSlot, level LogLevel) {
+func (this *logger) SetLinkLevel(slot Slot, level Level) {
 	this.lock.Lock()
 
-	lnk := this.linkSlots[slot]
+	lnk := this.slots[slot]
 	if lnk != nil && lnk.level != level {
 		lnk.level = level
 		this.updateCompactSlots()
@@ -127,10 +141,10 @@ func (this *logger) SetLinkLevel(slot LinkSlot, level LogLevel) {
 	this.lock.Unlock()
 }
 
-func (this *logger) GetLinkFilter(slot LinkSlot) (filter Filter) {
+func (this *logger) GetLinkFilter(slot Slot) (filter Filter) {
 	this.lock.Lock()
 
-	lnk := this.linkSlots[slot]
+	lnk := this.slots[slot]
 	if lnk != nil {
 		filter = lnk.filter
 	}
@@ -140,10 +154,10 @@ func (this *logger) GetLinkFilter(slot LinkSlot) (filter Filter) {
 	return filter
 }
 
-func (this *logger) SetLinkFilter(slot LinkSlot, filter Filter) {
+func (this *logger) SetLinkFilter(slot Slot, filter Filter) {
 	this.lock.Lock()
 
-	lnk := this.linkSlots[slot]
+	lnk := this.slots[slot]
 	if lnk != nil {
 		lnk.filter = filter
 	}
@@ -153,8 +167,8 @@ func (this *logger) SetLinkFilter(slot LinkSlot, filter Filter) {
 
 func (this *logger) updateCompactSlots() {
 	this.compactSlots = this.compactSlots[:0]
-	for i := range this.linkSlots {
-		lnk := this.linkSlots[i]
+	for i := range this.slots {
+		lnk := this.slots[i]
 		if lnk != nil && lnk.level != LevelOff {
 			this.compactSlots = append(this.compactSlots, lnk)
 		}

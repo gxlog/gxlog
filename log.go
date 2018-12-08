@@ -56,11 +56,11 @@ func (this *Logger) Panicf(fmtstr string, args ...interface{}) {
 	this.logger.Panicf(&this.aux, fmtstr, args)
 }
 
-func (this *Logger) Log(calldepth int, level LogLevel, args ...interface{}) {
+func (this *Logger) Log(calldepth int, level Level, args ...interface{}) {
 	this.logger.Log(calldepth, level, &this.aux, args)
 }
 
-func (this *Logger) Logf(calldepth int, level LogLevel, fmtstr string, args ...interface{}) {
+func (this *Logger) Logf(calldepth int, level Level, fmtstr string, args ...interface{}) {
 	this.logger.Logf(calldepth, level, &this.aux, fmtstr, args)
 }
 

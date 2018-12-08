@@ -6,11 +6,6 @@ import (
 	"github.com/gratonos/gxlog"
 )
 
-const (
-	cEscSeq = "\033[%dm"
-	cReset  = 0
-)
-
 type ColorID int
 
 const (
@@ -34,13 +29,18 @@ const (
 	DefaultMarkedColor = Blue
 )
 
+const (
+	cEscSeq = "\033[%dm"
+	cReset  = 0
+)
+
 type colorMgr struct {
 	colors      []ColorID
 	markedColor ColorID
 
-	colorEscSeqs [][]byte
-	markedEscSeq []byte
-	resetEscSeq  []byte
+	colorSeqs [][]byte
+	markedSeq []byte
+	resetSeq  []byte
 }
 
 func newColorMgr() *colorMgr {
@@ -53,25 +53,25 @@ func newColorMgr() *colorMgr {
 		gxlog.LevelFatal: DefaultFatalColor,
 	}
 	mgr := &colorMgr{
-		colors:       colors,
-		markedColor:  DefaultMarkedColor,
-		colorEscSeqs: initColorSeqs(colors),
-		markedEscSeq: makeSeq(DefaultMarkedColor),
-		resetEscSeq:  makeSeq(0),
+		colors:      colors,
+		markedColor: DefaultMarkedColor,
+		colorSeqs:   initColorSeqs(colors),
+		markedSeq:   makeSeq(DefaultMarkedColor),
+		resetSeq:    makeSeq(0),
 	}
 	return mgr
 }
 
-func (this *colorMgr) GetColor(level gxlog.LogLevel) ColorID {
+func (this *colorMgr) GetColor(level gxlog.Level) ColorID {
 	return this.colors[level]
 }
 
-func (this *colorMgr) SetColor(level gxlog.LogLevel, color ColorID) {
+func (this *colorMgr) SetColor(level gxlog.Level, color ColorID) {
 	this.colors[level] = color
-	this.colorEscSeqs[level] = makeSeq(color)
+	this.colorSeqs[level] = makeSeq(color)
 }
 
-func (this *colorMgr) MapColors(colorMap map[gxlog.LogLevel]ColorID) {
+func (this *colorMgr) MapColors(colorMap map[gxlog.Level]ColorID) {
 	for level, color := range colorMap {
 		this.SetColor(level, color)
 	}
@@ -83,23 +83,23 @@ func (this *colorMgr) GetMarkedColor() ColorID {
 
 func (this *colorMgr) SetMarkedColor(color ColorID) {
 	this.markedColor = color
-	this.markedEscSeq = makeSeq(color)
+	this.markedSeq = makeSeq(color)
 }
 
-func (this *colorMgr) GetColorEars(level gxlog.LogLevel) ([]byte, []byte) {
-	return this.colorEscSeqs[level], this.resetEscSeq
+func (this *colorMgr) GetColorEars(level gxlog.Level) ([]byte, []byte) {
+	return this.colorSeqs[level], this.resetSeq
 }
 
 func (this *colorMgr) GetMarkedColorEars() ([]byte, []byte) {
-	return this.markedEscSeq, this.resetEscSeq
+	return this.markedSeq, this.resetSeq
 }
 
 func initColorSeqs(colors []ColorID) [][]byte {
-	colorEscSeqs := make([][]byte, len(colors))
+	colorSeqs := make([][]byte, len(colors))
 	for i := range colors {
-		colorEscSeqs[i] = makeSeq(colors[i])
+		colorSeqs[i] = makeSeq(colors[i])
 	}
-	return colorEscSeqs
+	return colorSeqs
 }
 
 func makeSeq(color ColorID) []byte {

@@ -8,7 +8,7 @@ const (
 type Filter func(*Record) bool
 
 type Config struct {
-	Level       LogLevel
+	Level       Level
 	Filter      Filter
 	ExitOnFatal bool
 }
@@ -20,7 +20,7 @@ func NewConfig() *Config {
 	}
 }
 
-func (this *Config) WithLevel(level LogLevel) *Config {
+func (this *Config) WithLevel(level Level) *Config {
 	this.Level = level
 	return this
 }

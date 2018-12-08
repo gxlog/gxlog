@@ -14,7 +14,7 @@ const (
 type Config struct {
 	Header      string
 	MinBufSize  int
-	ColorMap    map[gxlog.LogLevel]ColorID
+	ColorMap    map[gxlog.Level]ColorID
 	EnableColor bool
 }
 
@@ -36,7 +36,7 @@ func (this *Config) WithMinBufSize(size int) *Config {
 	return this
 }
 
-func (this *Config) WithColorMap(colorMap map[gxlog.LogLevel]ColorID) *Config {
+func (this *Config) WithColorMap(colorMap map[gxlog.Level]ColorID) *Config {
 	this.ColorMap = colorMap
 	return this
 }

@@ -14,17 +14,17 @@ const (
 )
 
 type logger struct {
-	level       LogLevel
+	level       Level
 	filter      Filter
 	exitOnFatal bool
 
-	linkSlots    [MaxLinkSlot]*link
+	slots        [MaxSlot]*link
 	compactSlots []*link
 
 	lock sync.Mutex
 }
 
-func (this *logger) Log(calldepth int, level LogLevel, aux *Auxiliary, args []interface{}) {
+func (this *logger) Log(calldepth int, level Level, aux *Auxiliary, args []interface{}) {
 	thisLevel, exitOnFatal := this.getLevelAndExitOnFatal()
 	if thisLevel <= level {
 		this.write(calldepth, level, aux, fmt.Sprint(args...))
@@ -34,7 +34,7 @@ func (this *logger) Log(calldepth int, level LogLevel, aux *Auxiliary, args []in
 	}
 }
 
-func (this *logger) Logf(calldepth int, level LogLevel, aux *Auxiliary,
+func (this *logger) Logf(calldepth int, level Level, aux *Auxiliary,
 	fmtstr string, args []interface{}) {
 	thisLevel, exitOnFatal := this.getLevelAndExitOnFatal()
 	if thisLevel <= level {
@@ -77,7 +77,7 @@ func (this *logger) Timef(aux *Auxiliary, fmtstr string, args []interface{}) fun
 	return done
 }
 
-func (this *logger) GetLevel() (level LogLevel) {
+func (this *logger) GetLevel() (level Level) {
 	this.lock.Lock()
 	level = this.level
 	this.lock.Unlock()
@@ -85,7 +85,7 @@ func (this *logger) GetLevel() (level LogLevel) {
 	return level
 }
 
-func (this *logger) SetLevel(level LogLevel) {
+func (this *logger) SetLevel(level Level) {
 	this.lock.Lock()
 	this.level = level
 	this.lock.Unlock()
@@ -119,7 +119,7 @@ func (this *logger) SetExitOnFatal(ok bool) {
 	this.lock.Unlock()
 }
 
-func (this *logger) getLevelAndExitOnFatal() (level LogLevel, exitOnFatal bool) {
+func (this *logger) getLevelAndExitOnFatal() (level Level, exitOnFatal bool) {
 	this.lock.Lock()
 	level = this.level
 	exitOnFatal = this.exitOnFatal
@@ -128,7 +128,7 @@ func (this *logger) getLevelAndExitOnFatal() (level LogLevel, exitOnFatal bool) 
 	return level, exitOnFatal
 }
 
-func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg string) {
+func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string) {
 	file, line, pkg, fn := getRuntime(calldepth + cCallDepth)
 
 	this.lock.Lock()

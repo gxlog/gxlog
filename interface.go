@@ -4,30 +4,16 @@ import (
 	"time"
 )
 
-type LogLevel int
+type Level int
 
 const (
-	LevelTrace LogLevel = iota
+	LevelTrace Level = iota
 	LevelDebug
 	LevelInfo
 	LevelWarn
 	LevelError
 	LevelFatal
 	LevelOff
-)
-
-type LinkSlot int
-
-const (
-	LinkSlot0 LinkSlot = iota
-	LinkSlot1
-	LinkSlot2
-	LinkSlot3
-	LinkSlot4
-	LinkSlot5
-	LinkSlot6
-	LinkSlot7
-	MaxLinkSlot
 )
 
 type Context struct {
@@ -43,7 +29,7 @@ type Auxiliary struct {
 
 type Record struct {
 	Time  time.Time
-	Level LogLevel
+	Level Level
 	File  string
 	Line  int
 	Pkg   string
