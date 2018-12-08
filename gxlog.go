@@ -14,6 +14,7 @@ func New(config *Config) *Logger {
 	return &Logger{
 		logger: &logger{
 			level:       config.Level,
+			filter:      config.Filter,
 			exitOnFatal: config.ExitOnFatal,
 		},
 	}

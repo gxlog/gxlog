@@ -15,6 +15,7 @@ const (
 
 type logger struct {
 	level       LogLevel
+	filter      Filter
 	exitOnFatal bool
 
 	linkSlots    [MaxLinkSlot]*link
@@ -90,6 +91,20 @@ func (this *logger) SetLevel(level LogLevel) {
 	this.lock.Unlock()
 }
 
+func (this *logger) GetFilter() (filter Filter) {
+	this.lock.Lock()
+	filter = this.filter
+	this.lock.Unlock()
+
+	return filter
+}
+
+func (this *logger) SetFilter(filter Filter) {
+	this.lock.Lock()
+	this.filter = filter
+	this.lock.Unlock()
+}
+
 func (this *logger) GetExitOnFatal() (ok bool) {
 	this.lock.Lock()
 	ok = this.exitOnFatal
@@ -128,9 +143,11 @@ func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg str
 		Msg:   msg,
 		Aux:   *aux,
 	}
-	for _, lnk := range this.compactSlots {
-		if lnk.level <= level {
-			lnk.writer.Write(lnk.formatter.Format(record), record)
+	if this.filter == nil || this.filter(record) {
+		for _, lnk := range this.compactSlots {
+			if lnk.level <= level {
+				lnk.writer.Write(lnk.formatter.Format(record), record)
+			}
 		}
 	}
 

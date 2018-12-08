@@ -5,8 +5,11 @@ const (
 	DefaultExitOnFatal = false
 )
 
+type Filter func(*Record) bool
+
 type Config struct {
 	Level       LogLevel
+	Filter      Filter
 	ExitOnFatal bool
 }
 
@@ -19,6 +22,11 @@ func NewConfig() *Config {
 
 func (this *Config) WithLevel(level LogLevel) *Config {
 	this.Level = level
+	return this
+}
+
+func (this *Config) WithFilter(filter Filter) *Config {
+	this.Filter = filter
 	return this
 }
 
