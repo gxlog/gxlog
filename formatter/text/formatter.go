@@ -33,16 +33,16 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
-func (this *Formatter) GetHeader() (header string) {
+func (this *Formatter) GetHeader() string {
 	this.lock.Lock()
-	header = this.header
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return header
+	return this.header
 }
 
 func (this *Formatter) SetHeader(header string) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	this.header = header
 	this.appenders = this.appenders[:0]
@@ -61,72 +61,74 @@ func (this *Formatter) SetHeader(header string) {
 		header = header[end:]
 	}
 	this.suffix = staticText + header
-
-	this.lock.Unlock()
 }
 
-func (this *Formatter) GetMinBufSize() (size int) {
+func (this *Formatter) GetMinBufSize() int {
 	this.lock.Lock()
-	size = this.minBufSize
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return size
+	return this.minBufSize
 }
 
 func (this *Formatter) SetMinBufSize(size int) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.minBufSize = size
-	this.lock.Unlock()
 }
 
 func (this *Formatter) EnableColor() {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.enableColor = true
-	this.lock.Unlock()
 }
 
 func (this *Formatter) DisableColor() {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.enableColor = false
-	this.lock.Unlock()
 }
 
-func (this *Formatter) GetColor(level gxlog.Level) (color ColorID) {
+func (this *Formatter) GetColor(level gxlog.Level) ColorID {
 	this.lock.Lock()
-	color = this.colorMgr.GetColor(level)
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return color
+	return this.colorMgr.GetColor(level)
 }
 
 func (this *Formatter) SetColor(level gxlog.Level, color ColorID) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.colorMgr.SetColor(level, color)
-	this.lock.Unlock()
 }
 
 func (this *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.colorMgr.MapColors(colorMap)
-	this.lock.Unlock()
 }
 
-func (this *Formatter) GetMarkedColor() (color ColorID) {
+func (this *Formatter) GetMarkedColor() ColorID {
 	this.lock.Lock()
-	color = this.colorMgr.GetMarkedColor()
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return color
+	return this.colorMgr.GetMarkedColor()
 }
 
 func (this *Formatter) SetMarkedColor(color ColorID) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.colorMgr.SetMarkedColor(color)
-	this.lock.Unlock()
 }
 
 func (this *Formatter) Format(record *gxlog.Record) []byte {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	var left, right []byte
 	if this.enableColor {
@@ -144,8 +146,6 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	}
 	buf = append(buf, this.suffix...)
 	buf = append(buf, right...)
-
-	this.lock.Unlock()
 
 	return buf
 }

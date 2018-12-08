@@ -40,55 +40,56 @@ func (this *Writer) Close() error {
 	return nil
 }
 
-func (this *Writer) Sync() (err error) {
+func (this *Writer) Sync() error {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	if this.file != nil {
-		err = this.file.Sync()
+		if err := this.file.Sync(); err != nil {
+			return fmt.Errorf("file.Sync: %v", err)
+		}
 	}
-
-	this.lock.Unlock()
-
-	return err
+	return nil
 }
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	if err := this.checkFile(record); err == nil {
 		n, _ := this.file.Write(bs)
 		this.fileSize += int64(n)
 	}
-
-	this.lock.Unlock()
 }
 
-func (this *Writer) GetConfig() (config Config) {
+func (this *Writer) GetConfig() *Config {
 	this.lock.Lock()
-	config = this.config
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return config
+	copyConfig := this.config
+	return &copyConfig
 }
 
-func (this *Writer) SetConfig(config *Config) (err error) {
+func (this *Writer) SetConfig(config *Config) error {
 	this.lock.Lock()
-	err = this.setConfig(config)
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return err
+	if err := this.setConfig(config); err != nil {
+		return fmt.Errorf("file.SetConfig: %v", err)
+	}
+	return nil
 }
 
-func (this *Writer) UpdateConfig(fn func(*Config)) (err error) {
+func (this *Writer) UpdateConfig(fn func(*Config)) error {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
-	config := this.config
-	fn(&config)
-	err = this.setConfig(&config)
-
-	this.lock.Unlock()
-
-	return err
+	copyConfig := this.config
+	fn(&copyConfig)
+	if err := this.setConfig(&copyConfig); err != nil {
+		return fmt.Errorf("file.UpdateConfig: %v", err)
+	}
+	return nil
 }
 
 func (this *Writer) checkFile(record *gxlog.Record) error {

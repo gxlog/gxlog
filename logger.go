@@ -76,61 +76,60 @@ func (this *logger) Timef(aux *Auxiliary, fmtstr string, args []interface{}) fun
 	return done
 }
 
-func (this *logger) GetLevel() (level Level) {
+func (this *logger) GetLevel() Level {
 	this.lock.Lock()
-	level = this.level
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return level
+	return this.level
 }
 
 func (this *logger) SetLevel(level Level) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.level = level
-	this.lock.Unlock()
 }
 
-func (this *logger) GetFilter() (filter Filter) {
+func (this *logger) GetFilter() Filter {
 	this.lock.Lock()
-	filter = this.filter
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return filter
+	return this.filter
 }
 
 func (this *logger) SetFilter(filter Filter) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.filter = filter
-	this.lock.Unlock()
 }
 
-func (this *logger) GetExitOnFatal() (ok bool) {
+func (this *logger) GetExitOnFatal() bool {
 	this.lock.Lock()
-	ok = this.exitOnFatal
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return ok
+	return this.exitOnFatal
 }
 
 func (this *logger) SetExitOnFatal(ok bool) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
 	this.exitOnFatal = ok
-	this.lock.Unlock()
 }
 
-func (this *logger) getLevelAndExitOnFatal() (level Level, exitOnFatal bool) {
+func (this *logger) getLevelAndExitOnFatal() (Level, bool) {
 	this.lock.Lock()
-	level = this.level
-	exitOnFatal = this.exitOnFatal
-	this.lock.Unlock()
+	defer this.lock.Unlock()
 
-	return level, exitOnFatal
+	return this.level, this.exitOnFatal
 }
 
 func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string) {
 	file, line, pkg, fn := getRuntime(calldepth + cCallDepth)
 
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	record := &Record{
 		Time:  time.Now(),
@@ -151,8 +150,6 @@ func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string
 			}
 		}
 	}
-
-	this.lock.Unlock()
 }
 
 func (this *logger) genDone(aux *Auxiliary, msg string) func() {

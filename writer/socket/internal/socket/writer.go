@@ -39,19 +39,19 @@ func (this *Writer) Close() error {
 	this.wg.Wait()
 
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	for id, conn := range this.conns {
 		conn.Close()
 		delete(this.conns, id)
 	}
 
-	this.lock.Unlock()
-
 	return nil
 }
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	for id, conn := range this.conns {
 		if _, err := conn.Write(bs); err != nil {
@@ -59,8 +59,6 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 			delete(this.conns, id)
 		}
 	}
-
-	this.lock.Unlock()
 }
 
 func (this *Writer) serve() {
