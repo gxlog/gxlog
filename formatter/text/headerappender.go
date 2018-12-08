@@ -20,8 +20,8 @@ func newHeaderAppender(element, property, fmtspec, staticText string) *headerApp
 		formatter = newTimeFormatter(property, fmtspec)
 	case "level":
 		formatter = newLevelFormatter(property, fmtspec)
-	case "pathname":
-		formatter = newPathnameFormatter(property, fmtspec)
+	case "file":
+		formatter = newFileFormatter(property, fmtspec)
 	case "line":
 		formatter = newLineFormatter(property, fmtspec)
 	case "pkg":

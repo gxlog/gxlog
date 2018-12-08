@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	DefaultHeader = "{{time}} {{level}} {{pathname}}:{{line}} {{pkg}}.{{func}} " +
+	DefaultHeader = "{{time}} {{level}} {{file}}:{{line}} {{pkg}}.{{func}} " +
 		"{{prefix}}[{{context}}] {{msg}}\n"
 	DefaultMinBufSize  = 256
 	DefaultEnableColor = false

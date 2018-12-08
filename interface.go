@@ -42,14 +42,14 @@ type Auxiliary struct {
 }
 
 type Record struct {
-	Time     time.Time
-	Level    LogLevel
-	Pathname string
-	Line     int
-	Pkg      string
-	Func     string
-	Msg      string
-	Aux      Auxiliary
+	Time  time.Time
+	Level LogLevel
+	File  string
+	Line  int
+	Pkg   string
+	Func  string
+	Msg   string
+	Aux   Auxiliary
 }
 
 type Formatter interface {

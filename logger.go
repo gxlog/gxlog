@@ -119,14 +119,14 @@ func (this *logger) write(calldepth int, level LogLevel, aux *Auxiliary, msg str
 	this.lock.Lock()
 
 	record := &Record{
-		Time:     time.Now(),
-		Level:    level,
-		Pathname: file,
-		Line:     line,
-		Pkg:      pkg,
-		Func:     fn,
-		Msg:      msg,
-		Aux:      *aux,
+		Time:  time.Now(),
+		Level: level,
+		File:  file,
+		Line:  line,
+		Pkg:   pkg,
+		Func:  fn,
+		Msg:   msg,
+		Aux:   *aux,
 	}
 	for _, lnk := range this.compactSlots {
 		lnk.writer.Write(lnk.formatter.Format(record), record)
