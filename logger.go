@@ -18,8 +18,7 @@ type logger struct {
 	filter      Filter
 	exitOnFatal bool
 
-	slots        [MaxSlot]*link
-	compactSlots []*link
+	slots [MaxSlot]*Link
 
 	lock sync.Mutex
 }
@@ -144,10 +143,10 @@ func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string
 		Aux:   *aux,
 	}
 	if this.filter == nil || this.filter(record) {
-		for _, lnk := range this.compactSlots {
-			if lnk.level <= level {
-				if lnk.filter == nil || lnk.filter(record) {
-					lnk.writer.Write(lnk.formatter.Format(record), record)
+		for _, link := range this.slots {
+			if link != nil && link.Level <= level {
+				if link.Filter == nil || link.Filter(record) {
+					link.Writer.Write(link.Formatter.Format(record), record)
 				}
 			}
 		}

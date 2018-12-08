@@ -14,163 +14,84 @@ const (
 	MaxSlot
 )
 
-type link struct {
-	formatter Formatter
-	writer    Writer
-	level     Level
-	filter    Filter
+type Link struct {
+	Formatter Formatter
+	Writer    Writer
+	Level     Level
+	Filter    Filter
 }
 
-func (this *logger) Link(slot Slot, ft Formatter, wt Writer, level Level, filter Filter) {
-	this.lock.Lock()
-
-	this.slots[slot] = &link{
-		formatter: ft,
-		writer:    wt,
-		level:     level,
-		filter:    filter,
+func NewLink(ft Formatter, wt Writer) *Link {
+	return &Link{
+		Formatter: ft,
+		Writer:    wt,
 	}
-	this.updateCompactSlots()
-
-	this.lock.Unlock()
 }
 
-func (this *logger) Unlink(slot Slot) {
+func (this *Link) WithLevel(level Level) *Link {
+	this.Level = level
+	return this
+}
+
+func (this *Link) WithFilter(filter Filter) *Link {
+	this.Filter = filter
+	return this
+}
+
+func (this *logger) GetLink(slot Slot) *Link {
 	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	link := this.slots[slot]
+	if link == nil {
+		return nil
+	}
+	copyLink := *link
+	return &copyLink
+}
+
+func (this *logger) SetLink(slot Slot, link *Link) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	if link == nil {
+		this.slots[slot] = nil
+		return
+	}
+	this.setLink(slot, link)
+}
+
+func (this *logger) UpdateLink(slot Slot, fn func(*Link)) bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	link := this.slots[slot]
+	if link == nil {
+		return false
+	}
+	copyLink := *link
+	fn(&copyLink)
+	this.setLink(slot, &copyLink)
+	return true
+}
+
+func (this *logger) ResetLink(slot Slot) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	this.slots[slot] = nil
-	this.updateCompactSlots()
-
-	this.lock.Unlock()
 }
 
-func (this *logger) UnlinkAll() {
+func (this *logger) ClearLinks() {
 	this.lock.Lock()
+	defer this.lock.Unlock()
 
 	for i := range this.slots {
 		this.slots[i] = nil
 	}
-	this.updateCompactSlots()
-
-	this.lock.Unlock()
 }
 
-func (this *logger) CopyLink(dst, src Slot) {
-	this.lock.Lock()
-
-	this.slots[dst] = this.slots[src]
-	this.updateCompactSlots()
-
-	this.lock.Unlock()
-}
-
-func (this *logger) MoveLink(to, from Slot) {
-	this.lock.Lock()
-
-	this.slots[to] = this.slots[from]
-	this.slots[from] = nil
-	this.updateCompactSlots()
-
-	this.lock.Unlock()
-}
-
-func (this *logger) SwapLink(left, right Slot) {
-	this.lock.Lock()
-
-	this.slots[left], this.slots[right] = this.slots[right], this.slots[left]
-	this.updateCompactSlots()
-
-	this.lock.Unlock()
-}
-
-func (this *logger) HasLink(slot Slot) (ok bool) {
-	this.lock.Lock()
-	ok = (this.slots[slot] != nil)
-	this.lock.Unlock()
-
-	return ok
-}
-
-func (this *logger) GetLink(slot Slot) (ft Formatter, wt Writer, ok bool) {
-	this.lock.Lock()
-
-	lnk := this.slots[slot]
-	if lnk != nil {
-		ft, wt, ok = lnk.formatter, lnk.writer, true
-	} else {
-		ft, wt, ok = nil, nil, false
-	}
-
-	this.lock.Unlock()
-
-	return ft, wt, ok
-}
-
-func (this *logger) MustGetLink(slot Slot) (ft Formatter, wt Writer) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	lnk := this.slots[slot]
-	return lnk.formatter, lnk.writer
-}
-
-func (this *logger) GetLinkLevel(slot Slot) (level Level) {
-	this.lock.Lock()
-
-	lnk := this.slots[slot]
-	if lnk != nil {
-		level = lnk.level
-	} else {
-		level = LevelOff
-	}
-
-	this.lock.Unlock()
-
-	return level
-}
-
-func (this *logger) SetLinkLevel(slot Slot, level Level) {
-	this.lock.Lock()
-
-	lnk := this.slots[slot]
-	if lnk != nil && lnk.level != level {
-		lnk.level = level
-		this.updateCompactSlots()
-	}
-
-	this.lock.Unlock()
-}
-
-func (this *logger) GetLinkFilter(slot Slot) (filter Filter) {
-	this.lock.Lock()
-
-	lnk := this.slots[slot]
-	if lnk != nil {
-		filter = lnk.filter
-	}
-
-	this.lock.Unlock()
-
-	return filter
-}
-
-func (this *logger) SetLinkFilter(slot Slot, filter Filter) {
-	this.lock.Lock()
-
-	lnk := this.slots[slot]
-	if lnk != nil {
-		lnk.filter = filter
-	}
-
-	this.lock.Unlock()
-}
-
-func (this *logger) updateCompactSlots() {
-	this.compactSlots = this.compactSlots[:0]
-	for i := range this.slots {
-		lnk := this.slots[i]
-		if lnk != nil && lnk.level != LevelOff {
-			this.compactSlots = append(this.compactSlots, lnk)
-		}
-	}
+func (this *logger) setLink(slot Slot, link *Link) {
+	copyLink := *link
+	this.slots[slot] = &copyLink
 }
