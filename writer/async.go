@@ -16,6 +16,9 @@ type Async struct {
 }
 
 func NewAsync(wt gxlog.Writer, chanLen int) *Async {
+	if wt == nil {
+		panic("nil wt")
+	}
 	async := &Async{
 		writer:    wt,
 		chanData:  make(chan logData, chanLen),

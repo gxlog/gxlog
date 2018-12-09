@@ -23,6 +23,9 @@ type Formatter struct {
 }
 
 func New(config *Config) *Formatter {
+	if config == nil {
+		panic("nil config")
+	}
 	formatter := &Formatter{
 		minBufSize:  config.MinBufSize,
 		enableColor: config.EnableColor,

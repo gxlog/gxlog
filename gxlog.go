@@ -11,6 +11,9 @@ type Logger struct {
 }
 
 func New(config *Config) *Logger {
+	if config == nil {
+		panic("nil config")
+	}
 	return &Logger{
 		logger: &logger{
 			level:       config.Level,

@@ -11,6 +11,9 @@ type wrapper struct {
 }
 
 func Wrap(wt io.Writer) gxlog.Writer {
+	if wt == nil {
+		panic("nil wt")
+	}
 	return &wrapper{writer: wt}
 }
 

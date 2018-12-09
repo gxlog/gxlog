@@ -24,6 +24,9 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
+	if config == nil {
+		panic("nil config")
+	}
 	if err := config.Check(); err != nil {
 		return nil, fmt.Errorf("file.Open: %v", err)
 	}
@@ -71,6 +74,10 @@ func (this *Writer) Config() *Config {
 }
 
 func (this *Writer) SetConfig(config *Config) error {
+	if config == nil {
+		panic("nil config")
+	}
+
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -81,6 +88,10 @@ func (this *Writer) SetConfig(config *Config) error {
 }
 
 func (this *Writer) UpdateConfig(fn func(*Config)) error {
+	if fn == nil {
+		panic("nil fn")
+	}
+
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
