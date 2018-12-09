@@ -11,6 +11,9 @@ const (
 	DefaultEnableColor = false
 )
 
+const CompactHeader = "{{time:time.us}} {{level}} {{file:1}}:{{line}} {{pkg}}.{{func}} " +
+	"{{prefix}}[{{context}}] {{msg}}\n"
+
 type Config struct {
 	Header      string
 	MinBufSize  int
