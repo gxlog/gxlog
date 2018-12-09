@@ -138,6 +138,17 @@ func (this *logger) HasLink(slot Slot) bool {
 	return this.slots[slot] != nil
 }
 
+func (this *logger) LinkFormatter(slot Slot) Formatter {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	link := this.slots[slot]
+	if link == nil {
+		return nil
+	}
+	return link.formatter
+}
+
 func (this *logger) SetLinkFormatter(slot Slot, ft Formatter) {
 	if ft == nil {
 		panic("nil formatter")
@@ -150,6 +161,17 @@ func (this *logger) SetLinkFormatter(slot Slot, ft Formatter) {
 	if link != nil {
 		link.formatter = ft
 	}
+}
+
+func (this *logger) LinkWriter(slot Slot) Writer {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	link := this.slots[slot]
+	if link == nil {
+		return nil
+	}
+	return link.writer
 }
 
 func (this *logger) SetLinkWriter(slot Slot, wt Writer) {
@@ -166,6 +188,17 @@ func (this *logger) SetLinkWriter(slot Slot, wt Writer) {
 	}
 }
 
+func (this *logger) LinkLevel(slot Slot) Level {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	link := this.slots[slot]
+	if link == nil {
+		return LevelOff
+	}
+	return link.level
+}
+
 func (this *logger) SetLinkLevel(slot Slot, level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -174,6 +207,17 @@ func (this *logger) SetLinkLevel(slot Slot, level Level) {
 	if link != nil {
 		link.level = level
 	}
+}
+
+func (this *logger) LinkFilter(slot Slot) Filter {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	link := this.slots[slot]
+	if link == nil {
+		return nil
+	}
+	return link.filter
 }
 
 func (this *logger) SetLinkFilter(slot Slot, filter Filter) {
