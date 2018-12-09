@@ -33,7 +33,7 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
-func (this *Formatter) GetHeader() string {
+func (this *Formatter) Header() string {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -63,7 +63,7 @@ func (this *Formatter) SetHeader(header string) {
 	this.suffix = staticText + header
 }
 
-func (this *Formatter) GetMinBufSize() int {
+func (this *Formatter) MinBufSize() int {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -91,11 +91,11 @@ func (this *Formatter) DisableColor() {
 	this.enableColor = false
 }
 
-func (this *Formatter) GetColor(level gxlog.Level) ColorID {
+func (this *Formatter) Color(level gxlog.Level) ColorID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.colorMgr.GetColor(level)
+	return this.colorMgr.Color(level)
 }
 
 func (this *Formatter) SetColor(level gxlog.Level, color ColorID) {
@@ -112,11 +112,11 @@ func (this *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 	this.colorMgr.MapColors(colorMap)
 }
 
-func (this *Formatter) GetMarkedColor() ColorID {
+func (this *Formatter) MarkedColor() ColorID {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.colorMgr.GetMarkedColor()
+	return this.colorMgr.MarkedColor()
 }
 
 func (this *Formatter) SetMarkedColor(color ColorID) {
@@ -133,9 +133,9 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	var left, right []byte
 	if this.enableColor {
 		if record.Aux.Marked {
-			left, right = this.colorMgr.GetMarkedColorEars()
+			left, right = this.colorMgr.MarkedColorEars()
 		} else {
-			left, right = this.colorMgr.GetColorEars(record.Level)
+			left, right = this.colorMgr.ColorEars(record.Level)
 		}
 	}
 

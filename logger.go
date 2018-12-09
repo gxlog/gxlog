@@ -24,7 +24,7 @@ type logger struct {
 }
 
 func (this *logger) Log(calldepth int, level Level, aux *Auxiliary, args []interface{}) {
-	thisLevel, exitOnFatal := this.getLevelAndExitOnFatal()
+	thisLevel, exitOnFatal := this.levelAndExitOnFatal()
 	if thisLevel <= level {
 		this.write(calldepth, level, aux, fmt.Sprint(args...))
 	}
@@ -35,7 +35,7 @@ func (this *logger) Log(calldepth int, level Level, aux *Auxiliary, args []inter
 
 func (this *logger) Logf(calldepth int, level Level, aux *Auxiliary,
 	fmtstr string, args []interface{}) {
-	thisLevel, exitOnFatal := this.getLevelAndExitOnFatal()
+	thisLevel, exitOnFatal := this.levelAndExitOnFatal()
 	if thisLevel <= level {
 		this.write(calldepth, level, aux, fmt.Sprintf(fmtstr, args...))
 	}
@@ -46,7 +46,7 @@ func (this *logger) Logf(calldepth int, level Level, aux *Auxiliary,
 
 func (this *logger) Panic(aux *Auxiliary, args []interface{}) {
 	msg := fmt.Sprint(args...)
-	if this.GetLevel() <= LevelFatal {
+	if this.Level() <= LevelFatal {
 		this.write(0, LevelFatal, aux, msg)
 	}
 	panic(msg)
@@ -54,7 +54,7 @@ func (this *logger) Panic(aux *Auxiliary, args []interface{}) {
 
 func (this *logger) Panicf(aux *Auxiliary, fmtstr string, args []interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
-	if this.GetLevel() <= LevelFatal {
+	if this.Level() <= LevelFatal {
 		this.write(0, LevelFatal, aux, msg)
 	}
 	panic(msg)
@@ -62,7 +62,7 @@ func (this *logger) Panicf(aux *Auxiliary, fmtstr string, args []interface{}) {
 
 func (this *logger) Time(aux *Auxiliary, args []interface{}) func() {
 	done := func() {}
-	if this.GetLevel() <= LevelTrace {
+	if this.Level() <= LevelTrace {
 		done = this.genDone(aux, fmt.Sprint(args...))
 	}
 	return done
@@ -70,13 +70,13 @@ func (this *logger) Time(aux *Auxiliary, args []interface{}) func() {
 
 func (this *logger) Timef(aux *Auxiliary, fmtstr string, args []interface{}) func() {
 	done := func() {}
-	if this.GetLevel() <= LevelTrace {
+	if this.Level() <= LevelTrace {
 		done = this.genDone(aux, fmt.Sprintf(fmtstr, args...))
 	}
 	return done
 }
 
-func (this *logger) GetLevel() Level {
+func (this *logger) Level() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -90,7 +90,7 @@ func (this *logger) SetLevel(level Level) {
 	this.level = level
 }
 
-func (this *logger) GetFilter() Filter {
+func (this *logger) Filter() Filter {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -104,7 +104,7 @@ func (this *logger) SetFilter(filter Filter) {
 	this.filter = filter
 }
 
-func (this *logger) GetExitOnFatal() bool {
+func (this *logger) ExitOnFatal() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -118,7 +118,7 @@ func (this *logger) SetExitOnFatal(ok bool) {
 	this.exitOnFatal = ok
 }
 
-func (this *logger) getLevelAndExitOnFatal() (Level, bool) {
+func (this *logger) levelAndExitOnFatal() (Level, bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -126,7 +126,7 @@ func (this *logger) getLevelAndExitOnFatal() (Level, bool) {
 }
 
 func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string) {
-	file, line, pkg, fn := getRuntime(calldepth + cCallDepth)
+	file, line, pkg, fn := getPosInfo(calldepth + cCallDepth)
 
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -156,13 +156,13 @@ func (this *logger) genDone(aux *Auxiliary, msg string) func() {
 	now := time.Now()
 	return func() {
 		costs := time.Since(now)
-		if this.GetLevel() <= LevelTrace {
+		if this.Level() <= LevelTrace {
 			this.write(-1, LevelTrace, aux, fmt.Sprintf("%s (costs: %v)", msg, costs))
 		}
 	}
 }
 
-func getRuntime(calldepth int) (file string, line int, pkg, fn string) {
+func getPosInfo(calldepth int) (file string, line int, pkg, fn string) {
 	var pc uintptr
 	var ok bool
 	pc, file, line, ok = runtime.Caller(calldepth)

@@ -62,7 +62,7 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	}
 }
 
-func (this *Writer) GetConfig() *Config {
+func (this *Writer) Config() *Config {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

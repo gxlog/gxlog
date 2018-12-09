@@ -62,7 +62,7 @@ func newColorMgr() *colorMgr {
 	return mgr
 }
 
-func (this *colorMgr) GetColor(level gxlog.Level) ColorID {
+func (this *colorMgr) Color(level gxlog.Level) ColorID {
 	return this.colors[level]
 }
 
@@ -77,7 +77,7 @@ func (this *colorMgr) MapColors(colorMap map[gxlog.Level]ColorID) {
 	}
 }
 
-func (this *colorMgr) GetMarkedColor() ColorID {
+func (this *colorMgr) MarkedColor() ColorID {
 	return this.markedColor
 }
 
@@ -86,11 +86,11 @@ func (this *colorMgr) SetMarkedColor(color ColorID) {
 	this.markedSeq = makeSeq(color)
 }
 
-func (this *colorMgr) GetColorEars(level gxlog.Level) ([]byte, []byte) {
+func (this *colorMgr) ColorEars(level gxlog.Level) ([]byte, []byte) {
 	return this.colorSeqs[level], this.resetSeq
 }
 
-func (this *colorMgr) GetMarkedColorEars() ([]byte, []byte) {
+func (this *colorMgr) MarkedColorEars() ([]byte, []byte) {
 	return this.markedSeq, this.resetSeq
 }
 
