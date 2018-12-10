@@ -14,6 +14,7 @@ const (
 	LevelError
 	LevelFatal
 	LevelOff
+	LevelCount = LevelOff
 )
 
 type Context struct {
