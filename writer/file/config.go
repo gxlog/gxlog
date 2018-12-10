@@ -32,6 +32,7 @@ const (
 	DefaultMaxFileSize   = 20 * 1024 * 1024
 	DefaultCheckInterval = time.Second * 5
 	DefaultNewDirEachDay = true
+	DefaultReportOnErr   = true
 )
 
 type Config struct {
@@ -44,6 +45,7 @@ type Config struct {
 	MaxFileSize   int64
 	CheckInterval time.Duration
 	NewDirEachDay bool
+	ReportOnErr   bool
 }
 
 func NewConfig(path, base string) *Config {
@@ -57,6 +59,7 @@ func NewConfig(path, base string) *Config {
 		MaxFileSize:   DefaultMaxFileSize,
 		CheckInterval: DefaultCheckInterval,
 		NewDirEachDay: DefaultNewDirEachDay,
+		ReportOnErr:   DefaultReportOnErr,
 	}
 }
 
@@ -92,6 +95,11 @@ func (this *Config) WithCheckInterval(interval time.Duration) *Config {
 
 func (this *Config) WithNewDirEachDay(ok bool) *Config {
 	this.NewDirEachDay = ok
+	return this
+}
+
+func (this *Config) WithReportOnErr(ok bool) *Config {
+	this.ReportOnErr = ok
 	return this
 }
 

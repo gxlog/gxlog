@@ -2,6 +2,7 @@ package file
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,9 +60,14 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	if err := this.checkFile(record); err == nil {
-		n, _ := this.file.Write(bs)
+	err := this.checkFile(record)
+	if err == nil {
+		var n int
+		n, err = this.file.Write(bs)
 		this.fileSize += int64(n)
+	}
+	if this.config.ReportOnErr && err != nil {
+		log.Println("file.Write:", err)
 	}
 }
 
