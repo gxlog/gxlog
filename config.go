@@ -1,22 +1,25 @@
 package gxlog
 
 const (
-	DefaultLevel       = LevelTrace
-	DefaultExitOnFatal = false
+	DefaultLevel      = LevelTrace
+	DefaultTrackLevel = LevelFatal
+	DefaultExitLevel  = LevelOff
 )
 
 type Filter func(*Record) bool
 
 type Config struct {
-	Level       Level
-	Filter      Filter
-	ExitOnFatal bool
+	Level      Level
+	TrackLevel Level
+	ExitLevel  Level
+	Filter     Filter
 }
 
 func NewConfig() *Config {
 	return &Config{
-		Level:       DefaultLevel,
-		ExitOnFatal: DefaultExitOnFatal,
+		Level:      DefaultLevel,
+		TrackLevel: DefaultTrackLevel,
+		ExitLevel:  DefaultExitLevel,
 	}
 }
 
@@ -25,12 +28,15 @@ func (this *Config) WithLevel(level Level) *Config {
 	return this
 }
 
-func (this *Config) WithFilter(filter Filter) *Config {
-	this.Filter = filter
+func (this *Config) WithTrackLevel(level Level) *Config {
+	this.TrackLevel = level
 	return this
 }
-
-func (this *Config) WithExitOnFatal(ok bool) *Config {
-	this.ExitOnFatal = ok
+func (this *Config) WithExitLevel(level Level) *Config {
+	this.ExitLevel = level
+	return this
+}
+func (this *Config) WithFilter(filter Filter) *Config {
+	this.Filter = filter
 	return this
 }

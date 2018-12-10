@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -14,9 +15,10 @@ const (
 )
 
 type logger struct {
-	level       Level
-	filter      Filter
-	exitOnFatal bool
+	level      Level
+	trackLevel Level
+	exitLevel  Level
+	filter     Filter
 
 	slots [MaxSlot]*link
 
@@ -24,23 +26,30 @@ type logger struct {
 }
 
 func (this *logger) Log(calldepth int, level Level, aux *Auxiliary, args []interface{}) {
-	thisLevel, exitOnFatal := this.levelAndExitOnFatal()
-	if thisLevel <= level {
+	logLevel, trackLevel, exitLevel := this.levels()
+	if logLevel <= level {
+		if trackLevel <= level {
+			args = append(args, "\n", string(debug.Stack()))
+		}
 		this.write(calldepth, level, aux, fmt.Sprint(args...))
-	}
-	if exitOnFatal && level == LevelFatal {
-		os.Exit(1)
+		if exitLevel <= level {
+			os.Exit(1)
+		}
 	}
 }
 
 func (this *logger) Logf(calldepth int, level Level, aux *Auxiliary,
 	fmtstr string, args []interface{}) {
-	thisLevel, exitOnFatal := this.levelAndExitOnFatal()
-	if thisLevel <= level {
+	logLevel, trackLevel, exitLevel := this.levels()
+	if logLevel <= level {
+		if trackLevel <= level {
+			fmtstr += "\n%s"
+			args = append(args, debug.Stack())
+		}
 		this.write(calldepth, level, aux, fmt.Sprintf(fmtstr, args...))
-	}
-	if exitOnFatal && level == LevelFatal {
-		os.Exit(1)
+		if exitLevel <= level {
+			os.Exit(1)
+		}
 	}
 }
 
@@ -61,19 +70,17 @@ func (this *logger) Panicf(aux *Auxiliary, fmtstr string, args []interface{}) {
 }
 
 func (this *logger) Time(aux *Auxiliary, args []interface{}) func() {
-	done := func() {}
 	if this.Level() <= LevelTrace {
-		done = this.genDone(aux, fmt.Sprint(args...))
+		return this.genDone(aux, fmt.Sprint(args...))
 	}
-	return done
+	return func() {}
 }
 
 func (this *logger) Timef(aux *Auxiliary, fmtstr string, args []interface{}) func() {
-	done := func() {}
 	if this.Level() <= LevelTrace {
-		done = this.genDone(aux, fmt.Sprintf(fmtstr, args...))
+		return this.genDone(aux, fmt.Sprintf(fmtstr, args...))
 	}
-	return done
+	return func() {}
 }
 
 func (this *logger) Level() Level {
@@ -104,25 +111,39 @@ func (this *logger) SetFilter(filter Filter) {
 	this.filter = filter
 }
 
-func (this *logger) ExitOnFatal() bool {
+func (this *logger) TrackLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.exitOnFatal
+	return this.trackLevel
 }
 
-func (this *logger) SetExitOnFatal(ok bool) {
+func (this *logger) SetTrackLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.exitOnFatal = ok
+	this.trackLevel = level
 }
 
-func (this *logger) levelAndExitOnFatal() (Level, bool) {
+func (this *logger) ExitLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.level, this.exitOnFatal
+	return this.exitLevel
+}
+
+func (this *logger) SetExitLevel(level Level) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.exitLevel = level
+}
+
+func (this *logger) levels() (Level, Level, Level) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.level, this.trackLevel, this.exitLevel
 }
 
 func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string) {

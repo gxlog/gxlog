@@ -16,9 +16,10 @@ func New(config *Config) *Logger {
 	}
 	return &Logger{
 		logger: &logger{
-			level:       config.Level,
-			filter:      config.Filter,
-			exitOnFatal: config.ExitOnFatal,
+			level:      config.Level,
+			trackLevel: config.TrackLevel,
+			exitLevel:  config.ExitLevel,
+			filter:     config.Filter,
 		},
 	}
 }
