@@ -11,8 +11,11 @@ const (
 	DefaultEnableColor = false
 )
 
-const CompactHeader = "{{time:time.us}} {{level}} {{file:1}}:{{line}} {{pkg}}.{{func}} " +
-	"{{prefix}}[{{context}}] {{msg}}\n"
+const (
+	CompactHeader = "{{time:time.us}} {{level}} {{file:1}}:{{line}} {{pkg}}.{{func}} " +
+		"{{prefix}}[{{context}}] {{msg}}\n"
+	SyslogHeader = "{{file:1}}:{{line}} {{pkg}}.{{func}} {{prefix}}[{{context}}] {{msg}}\n"
+)
 
 type Config struct {
 	Header      string
