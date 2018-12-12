@@ -1,3 +1,5 @@
+// +build !nacl,!plan9,!windows
+
 package syslog
 
 import (
@@ -7,15 +9,6 @@ import (
 	"sync"
 
 	"github.com/gxlog/gxlog"
-)
-
-const (
-	DefaultTraceSeverity = syslog.LOG_DEBUG
-	DefaultDebugSeverity = syslog.LOG_DEBUG
-	DefaultInfoSeverity  = syslog.LOG_INFO
-	DefaultWarnSeverity  = syslog.LOG_WARNING
-	DefaultErrorSeverity = syslog.LOG_ERR
-	DefaultFatalSeverity = syslog.LOG_CRIT
 )
 
 const cSeverityMask = 0x07
@@ -31,19 +24,19 @@ type Writer struct {
 	lock sync.Mutex
 }
 
-func Open(config *Config) (*Writer, error) {
-	if config == nil {
-		panic("nil config")
+func Open(cfg *Config) (*Writer, error) {
+	if cfg == nil {
+		panic("nil cfg")
 	}
-	wt, err := syslog.Dial(config.Network, config.Addr, config.Priority, config.Tag)
+	wt, err := syslog.Dial(cfg.Network, cfg.Addr, syslog.Priority(cfg.Priority), cfg.Tag)
 	if err != nil {
 		return nil, fmt.Errorf("syslog.Open: %v", err)
 	}
 	writer := &Writer{
-		reportOnErr: config.ReportOnErr,
+		reportOnErr: cfg.ReportOnErr,
 		writer:      wt,
 	}
-	severityMap := map[gxlog.Level]syslog.Priority{
+	severityMap := map[gxlog.Level]Priority{
 		gxlog.LevelTrace: DefaultTraceSeverity,
 		gxlog.LevelDebug: DefaultDebugSeverity,
 		gxlog.LevelInfo:  DefaultInfoSeverity,
@@ -52,7 +45,7 @@ func Open(config *Config) (*Writer, error) {
 		gxlog.LevelFatal: DefaultFatalSeverity,
 	}
 	writer.updateLogFuncs(severityMap)
-	writer.updateLogFuncs(config.SeverityMap)
+	writer.updateLogFuncs(cfg.SeverityMap)
 	return writer, nil
 }
 
@@ -76,32 +69,32 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	}
 }
 
-func (this *Writer) MapSeverity(severityMap map[gxlog.Level]syslog.Priority) {
+func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Priority) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.updateLogFuncs(severityMap)
 }
 
-func (this *Writer) updateLogFuncs(severityMap map[gxlog.Level]syslog.Priority) {
+func (this *Writer) updateLogFuncs(severityMap map[gxlog.Level]Priority) {
 	for level, severity := range severityMap {
 		var fn syslogFunc
 		switch severity & cSeverityMask {
-		case syslog.LOG_DEBUG:
+		case SevDebug:
 			fn = this.writer.Debug
-		case syslog.LOG_INFO:
+		case SevInfo:
 			fn = this.writer.Info
-		case syslog.LOG_NOTICE:
+		case SevNotice:
 			fn = this.writer.Notice
-		case syslog.LOG_WARNING:
+		case SevWarning:
 			fn = this.writer.Warning
-		case syslog.LOG_ERR:
+		case SevErr:
 			fn = this.writer.Err
-		case syslog.LOG_CRIT:
+		case SevCrit:
 			fn = this.writer.Crit
-		case syslog.LOG_ALERT:
+		case SevAlert:
 			fn = this.writer.Alert
-		case syslog.LOG_EMERG:
+		case SevEmerg:
 			fn = this.writer.Emerg
 		}
 		this.logFuncs[level] = fn
