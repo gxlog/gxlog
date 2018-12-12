@@ -6,8 +6,6 @@ const (
 	DefaultExitLevel  = LevelOff
 )
 
-type Filter func(*Record) bool
-
 type Config struct {
 	Level      Level
 	TrackLevel Level

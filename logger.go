@@ -14,6 +14,8 @@ const (
 	cCallDepth = 4
 )
 
+type Filter func(*Record) bool
+
 type logger struct {
 	level      Level
 	trackLevel Level
