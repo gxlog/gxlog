@@ -6,7 +6,7 @@ import (
 	"log/syslog"
 	"sync"
 
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 const (

@@ -1,6 +1,6 @@
 package formatter
 
-import "github.com/gratonos/gxlog"
+import "github.com/gxlog/gxlog"
 
 type FormatterFunc func(record *gxlog.Record) []byte
 

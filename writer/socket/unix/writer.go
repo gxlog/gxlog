@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gratonos/gxlog"
-	"github.com/gratonos/gxlog/writer/socket/internal/socket"
+	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/writer/socket/internal/socket"
 )
 
 type Writer struct {

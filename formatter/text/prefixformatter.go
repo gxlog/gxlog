@@ -3,7 +3,7 @@ package text
 import (
 	"fmt"
 
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 type prefixFormatter struct {

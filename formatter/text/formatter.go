@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 var gHeaderRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")

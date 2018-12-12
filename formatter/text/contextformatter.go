@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 type contextFormatter struct {

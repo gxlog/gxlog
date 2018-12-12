@@ -1,8 +1,8 @@
 package null
 
 import (
-	"github.com/gratonos/gxlog"
-	"github.com/gratonos/gxlog/writer"
+	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/writer"
 )
 
 var gNullWriter = writer.WriterFunc(func([]byte, *gxlog.Record) {})

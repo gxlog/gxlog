@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 type Writer struct {

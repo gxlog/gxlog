@@ -3,7 +3,7 @@ package writer
 import (
 	"io"
 
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 type wrapper struct {

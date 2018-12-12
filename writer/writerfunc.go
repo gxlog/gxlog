@@ -1,6 +1,6 @@
 package writer
 
-import "github.com/gratonos/gxlog"
+import "github.com/gxlog/gxlog"
 
 type WriterFunc func(bs []byte, record *gxlog.Record)
 

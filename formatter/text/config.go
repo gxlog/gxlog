@@ -1,7 +1,7 @@
 package text
 
 import (
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 const (

@@ -1,7 +1,7 @@
 package writer
 
 import (
-	"github.com/gratonos/gxlog"
+	"github.com/gxlog/gxlog"
 )
 
 type logData struct {

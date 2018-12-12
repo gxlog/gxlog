@@ -3,9 +3,9 @@ package defaults
 import (
 	"os"
 
-	"github.com/gratonos/gxlog"
-	"github.com/gratonos/gxlog/formatter/text"
-	"github.com/gratonos/gxlog/writer"
+	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/formatter/text"
+	"github.com/gxlog/gxlog/writer"
 )
 
 var gLogger *gxlog.Logger
