@@ -28,7 +28,7 @@ func Open(cfg *Config) (*Writer, error) {
 	if cfg == nil {
 		panic("nil cfg")
 	}
-	wt, err := syslog.Dial(cfg.Network, cfg.Addr, syslog.Priority(cfg.Priority), cfg.Tag)
+	wt, err := syslog.Dial(cfg.Network, cfg.Addr, syslog.Priority(cfg.Facility), cfg.Tag)
 	if err != nil {
 		return nil, fmt.Errorf("syslog.Open: %v", err)
 	}

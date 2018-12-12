@@ -9,18 +9,6 @@ import (
 
 type Priority int
 
-// Severity definitions here to be cross compilation friendly
-const (
-	SevEmerg Priority = iota
-	SevAlert
-	SevCrit
-	SevErr
-	SevWarning
-	SevNotice
-	SevInfo
-	SevDebug
-)
-
 // Facility definitions here to be cross compilation friendly
 const (
 	FacKern Priority = iota << 3
@@ -35,21 +23,22 @@ const (
 	FacCron
 	FacAuthPriv
 	FacFTP
+)
 
-	FacLocal0
-	FacLocal1
-	FacLocal2
-	FacLocal3
-	FacLocal4
-	FacLocal5
-	FacLocal6
-	FacLocal7
+// Severity definitions here to be cross compilation friendly
+const (
+	SevEmerg Priority = iota
+	SevAlert
+	SevCrit
+	SevErr
+	SevWarning
+	SevNotice
+	SevInfo
+	SevDebug
 )
 
 const (
 	DefaultFacility    = FacUser
-	DefaultSeverity    = SevDebug
-	DefaultPriority    = DefaultFacility | DefaultSeverity
 	DefaultReportOnErr = true
 )
 
@@ -64,7 +53,7 @@ const (
 
 type Config struct {
 	Tag         string
-	Priority    Priority
+	Facility    Priority
 	Network     string
 	Addr        string
 	SeverityMap map[gxlog.Level]Priority
@@ -77,13 +66,13 @@ func NewConfig(tag string) *Config {
 	}
 	return &Config{
 		Tag:         tag,
-		Priority:    DefaultPriority,
+		Facility:    DefaultFacility,
 		ReportOnErr: DefaultReportOnErr,
 	}
 }
 
-func (this *Config) WithPriority(priority Priority) *Config {
-	this.Priority = priority
+func (this *Config) WithFacility(facility Priority) *Config {
+	this.Facility = facility
 	return this
 }
 
