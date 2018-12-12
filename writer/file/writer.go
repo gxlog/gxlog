@@ -1,7 +1,9 @@
 package file
 
 import (
+	"compress/flate"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,7 +17,7 @@ import (
 type Writer struct {
 	config Config
 
-	file      *os.File
+	writer    io.WriteCloser
 	pathname  string
 	checkTime time.Time
 	day       int
@@ -44,18 +46,6 @@ func (this *Writer) Close() error {
 	return nil
 }
 
-func (this *Writer) Sync() error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	if this.file != nil {
-		if err := this.file.Sync(); err != nil {
-			return fmt.Errorf("file.Sync: %v", err)
-		}
-	}
-	return nil
-}
-
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -63,7 +53,7 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	err := this.checkFile(record)
 	if err == nil {
 		var n int
-		n, err = this.file.Write(bs)
+		n, err = this.writer.Write(bs)
 		this.fileSize += int64(n)
 	}
 	if this.config.ReportOnErr && err != nil {
@@ -110,7 +100,7 @@ func (this *Writer) UpdateConfig(fn func(*Config)) error {
 }
 
 func (this *Writer) checkFile(record *gxlog.Record) error {
-	if this.file == nil ||
+	if this.writer == nil ||
 		this.day != record.Time.YearDay() ||
 		this.fileSize >= this.config.MaxFileSize {
 		return this.createFile(record)
@@ -140,7 +130,13 @@ func (this *Writer) createFile(record *gxlog.Record) error {
 		return err
 	}
 
-	this.file = file
+	var writer io.WriteCloser = file
+
+	if this.config.GzipLevel != flate.NoCompression {
+		writer = newGzipWriter(writer, this.config.GzipLevel)
+	}
+
+	this.writer = writer
 	this.pathname = pathname
 	this.day = record.Time.YearDay()
 	this.fileSize = 0
@@ -149,11 +145,11 @@ func (this *Writer) createFile(record *gxlog.Record) error {
 }
 
 func (this *Writer) closeFile() error {
-	if this.file != nil {
-		if err := this.file.Close(); err != nil {
+	if this.writer != nil {
+		if err := this.writer.Close(); err != nil {
 			return err
 		}
-		this.file = nil
+		this.writer = nil
 	}
 	return nil
 }
@@ -213,6 +209,7 @@ func (this *Writer) needNewFile(config *Config) bool {
 		config.Separator != this.config.Separator ||
 		config.DateStyle != this.config.DateStyle ||
 		config.TimeStyle != this.config.TimeStyle ||
+		config.GzipLevel != this.config.GzipLevel ||
 		config.NewDirEachDay != this.config.NewDirEachDay {
 		return true
 	}

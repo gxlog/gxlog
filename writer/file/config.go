@@ -1,6 +1,7 @@
 package file
 
 import (
+	"compress/flate"
 	"errors"
 	"time"
 )
@@ -31,6 +32,7 @@ const (
 	DefaultTimeStyle     = TimeStyleCompact
 	DefaultMaxFileSize   = 20 * 1024 * 1024
 	DefaultCheckInterval = time.Second * 5
+	DefaultGzipLevel     = flate.NoCompression
 	DefaultNewDirEachDay = true
 	DefaultReportOnErr   = true
 )
@@ -44,6 +46,7 @@ type Config struct {
 	TimeStyle     TimeStyleID
 	MaxFileSize   int64
 	CheckInterval time.Duration
+	GzipLevel     int
 	NewDirEachDay bool
 	ReportOnErr   bool
 }
@@ -58,6 +61,7 @@ func NewConfig(path, base string) *Config {
 		TimeStyle:     DefaultTimeStyle,
 		MaxFileSize:   DefaultMaxFileSize,
 		CheckInterval: DefaultCheckInterval,
+		GzipLevel:     DefaultGzipLevel,
 		NewDirEachDay: DefaultNewDirEachDay,
 		ReportOnErr:   DefaultReportOnErr,
 	}
@@ -93,6 +97,11 @@ func (this *Config) WithCheckInterval(interval time.Duration) *Config {
 	return this
 }
 
+func (this *Config) WithGzipLevel(level int) *Config {
+	this.GzipLevel = level
+	return this
+}
+
 func (this *Config) WithNewDirEachDay(ok bool) *Config {
 	this.NewDirEachDay = ok
 	return this
@@ -109,6 +118,10 @@ func (this *Config) Check() error {
 	}
 	if this.CheckInterval <= 0 {
 		return errors.New("Config.CheckInterval must be greater than 0")
+	}
+	if this.GzipLevel < flate.HuffmanOnly || this.GzipLevel > flate.BestCompression {
+		return errors.New("Config.GzipLevel must be DefaultCompression, NoCompression, " +
+			"HuffmanOnly or any integer value between BestSpeed and BestCompression inclusive")
 	}
 	return nil
 }
