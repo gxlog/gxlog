@@ -25,8 +25,6 @@ type logger struct {
 
 	slots [MaxSlot]*link
 
-	countMap map[locator]int64
-
 	lock sync.Mutex
 }
 

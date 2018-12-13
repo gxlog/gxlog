@@ -15,13 +15,14 @@ type locator struct {
 
 type attribute struct {
 	aux          Auxiliary
-	countLimiter Filter
+	countLimiter func(*Record) bool
 }
 
 type Logger struct {
 	*logger
 
-	attr attribute
+	attr     attribute
+	countMap map[locator]int64
 }
 
 func New(config *Config) *Logger {
@@ -35,8 +36,8 @@ func New(config *Config) *Logger {
 			exitLevel:  config.ExitLevel,
 			filter:     config.Filter,
 			limit:      config.Limit,
-			countMap:   make(map[locator]int64, cMapInitCap),
 		},
+		countMap: make(map[locator]int64, cMapInitCap),
 	}
 }
 
@@ -65,8 +66,8 @@ func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 			file: record.File,
 			line: record.Line,
 		}
-		n := this.logger.countMap[loc]
-		this.logger.countMap[loc]++
+		n := this.countMap[loc]
+		this.countMap[loc]++
 		if n%batch < limit {
 			return true
 		}
