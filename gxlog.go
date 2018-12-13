@@ -4,10 +4,24 @@ import (
 	"fmt"
 )
 
+const (
+	cMapInitCap = 256
+)
+
+type locator struct {
+	file string
+	line int
+}
+
+type attribute struct {
+	aux          Auxiliary
+	countLimiter Filter
+}
+
 type Logger struct {
 	*logger
 
-	aux Auxiliary
+	attr attribute
 }
 
 func New(config *Config) *Logger {
@@ -20,25 +34,44 @@ func New(config *Config) *Logger {
 			trackLevel: config.TrackLevel,
 			exitLevel:  config.ExitLevel,
 			filter:     config.Filter,
+			limit:      config.Limit,
+			countMap:   make(map[locator]int64, cMapInitCap),
 		},
 	}
 }
 
 func (this *Logger) WithPrefix(prefix string) *Logger {
 	clone := *this
-	clone.aux.Prefix = prefix
+	clone.attr.aux.Prefix = prefix
 	return &clone
 }
 
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	clone := *this
-	clone.aux.Contexts = copyAppendContexts(clone.aux.Contexts, kvs)
+	clone.attr.aux.Contexts = copyAppendContexts(clone.attr.aux.Contexts, kvs)
 	return &clone
 }
 
 func (this *Logger) WithMark(ok bool) *Logger {
 	clone := *this
-	clone.aux.Marked = ok
+	clone.attr.aux.Marked = ok
+	return &clone
+}
+
+func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
+	clone := *this
+	clone.attr.countLimiter = func(record *Record) bool {
+		loc := locator{
+			file: record.File,
+			line: record.Line,
+		}
+		n := this.logger.countMap[loc]
+		this.logger.countMap[loc]++
+		if n%batch < limit {
+			return true
+		}
+		return false
+	}
 	return &clone
 }
 

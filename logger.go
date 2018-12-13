@@ -21,26 +21,29 @@ type logger struct {
 	trackLevel Level
 	exitLevel  Level
 	filter     Filter
+	limit      bool
 
 	slots [MaxSlot]*link
+
+	countMap map[locator]int64
 
 	lock sync.Mutex
 }
 
-func (this *logger) Log(calldepth int, level Level, aux *Auxiliary, args []interface{}) {
+func (this *logger) Log(calldepth int, level Level, attr *attribute, args []interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
 			args = append(args, "\n", string(debug.Stack()))
 		}
-		this.write(calldepth, level, aux, fmt.Sprint(args...))
+		this.write(calldepth, level, attr, fmt.Sprint(args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
 	}
 }
 
-func (this *logger) Logf(calldepth int, level Level, aux *Auxiliary,
+func (this *logger) Logf(calldepth int, level Level, attr *attribute,
 	fmtstr string, args []interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
@@ -48,39 +51,39 @@ func (this *logger) Logf(calldepth int, level Level, aux *Auxiliary,
 			fmtstr += "\n%s"
 			args = append(args, debug.Stack())
 		}
-		this.write(calldepth, level, aux, fmt.Sprintf(fmtstr, args...))
+		this.write(calldepth, level, attr, fmt.Sprintf(fmtstr, args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
 	}
 }
 
-func (this *logger) Panic(aux *Auxiliary, args []interface{}) {
+func (this *logger) Panic(attr *attribute, args []interface{}) {
 	msg := fmt.Sprint(args...)
 	if this.Level() <= LevelFatal {
-		this.write(0, LevelFatal, aux, msg)
+		this.write(0, LevelFatal, attr, msg)
 	}
 	panic(msg)
 }
 
-func (this *logger) Panicf(aux *Auxiliary, fmtstr string, args []interface{}) {
+func (this *logger) Panicf(attr *attribute, fmtstr string, args []interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
 	if this.Level() <= LevelFatal {
-		this.write(0, LevelFatal, aux, msg)
+		this.write(0, LevelFatal, attr, msg)
 	}
 	panic(msg)
 }
 
-func (this *logger) Time(aux *Auxiliary, args []interface{}) func() {
+func (this *logger) Time(attr *attribute, args []interface{}) func() {
 	if this.Level() <= LevelTrace {
-		return this.genDone(aux, fmt.Sprint(args...))
+		return this.genDone(attr, fmt.Sprint(args...))
 	}
 	return func() {}
 }
 
-func (this *logger) Timef(aux *Auxiliary, fmtstr string, args []interface{}) func() {
+func (this *logger) Timef(attr *attribute, fmtstr string, args []interface{}) func() {
 	if this.Level() <= LevelTrace {
-		return this.genDone(aux, fmt.Sprintf(fmtstr, args...))
+		return this.genDone(attr, fmt.Sprintf(fmtstr, args...))
 	}
 	return func() {}
 }
@@ -141,6 +144,20 @@ func (this *logger) SetExitLevel(level Level) {
 	this.exitLevel = level
 }
 
+func (this *logger) Limit() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.limit
+}
+
+func (this *logger) SetLimit(ok bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.limit = ok
+}
+
 func (this *logger) levels() (Level, Level, Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -148,7 +165,7 @@ func (this *logger) levels() (Level, Level, Level) {
 	return this.level, this.trackLevel, this.exitLevel
 }
 
-func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string) {
+func (this *logger) write(calldepth int, level Level, attr *attribute, msg string) {
 	file, line, pkg, fn := getPosInfo(calldepth + cCallDepth)
 
 	this.lock.Lock()
@@ -162,25 +179,31 @@ func (this *logger) write(calldepth int, level Level, aux *Auxiliary, msg string
 		Pkg:   pkg,
 		Func:  fn,
 		Msg:   msg,
-		Aux:   *aux,
+		Aux:   attr.aux,
 	}
-	if this.filter == nil || this.filter(record) {
-		for _, link := range this.slots {
-			if link != nil && link.level <= level {
-				if link.filter == nil || link.filter(record) {
-					link.writer.Write(link.formatter.Format(record), record)
-				}
+	if this.filter != nil && !this.filter(record) {
+		return
+	}
+	if this.limit {
+		if attr.countLimiter != nil && !attr.countLimiter(record) {
+			return
+		}
+	}
+	for _, link := range this.slots {
+		if link != nil && link.level <= level {
+			if link.filter == nil || link.filter(record) {
+				link.writer.Write(link.formatter.Format(record), record)
 			}
 		}
 	}
 }
 
-func (this *logger) genDone(aux *Auxiliary, msg string) func() {
+func (this *logger) genDone(attr *attribute, msg string) func() {
 	now := time.Now()
 	return func() {
-		costs := time.Since(now)
+		cost := time.Since(now)
 		if this.Level() <= LevelTrace {
-			this.write(-1, LevelTrace, aux, fmt.Sprintf("%s (costs: %v)", msg, costs))
+			this.write(-1, LevelTrace, attr, fmt.Sprintf("%s (cost: %v)", msg, cost))
 		}
 	}
 }
