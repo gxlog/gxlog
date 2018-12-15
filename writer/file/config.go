@@ -2,6 +2,7 @@ package file
 
 import (
 	"compress/flate"
+	"encoding/hex"
 	"errors"
 	"time"
 )
@@ -33,6 +34,7 @@ const (
 	DefaultMaxFileSize   = 20 * 1024 * 1024
 	DefaultCheckInterval = time.Second * 5
 	DefaultGzipLevel     = flate.NoCompression
+	DefaultBlockMode     = ModeCFB
 	DefaultNewDirEachDay = true
 	DefaultReportOnErr   = true
 )
@@ -47,6 +49,8 @@ type Config struct {
 	MaxFileSize   int64
 	CheckInterval time.Duration
 	GzipLevel     int
+	AESKey        string
+	BlockMode     BlockCipherMode
 	NewDirEachDay bool
 	ReportOnErr   bool
 }
@@ -62,6 +66,7 @@ func NewConfig(path, base string) *Config {
 		MaxFileSize:   DefaultMaxFileSize,
 		CheckInterval: DefaultCheckInterval,
 		GzipLevel:     DefaultGzipLevel,
+		BlockMode:     DefaultBlockMode,
 		NewDirEachDay: DefaultNewDirEachDay,
 		ReportOnErr:   DefaultReportOnErr,
 	}
@@ -102,6 +107,16 @@ func (this *Config) WithGzipLevel(level int) *Config {
 	return this
 }
 
+func (this *Config) WithAESKey(key string) *Config {
+	this.AESKey = key
+	return this
+}
+
+func (this *Config) WithBlockMode(mode BlockCipherMode) *Config {
+	this.BlockMode = mode
+	return this
+}
+
 func (this *Config) WithNewDirEachDay(ok bool) *Config {
 	this.NewDirEachDay = ok
 	return this
@@ -122,6 +137,17 @@ func (this *Config) Check() error {
 	if this.GzipLevel < flate.HuffmanOnly || this.GzipLevel > flate.BestCompression {
 		return errors.New("Config.GzipLevel must be DefaultCompression, NoCompression, " +
 			"HuffmanOnly or any integer value between BestSpeed and BestCompression inclusive")
+	}
+	key, err := hex.DecodeString(this.AESKey)
+	if err != nil {
+		return errors.New("Config.AESKey must be hexadecimal encoded without prefix 0X or 0x")
+	}
+	keyLen := len(key)
+	if keyLen != 0 && keyLen != 16 && keyLen != 24 && keyLen != 32 {
+		return errors.New("Config.AESKey must be either empty, 128 bits, 192 bits or 256 bits")
+	}
+	if this.BlockMode < ModeCFB || this.BlockMode > ModeOFB {
+		return errors.New("Config.BlockMode must be either ModeCFB, ModeCTR or ModeOFB")
 	}
 	return nil
 }

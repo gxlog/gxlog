@@ -92,7 +92,9 @@ func (this *Writer) UpdateConfig(fn func(*Config)) error {
 	defer this.lock.Unlock()
 
 	copyConfig := this.config
+
 	fn(&copyConfig)
+
 	if err := this.setConfig(&copyConfig); err != nil {
 		return fmt.Errorf("file.UpdateConfig: %v", err)
 	}
@@ -131,9 +133,21 @@ func (this *Writer) createFile(record *gxlog.Record) error {
 	}
 
 	var writer io.WriteCloser = file
-
+	if this.config.AESKey != "" {
+		// newAESWriter will return the input writer when an error occurs
+		writer, err = newAESWriter(writer, this.config.AESKey, this.config.BlockMode)
+		if err != nil {
+			writer.Close()
+			return err
+		}
+	}
 	if this.config.GzipLevel != flate.NoCompression {
-		writer = newGzipWriter(writer, this.config.GzipLevel)
+		// newGzipWriter will return the input writer when an error occurs
+		writer, err = newGzipWriter(writer, this.config.GzipLevel)
+		if err != nil {
+			writer.Close()
+			return err
+		}
 	}
 
 	this.writer = writer
@@ -210,6 +224,8 @@ func (this *Writer) needNewFile(config *Config) bool {
 		config.DateStyle != this.config.DateStyle ||
 		config.TimeStyle != this.config.TimeStyle ||
 		config.GzipLevel != this.config.GzipLevel ||
+		config.AESKey != this.config.AESKey ||
+		config.BlockMode != this.config.BlockMode ||
 		config.NewDirEachDay != this.config.NewDirEachDay {
 		return true
 	}

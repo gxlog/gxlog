@@ -10,13 +10,15 @@ type gzipWriter struct {
 	writer     *gzip.Writer
 }
 
-func newGzipWriter(wt io.WriteCloser, level int) *gzipWriter {
-	// the level is ensured to be valid, then NewWriterLevel will not fail
-	writer, _ := gzip.NewWriterLevel(wt, level)
+func newGzipWriter(wt io.WriteCloser, level int) (io.WriteCloser, error) {
+	writer, err := gzip.NewWriterLevel(wt, level)
+	if err != nil {
+		return wt, err
+	}
 	return &gzipWriter{
 		underlying: wt,
 		writer:     writer,
-	}
+	}, nil
 }
 
 func (this *gzipWriter) Close() error {
