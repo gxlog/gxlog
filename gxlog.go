@@ -2,6 +2,7 @@ package gxlog
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -15,7 +16,8 @@ type locator struct {
 
 type attribute struct {
 	aux          Auxiliary
-	countLimiter func(*Record) bool
+	countLimiter Filter
+	timeLimiter  Filter
 }
 
 type Logger struct {
@@ -23,6 +25,7 @@ type Logger struct {
 
 	attr     attribute
 	countMap map[locator]int64
+	timeMap  map[locator]*timeQueue
 }
 
 func New(config *Config) *Logger {
@@ -38,6 +41,7 @@ func New(config *Config) *Logger {
 			limit:      config.Limit,
 		},
 		countMap: make(map[locator]int64, cMapInitCap),
+		timeMap:  make(map[locator]*timeQueue, cMapInitCap),
 	}
 }
 
@@ -72,6 +76,23 @@ func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 			return true
 		}
 		return false
+	}
+	return &clone
+}
+
+func (this *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
+	clone := *this
+	clone.attr.timeLimiter = func(record *Record) bool {
+		loc := locator{
+			file: record.File,
+			line: record.Line,
+		}
+		queue := this.timeMap[loc]
+		if queue == nil {
+			queue = newTimeQueue(duration, limit)
+			this.timeMap[loc] = queue
+		}
+		return queue.Enqueue(record.Time)
 	}
 	return &clone
 }

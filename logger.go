@@ -186,6 +186,9 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 		if attr.countLimiter != nil && !attr.countLimiter(record) {
 			return
 		}
+		if attr.timeLimiter != nil && !attr.timeLimiter(record) {
+			return
+		}
 	}
 	for _, link := range this.slots {
 		if link != nil && link.level <= level {
