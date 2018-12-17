@@ -15,13 +15,13 @@ type Async struct {
 	chanClose chan struct{}
 }
 
-func NewAsync(wt gxlog.Writer, chanLen int) *Async {
+func NewAsync(wt gxlog.Writer, cap int) *Async {
 	if wt == nil {
 		panic("nil wt")
 	}
 	async := &Async{
 		writer:    wt,
-		chanData:  make(chan logData, chanLen),
+		chanData:  make(chan logData, cap),
 		chanClose: make(chan struct{}),
 	}
 	go async.serve()
@@ -43,6 +43,10 @@ func (this *Async) Close() {
 func (this *Async) Abort() {
 	close(this.chanClose)
 	close(this.chanData)
+}
+
+func (this *Async) Len() int {
+	return len(this.chanData)
 }
 
 func (this *Async) serve() {
