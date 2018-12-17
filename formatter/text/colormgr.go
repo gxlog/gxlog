@@ -20,16 +20,6 @@ const (
 )
 
 const (
-	DefaultTraceColor  = Green
-	DefaultDebugColor  = Green
-	DefaultInfoColor   = Green
-	DefaultWarnColor   = Yellow
-	DefaultErrorColor  = Red
-	DefaultFatalColor  = Red
-	DefaultMarkedColor = Purple
-)
-
-const (
 	cEscSeq = "\033[%dm"
 	cReset  = 0
 )
@@ -45,18 +35,18 @@ type colorMgr struct {
 
 func newColorMgr() *colorMgr {
 	colors := []ColorID{
-		gxlog.LevelTrace: DefaultTraceColor,
-		gxlog.LevelDebug: DefaultDebugColor,
-		gxlog.LevelInfo:  DefaultInfoColor,
-		gxlog.LevelWarn:  DefaultWarnColor,
-		gxlog.LevelError: DefaultErrorColor,
-		gxlog.LevelFatal: DefaultFatalColor,
+		gxlog.LevelTrace: Green,
+		gxlog.LevelDebug: Green,
+		gxlog.LevelInfo:  Green,
+		gxlog.LevelWarn:  Yellow,
+		gxlog.LevelError: Red,
+		gxlog.LevelFatal: Red,
 	}
 	mgr := &colorMgr{
 		colors:      colors,
-		markedColor: DefaultMarkedColor,
+		markedColor: Purple,
 		colorSeqs:   initColorSeqs(colors),
-		markedSeq:   makeSeq(DefaultMarkedColor),
+		markedSeq:   makeSeq(Purple),
 		resetSeq:    makeSeq(0),
 	}
 	return mgr

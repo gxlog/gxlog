@@ -1,16 +1,5 @@
 package gxlog
 
-const (
-	DefaultLevel      = LevelTrace
-	DefaultTrackLevel = LevelFatal
-	DefaultExitLevel  = LevelOff
-
-	DefaultPrefix  = true
-	DefaultContext = true
-	DefaultMark    = true
-	DefaultLimit   = true
-)
-
 type Config struct {
 	Level      Level
 	TrackLevel Level
@@ -25,13 +14,13 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		Level:      DefaultLevel,
-		TrackLevel: DefaultTrackLevel,
-		ExitLevel:  DefaultExitLevel,
-		Prefix:     DefaultPrefix,
-		Context:    DefaultContext,
-		Mark:       DefaultMark,
-		Limit:      DefaultLimit,
+		Level:      LevelTrace,
+		TrackLevel: LevelFatal,
+		ExitLevel:  LevelOff,
+		Prefix:     true,
+		Context:    true,
+		Mark:       true,
+		Limit:      true,
 	}
 }
 

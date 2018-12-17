@@ -29,7 +29,7 @@ func (this *logger) Link(slot Slot, ft Formatter, wt Writer, opts ...interface{}
 	link := &link{
 		formatter: ft,
 		writer:    wt,
-		level:     DefaultLevel,
+		level:     LevelTrace,
 	}
 	for _, opt := range opts {
 		switch opt := opt.(type) {

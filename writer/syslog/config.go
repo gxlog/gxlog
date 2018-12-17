@@ -37,20 +37,6 @@ const (
 	SevDebug
 )
 
-const (
-	DefaultFacility    = FacUser
-	DefaultReportOnErr = true
-)
-
-const (
-	DefaultTraceSeverity = SevDebug
-	DefaultDebugSeverity = SevDebug
-	DefaultInfoSeverity  = SevInfo
-	DefaultWarnSeverity  = SevWarning
-	DefaultErrorSeverity = SevErr
-	DefaultFatalSeverity = SevCrit
-)
-
 type Config struct {
 	Tag         string
 	Facility    Priority
@@ -66,8 +52,8 @@ func NewConfig(tag string) *Config {
 	}
 	return &Config{
 		Tag:         tag,
-		Facility:    DefaultFacility,
-		ReportOnErr: DefaultReportOnErr,
+		Facility:    FacUser,
+		ReportOnErr: true,
 	}
 }
 

@@ -7,8 +7,6 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-const DefaultTimeLayout = "2006-01-02 15:04:05.000000"
-
 const (
 	cFmtDate  = "2006-01-02"
 	cFmtTime  = "15:04:05"
@@ -54,7 +52,7 @@ func makeTimeLayout(property string) string {
 	case "time":
 		layout = cFmtTime
 	default:
-		return DefaultTimeLayout
+		return "2006-01-02 15:04:05.000000"
 	}
 	switch decimalType {
 	case "ms":

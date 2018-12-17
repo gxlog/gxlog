@@ -7,11 +7,6 @@ import (
 const (
 	DefaultHeader = "{{time}} {{level}} {{file}}:{{line}} {{pkg}}.{{func}} " +
 		"{{prefix}}[{{context}}] {{msg}}\n"
-	DefaultMinBufSize  = 256
-	DefaultEnableColor = false
-)
-
-const (
 	CompactHeader = "{{time:time.us}} {{level}} {{file:1}}:{{line}} {{pkg}}.{{func}} " +
 		"{{prefix}}[{{context}}] {{msg}}\n"
 	SyslogHeader = "{{file:1}}:{{line}} {{pkg}}.{{func}} {{prefix}}[{{context}}] {{msg}}\n"
@@ -26,9 +21,8 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		Header:      DefaultHeader,
-		MinBufSize:  DefaultMinBufSize,
-		EnableColor: DefaultEnableColor,
+		Header:     DefaultHeader,
+		MinBufSize: 256,
 	}
 }
 

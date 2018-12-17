@@ -26,19 +26,6 @@ const (
 	TimeStyleColon
 )
 
-const (
-	DefaultExt           = ".log"
-	DefaultSeparator     = "."
-	DefaultDateStyle     = DateStyleCompact
-	DefaultTimeStyle     = TimeStyleCompact
-	DefaultMaxFileSize   = 20 * 1024 * 1024
-	DefaultCheckInterval = time.Second * 5
-	DefaultGzipLevel     = flate.NoCompression
-	DefaultBlockMode     = ModeCFB
-	DefaultNewDirEachDay = true
-	DefaultReportOnErr   = true
-)
-
 type Config struct {
 	Path          string
 	Base          string
@@ -59,16 +46,16 @@ func NewConfig(path, base string) *Config {
 	return &Config{
 		Path:          path,
 		Base:          base,
-		Ext:           DefaultExt,
-		Separator:     DefaultSeparator,
-		DateStyle:     DefaultDateStyle,
-		TimeStyle:     DefaultTimeStyle,
-		MaxFileSize:   DefaultMaxFileSize,
-		CheckInterval: DefaultCheckInterval,
-		GzipLevel:     DefaultGzipLevel,
-		BlockMode:     DefaultBlockMode,
-		NewDirEachDay: DefaultNewDirEachDay,
-		ReportOnErr:   DefaultReportOnErr,
+		Ext:           ".log",
+		Separator:     ".",
+		DateStyle:     DateStyleCompact,
+		TimeStyle:     TimeStyleCompact,
+		MaxFileSize:   20 * 1024 * 1024,
+		CheckInterval: time.Second * 5,
+		GzipLevel:     flate.NoCompression,
+		BlockMode:     ModeCFB,
+		NewDirEachDay: true,
+		ReportOnErr:   true,
 	}
 }
 
