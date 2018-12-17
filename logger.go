@@ -17,11 +17,7 @@ const (
 type Filter func(*Record) bool
 
 type logger struct {
-	level      Level
-	trackLevel Level
-	exitLevel  Level
-	filter     Filter
-	limit      bool
+	config Config
 
 	slots [MaxSlot]*link
 
@@ -86,81 +82,155 @@ func (this *logger) Timef(attr *attribute, fmtstr string, args []interface{}) fu
 	return func() {}
 }
 
+func (this *logger) Config() *Config {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	copyConfig := this.config
+	return &copyConfig
+}
+
+func (this *logger) SetConfig(config *Config) {
+	if config == nil {
+		return
+	}
+
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.config = *config
+}
+
+func (this *logger) UpdateConfig(fn func(*Config)) {
+	if fn == nil {
+		return
+	}
+
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	copyConfig := this.config
+	fn(&copyConfig)
+	this.config = copyConfig
+}
+
 func (this *logger) Level() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.level
+	return this.config.Level
 }
 
 func (this *logger) SetLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.level = level
-}
-
-func (this *logger) Filter() Filter {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.filter
-}
-
-func (this *logger) SetFilter(filter Filter) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.filter = filter
+	this.config.Level = level
 }
 
 func (this *logger) TrackLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.trackLevel
+	return this.config.TrackLevel
 }
 
 func (this *logger) SetTrackLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.trackLevel = level
+	this.config.TrackLevel = level
 }
 
 func (this *logger) ExitLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.exitLevel
+	return this.config.ExitLevel
 }
 
 func (this *logger) SetExitLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.exitLevel = level
+	this.config.ExitLevel = level
+}
+
+func (this *logger) Filter() Filter {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Filter
+}
+
+func (this *logger) SetFilter(filter Filter) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.config.Filter = filter
+}
+
+func (this *logger) Prefix() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Prefix
+}
+
+func (this *logger) SetPrefix(ok bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.config.Prefix = ok
+}
+
+func (this *logger) Context() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Context
+}
+
+func (this *logger) SetContext(ok bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.config.Context = ok
+}
+
+func (this *logger) Mark() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Mark
+}
+
+func (this *logger) SetMark(ok bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.config.Mark = ok
 }
 
 func (this *logger) Limit() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.limit
+	return this.config.Limit
 }
 
 func (this *logger) SetLimit(ok bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.limit = ok
+	this.config.Limit = ok
 }
 
 func (this *logger) levels() (Level, Level, Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.level, this.trackLevel, this.exitLevel
+	return this.config.Level, this.config.TrackLevel, this.config.ExitLevel
 }
 
 func (this *logger) write(calldepth int, level Level, attr *attribute, msg string) {
@@ -177,18 +247,26 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 		Pkg:   pkg,
 		Func:  fn,
 		Msg:   msg,
-		Aux:   attr.aux,
 	}
-	if this.filter != nil && !this.filter(record) {
+	if this.config.Filter != nil && !this.config.Filter(record) {
 		return
 	}
-	if this.limit {
+	if this.config.Limit {
 		if attr.countLimiter != nil && !attr.countLimiter(record) {
 			return
 		}
 		if attr.timeLimiter != nil && !attr.timeLimiter(record) {
 			return
 		}
+	}
+	if this.config.Prefix {
+		record.Aux.Prefix = attr.prefix
+	}
+	if this.config.Context {
+		record.Aux.Contexts = attr.contexts
+	}
+	if this.config.Mark {
+		record.Aux.Marked = attr.marked
 	}
 	for _, link := range this.slots {
 		if link != nil && link.level <= level {

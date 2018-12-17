@@ -15,7 +15,9 @@ type locator struct {
 }
 
 type attribute struct {
-	aux          Auxiliary
+	prefix       string
+	contexts     []Context
+	marked       bool
 	countLimiter Filter
 	timeLimiter  Filter
 }
@@ -33,13 +35,7 @@ func New(config *Config) *Logger {
 		panic("nil config")
 	}
 	return &Logger{
-		logger: &logger{
-			level:      config.Level,
-			trackLevel: config.TrackLevel,
-			exitLevel:  config.ExitLevel,
-			filter:     config.Filter,
-			limit:      config.Limit,
-		},
+		logger:   &logger{config: *config},
 		countMap: make(map[locator]int64, cMapInitCap),
 		timeMap:  make(map[locator]*timeQueue, cMapInitCap),
 	}
@@ -47,19 +43,19 @@ func New(config *Config) *Logger {
 
 func (this *Logger) WithPrefix(prefix string) *Logger {
 	clone := *this
-	clone.attr.aux.Prefix = prefix
+	clone.attr.prefix = prefix
 	return &clone
 }
 
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	clone := *this
-	clone.attr.aux.Contexts = copyAppendContexts(clone.attr.aux.Contexts, kvs)
+	clone.attr.contexts = copyAppendContexts(clone.attr.contexts, kvs)
 	return &clone
 }
 
 func (this *Logger) WithMark(ok bool) *Logger {
 	clone := *this
-	clone.attr.aux.Marked = ok
+	clone.attr.marked = ok
 	return &clone
 }
 
