@@ -71,7 +71,7 @@ func (this *Writer) Config() *Config {
 
 func (this *Writer) SetConfig(config *Config) error {
 	if config == nil {
-		panic("nil config")
+		return nil
 	}
 
 	this.lock.Lock()
@@ -85,16 +85,14 @@ func (this *Writer) SetConfig(config *Config) error {
 
 func (this *Writer) UpdateConfig(fn func(*Config)) error {
 	if fn == nil {
-		panic("nil fn")
+		return nil
 	}
 
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	copyConfig := this.config
-
 	fn(&copyConfig)
-
 	if err := this.setConfig(&copyConfig); err != nil {
 		return fmt.Errorf("file.UpdateConfig: %v", err)
 	}
