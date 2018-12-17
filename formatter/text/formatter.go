@@ -80,6 +80,13 @@ func (this *Formatter) SetMinBufSize(size int) {
 	this.minBufSize = size
 }
 
+func (this *Formatter) ColorEnabled() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.enableColor
+}
+
 func (this *Formatter) EnableColor() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
