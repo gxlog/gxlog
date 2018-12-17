@@ -9,17 +9,25 @@ const (
 	cMapInitCap = 256
 )
 
+type Dynamic func(key interface{}) interface{}
+
+type dynamicContext struct {
+	key   interface{}
+	value Dynamic
+}
+
 type locator struct {
 	file string
 	line int
 }
 
 type attribute struct {
-	prefix       string
-	contexts     []Context
-	marked       bool
-	countLimiter Filter
-	timeLimiter  Filter
+	prefix          string
+	contexts        []Context
+	dynamicContexts []dynamicContext
+	marked          bool
+	countLimiter    Filter
+	timeLimiter     Filter
 }
 
 type Logger struct {
@@ -49,7 +57,7 @@ func (this *Logger) WithPrefix(prefix string) *Logger {
 
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	clone := *this
-	clone.attr.contexts = copyAppendContexts(clone.attr.contexts, kvs)
+	clone.appendContexts(kvs)
 	return &clone
 }
 
@@ -93,14 +101,25 @@ func (this *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 	return &clone
 }
 
-func copyAppendContexts(dst []Context, kvs []interface{}) []Context {
-	contexts := make([]Context, 0, len(dst)+len(kvs)/2)
-	contexts = append(contexts, dst...)
+func (this *Logger) appendContexts(kvs []interface{}) {
+	dynamicContexts := this.attr.dynamicContexts
+	contexts := this.attr.contexts
 	for len(kvs) >= 2 {
-		key := fmt.Sprint(kvs[0])
-		value := fmt.Sprint(kvs[1])
-		contexts = append(contexts, Context{Key: key, Value: value})
+		dynamic, ok := kvs[1].(Dynamic)
+		if ok {
+			dynamicContexts = append(dynamicContexts, dynamicContext{
+				key:   kvs[0],
+				value: dynamic,
+			})
+		} else {
+			contexts = append(contexts, Context{
+				Key:   fmt.Sprint(kvs[0]),
+				Value: fmt.Sprint(kvs[1]),
+			})
+		}
 		kvs = kvs[2:]
 	}
-	return contexts
+	// slicing to set capacity to length, force next appending to reallocate memory
+	this.attr.contexts = contexts[:len(contexts):len(contexts)]
+	this.attr.dynamicContexts = dynamicContexts[:len(dynamicContexts):len(dynamicContexts)]
 }

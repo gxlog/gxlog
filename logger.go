@@ -263,7 +263,14 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 		record.Aux.Prefix = attr.prefix
 	}
 	if this.config.Context {
-		record.Aux.Contexts = attr.contexts
+		// slicing to set capacity to length, force next appending to reallocate memory
+		record.Aux.Contexts = attr.contexts[:len(attr.contexts):len(attr.contexts)]
+		for _, context := range attr.dynamicContexts {
+			record.Aux.Contexts = append(record.Aux.Contexts, Context{
+				Key:   fmt.Sprint(context.key),
+				Value: fmt.Sprint(context.value(context.key)),
+			})
+		}
 	}
 	if this.config.Mark {
 		record.Aux.Marked = attr.marked
