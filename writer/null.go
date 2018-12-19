@@ -4,8 +4,8 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-var gNullWriter = WriterFunc(func([]byte, *gxlog.Record) {})
+var gNullWriter = Func(func([]byte, *gxlog.Record) {})
 
-func NullWriter() gxlog.Writer {
+func Null() gxlog.Writer {
 	return gNullWriter
 }
