@@ -2,7 +2,6 @@ package text
 
 import (
 	"fmt"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gxlog/gxlog"
@@ -25,7 +24,7 @@ func newFileFormatter(property, fmtspec string) *fileFormatter {
 }
 
 func (this *fileFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	file := filepath.ToSlash(record.File)
+	file := record.File
 	if this.segments > 0 {
 		file = lastSegments(file, this.segments, '/')
 	}

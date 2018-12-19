@@ -3,6 +3,7 @@ package gxlog
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -307,7 +308,7 @@ func getPosInfo(calldepth int) (file string, line int, pkg, fn string) {
 		pkg = "?pkg?"
 		fn = "?func?"
 	}
-	return file, line, pkg, fn
+	return filepath.ToSlash(file), line, pkg, fn
 }
 
 func splitPkgAndFunc(name string) (string, string) {
