@@ -25,7 +25,7 @@ type logger struct {
 	lock sync.Mutex
 }
 
-func (this *logger) Log(calldepth int, level Level, attr *attribute, args []interface{}) {
+func (this *logger) Log(calldepth int, level Level, attr *attribute, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
@@ -39,7 +39,7 @@ func (this *logger) Log(calldepth int, level Level, attr *attribute, args []inte
 }
 
 func (this *logger) Logf(calldepth int, level Level, attr *attribute,
-	fmtstr string, args []interface{}) {
+	fmtstr string, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
@@ -53,7 +53,7 @@ func (this *logger) Logf(calldepth int, level Level, attr *attribute,
 	}
 }
 
-func (this *logger) Panic(attr *attribute, args []interface{}) {
+func (this *logger) Panic(attr *attribute, args ...interface{}) {
 	msg := fmt.Sprint(args...)
 	if this.Level() <= LevelFatal {
 		this.write(0, LevelFatal, attr, msg)
@@ -61,7 +61,7 @@ func (this *logger) Panic(attr *attribute, args []interface{}) {
 	panic(msg)
 }
 
-func (this *logger) Panicf(attr *attribute, fmtstr string, args []interface{}) {
+func (this *logger) Panicf(attr *attribute, fmtstr string, args ...interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
 	if this.Level() <= LevelFatal {
 		this.write(0, LevelFatal, attr, msg)
@@ -69,14 +69,14 @@ func (this *logger) Panicf(attr *attribute, fmtstr string, args []interface{}) {
 	panic(msg)
 }
 
-func (this *logger) Time(attr *attribute, args []interface{}) func() {
+func (this *logger) Time(attr *attribute, args ...interface{}) func() {
 	if this.Level() <= LevelTrace {
 		return this.genDone(attr, fmt.Sprint(args...))
 	}
 	return func() {}
 }
 
-func (this *logger) Timef(attr *attribute, fmtstr string, args []interface{}) func() {
+func (this *logger) Timef(attr *attribute, fmtstr string, args ...interface{}) func() {
 	if this.Level() <= LevelTrace {
 		return this.genDone(attr, fmt.Sprintf(fmtstr, args...))
 	}

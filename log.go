@@ -1,5 +1,10 @@
 package gxlog
 
+import (
+	"errors"
+	"fmt"
+)
+
 func (this *Logger) Trace(args ...interface{}) {
 	this.logger.Log(0, LevelTrace, &this.attr, args)
 }
@@ -70,4 +75,15 @@ func (this *Logger) Log(calldepth int, level Level, args ...interface{}) {
 
 func (this *Logger) Logf(calldepth int, level Level, fmtstr string, args ...interface{}) {
 	this.logger.Logf(calldepth, level, &this.attr, fmtstr, args)
+}
+
+func (this *Logger) LogError(level Level, text string) error {
+	this.logger.Log(0, level, &this.attr, text)
+	return errors.New(text)
+}
+
+func (this *Logger) LogErrorf(level Level, fmtstr string, args ...interface{}) error {
+	err := fmt.Errorf(fmtstr, args...)
+	this.logger.Log(0, level, &this.attr, err.Error())
+	return err
 }
