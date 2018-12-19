@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/formatter/internal/util"
 )
 
 type pkgFormatter struct {
@@ -24,10 +25,7 @@ func newPkgFormatter(property, fmtspec string) *pkgFormatter {
 }
 
 func (this *pkgFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	pkg := record.Pkg
-	if this.segments > 0 {
-		pkg = lastSegments(pkg, this.segments, '/')
-	}
+	pkg := util.LastSegments(record.Pkg, this.segments, '/')
 	if this.fmtspec == "%s" {
 		return append(buf, pkg...)
 	} else {

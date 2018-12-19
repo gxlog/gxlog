@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/formatter/internal/util"
 )
 
 type fileFormatter struct {
@@ -24,10 +25,7 @@ func newFileFormatter(property, fmtspec string) *fileFormatter {
 }
 
 func (this *fileFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	file := record.File
-	if this.segments > 0 {
-		file = lastSegments(file, this.segments, '/')
-	}
+	file := util.LastSegments(record.File, this.segments, '/')
 	if this.fmtspec == "%s" {
 		return append(buf, file...)
 	} else {
