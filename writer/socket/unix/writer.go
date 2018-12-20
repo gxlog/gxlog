@@ -13,31 +13,25 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
-	if config == nil {
-		panic("nil config")
-	}
-	if err := config.Check(); err != nil {
-		return nil, fmt.Errorf("unix.Open: %v", err)
-	}
 	if config.Overwrite {
 		if err := checkAndRemove(config.Pathname); err != nil {
-			return nil, fmt.Errorf("unix.Open: %v", err)
+			return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
 		}
 	}
-	wt, err := socket.Open("unix", config.Pathname)
+	writer, err := socket.Open("unix", config.Pathname)
 	if err != nil {
-		return nil, fmt.Errorf("unix.Open: %v", err)
+		return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
 	}
 	if err := os.Chmod(config.Pathname, config.Perm); err != nil {
-		wt.Close()
-		return nil, fmt.Errorf("unix.Open: %v", err)
+		writer.Close()
+		return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
 	}
-	return &Writer{writer: wt}, nil
+	return &Writer{writer: writer}, nil
 }
 
 func (this *Writer) Close() error {
 	if err := this.writer.Close(); err != nil {
-		return fmt.Errorf("unix.Close: %v", err)
+		return fmt.Errorf("writer/socket/unix.Close: %v", err)
 	}
 	return nil
 }

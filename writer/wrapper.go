@@ -10,11 +10,11 @@ type wrapper struct {
 	writer io.Writer
 }
 
-func Wrap(wt io.Writer) gxlog.Writer {
-	if wt == nil {
-		panic("nil wt")
+func Wrap(writer io.Writer) gxlog.Writer {
+	if writer == nil {
+		panic("writer.Wrap: nil writer")
 	}
-	return &wrapper{writer: wt}
+	return &wrapper{writer: writer}
 }
 
 func (this *wrapper) Write(bs []byte, _ *gxlog.Record) {

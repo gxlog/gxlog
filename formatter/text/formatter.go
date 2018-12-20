@@ -23,8 +23,8 @@ type Formatter struct {
 }
 
 func New(config *Config) *Formatter {
-	if config == nil {
-		panic("nil config")
+	if config.MinBufSize < 0 {
+		panic("formatter/text.New: Config.MinBufSize must not be negative")
 	}
 	formatter := &Formatter{
 		minBufSize:  config.MinBufSize,
@@ -74,6 +74,10 @@ func (this *Formatter) MinBufSize() int {
 }
 
 func (this *Formatter) SetMinBufSize(size int) {
+	if size < 0 {
+		panic("formatter/text.SetMinBufSize: size must not be negative")
+	}
+
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

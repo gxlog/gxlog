@@ -1,7 +1,6 @@
 package unix
 
 import (
-	"errors"
 	"os"
 )
 
@@ -27,11 +26,4 @@ func (this *Config) WithPerm(perm os.FileMode) *Config {
 func (this *Config) WithOverwrite(ok bool) *Config {
 	this.Overwrite = ok
 	return this
-}
-
-func (this *Config) Check() error {
-	if this.Pathname == "" {
-		return errors.New("Config.Pathname should not be empty")
-	}
-	return nil
 }

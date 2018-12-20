@@ -27,11 +27,8 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
-	if config == nil {
-		panic("nil config")
-	}
 	if err := config.Check(); err != nil {
-		return nil, fmt.Errorf("file.Open: %v", err)
+		return nil, fmt.Errorf("writer/file.Open: %v", err)
 	}
 	return &Writer{config: *config}, nil
 }
@@ -41,7 +38,7 @@ func (this *Writer) Close() error {
 	defer this.lock.Unlock()
 
 	if err := this.closeFile(); err != nil {
-		return fmt.Errorf("file.Close: %v", err)
+		return fmt.Errorf("writer/file.Close: %v", err)
 	}
 	return nil
 }
@@ -57,7 +54,7 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 		this.fileSize += int64(n)
 	}
 	if this.config.ReportOnErr && err != nil {
-		log.Println("file.Write:", err)
+		log.Println("writer/file.Write:", err)
 	}
 }
 
@@ -70,31 +67,23 @@ func (this *Writer) Config() *Config {
 }
 
 func (this *Writer) SetConfig(config *Config) error {
-	if config == nil {
-		return nil
-	}
-
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	if err := this.setConfig(config); err != nil {
-		return fmt.Errorf("file.SetConfig: %v", err)
+		return fmt.Errorf("writer/file.SetConfig: %v", err)
 	}
 	return nil
 }
 
 func (this *Writer) UpdateConfig(fn func(*Config)) error {
-	if fn == nil {
-		return nil
-	}
-
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	copyConfig := this.config
 	fn(&copyConfig)
 	if err := this.setConfig(&copyConfig); err != nil {
-		return fmt.Errorf("file.UpdateConfig: %v", err)
+		return fmt.Errorf("writer/file.UpdateConfig: %v", err)
 	}
 	return nil
 }

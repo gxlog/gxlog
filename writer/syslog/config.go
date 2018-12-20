@@ -7,11 +7,11 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-type Priority int
+type Facility int
 
 // Facility definitions here to be cross compilation friendly
 const (
-	FacKern Priority = iota << 3
+	FacKern Facility = iota << 3
 	FacUser
 	FacMail
 	FacDaemon
@@ -25,9 +25,11 @@ const (
 	FacFTP
 )
 
+type Severity int
+
 // Severity definitions here to be cross compilation friendly
 const (
-	SevEmerg Priority = iota
+	SevEmerg Severity = iota
 	SevAlert
 	SevCrit
 	SevErr
@@ -39,10 +41,10 @@ const (
 
 type Config struct {
 	Tag         string
-	Facility    Priority
+	Facility    Facility
 	Network     string
 	Addr        string
-	SeverityMap map[gxlog.Level]Priority
+	SeverityMap map[gxlog.Level]Severity
 	ReportOnErr bool
 }
 
@@ -57,7 +59,7 @@ func NewConfig(tag string) *Config {
 	}
 }
 
-func (this *Config) WithFacility(facility Priority) *Config {
+func (this *Config) WithFacility(facility Facility) *Config {
 	this.Facility = facility
 	return this
 }
@@ -67,7 +69,7 @@ func (this *Config) WithAddr(network, addr string) *Config {
 	return this
 }
 
-func (this *Config) WithSeverityMap(severityMap map[gxlog.Level]Priority) *Config {
+func (this *Config) WithSeverityMap(severityMap map[gxlog.Level]Severity) *Config {
 	this.SeverityMap = severityMap
 	return this
 }

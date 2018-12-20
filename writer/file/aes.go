@@ -17,7 +17,7 @@ const (
 	ModeOFB
 )
 
-const cInitBufCap = 256
+const cBufInitCap = 256
 
 func newAESWriter(wt io.WriteCloser, key string, mode BlockCipherMode) (io.WriteCloser, error) {
 	keyBytes, err := hex.DecodeString(key)
@@ -52,7 +52,7 @@ func newStreamEncrypter(wt io.WriteCloser, block cipher.Block, iv []byte,
 		underlying: wt,
 		stream:     stream,
 		iv:         iv,
-		buf:        make([]byte, 0, cInitBufCap),
+		buf:        make([]byte, 0, cBufInitCap),
 	}, nil
 }
 

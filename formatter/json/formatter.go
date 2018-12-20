@@ -1,6 +1,7 @@
 package json
 
 import (
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -16,8 +17,8 @@ type Formatter struct {
 }
 
 func New(config *Config) *Formatter {
-	if config == nil {
-		panic("nil config")
+	if config.MinBufSize < 0 {
+		panic("formatter/json.New: Config.MinBufSize must not be negative")
 	}
 	formatter := &Formatter{
 		config: *config,
@@ -76,28 +77,30 @@ func (this *Formatter) Config() *Config {
 	return &copyConfig
 }
 
-func (this *Formatter) SetConfig(config *Config) {
-	if config == nil {
-		return
+func (this *Formatter) SetConfig(config *Config) error {
+	if config.MinBufSize < 0 {
+		return errors.New("formatter/json.SetConfig: Config.MinBufSize must not be negative")
 	}
 
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config = *config
+	return nil
 }
 
-func (this *Formatter) UpdateConfig(fn func(*Config)) {
-	if fn == nil {
-		return
-	}
-
+func (this *Formatter) UpdateConfig(fn func(*Config)) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	copyConfig := this.config
 	fn(&copyConfig)
+
+	if copyConfig.MinBufSize < 0 {
+		return errors.New("formatter/json.UpdateConfig: Config.MinBufSize must not be negative")
+	}
 	this.config = copyConfig
+	return nil
 }
 
 func (this *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxiliary) []byte {

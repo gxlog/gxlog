@@ -25,18 +25,15 @@ type Writer struct {
 }
 
 func Open(cfg *Config) (*Writer, error) {
-	if cfg == nil {
-		panic("nil cfg")
-	}
 	wt, err := syslog.Dial(cfg.Network, cfg.Addr, syslog.Priority(cfg.Facility), cfg.Tag)
 	if err != nil {
-		return nil, fmt.Errorf("syslog.Open: %v", err)
+		return nil, fmt.Errorf("writer/syslog.Open: %v", err)
 	}
 	writer := &Writer{
 		reportOnErr: cfg.ReportOnErr,
 		writer:      wt,
 	}
-	severityMap := map[gxlog.Level]Priority{
+	severityMap := map[gxlog.Level]Severity{
 		gxlog.LevelTrace: SevDebug,
 		gxlog.LevelDebug: SevDebug,
 		gxlog.LevelInfo:  SevInfo,
@@ -54,7 +51,7 @@ func (this *Writer) Close() error {
 	defer this.lock.Unlock()
 
 	if err := this.writer.Close(); err != nil {
-		return fmt.Errorf("syslog.Close: %v", err)
+		return fmt.Errorf("writer/syslog.Close: %v", err)
 	}
 	return nil
 }
@@ -65,18 +62,18 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 
 	err := this.logFuncs[record.Level](string(bs))
 	if this.reportOnErr && err != nil {
-		log.Println("syslog.Write:", err)
+		log.Println("writer/syslog.Write:", err)
 	}
 }
 
-func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Priority) {
+func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.updateLogFuncs(severityMap)
 }
 
-func (this *Writer) updateLogFuncs(severityMap map[gxlog.Level]Priority) {
+func (this *Writer) updateLogFuncs(severityMap map[gxlog.Level]Severity) {
 	for level, severity := range severityMap {
 		var fn syslogFunc
 		switch severity & cSeverityMask {

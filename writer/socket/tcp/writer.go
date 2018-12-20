@@ -12,22 +12,16 @@ type Writer struct {
 }
 
 func Open(config *Config) (*Writer, error) {
-	if config == nil {
-		panic("nil config")
-	}
-	if err := config.Check(); err != nil {
-		return nil, fmt.Errorf("tcp.Open: %v", err)
-	}
-	wt, err := socket.Open("tcp", config.Addr)
+	writer, err := socket.Open("tcp", config.Addr)
 	if err != nil {
-		return nil, fmt.Errorf("tcp.Open: %v", err)
+		return nil, fmt.Errorf("writer/socket/tcp.Open: %v", err)
 	}
-	return &Writer{writer: wt}, nil
+	return &Writer{writer: writer}, nil
 }
 
 func (this *Writer) Close() error {
 	if err := this.writer.Close(); err != nil {
-		return fmt.Errorf("tcp.Close: %v", err)
+		return fmt.Errorf("writer/socket/tcp.Close: %v", err)
 	}
 	return nil
 }

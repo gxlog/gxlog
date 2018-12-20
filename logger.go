@@ -91,28 +91,22 @@ func (this *logger) Config() *Config {
 	return &copyConfig
 }
 
-func (this *logger) SetConfig(config *Config) {
-	if config == nil {
-		return
-	}
-
+func (this *logger) SetConfig(config *Config) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config = *config
+	return nil
 }
 
-func (this *logger) UpdateConfig(fn func(*Config)) {
-	if fn == nil {
-		return
-	}
-
+func (this *logger) UpdateConfig(fn func(*Config)) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	copyConfig := this.config
 	fn(&copyConfig)
 	this.config = copyConfig
+	return nil
 }
 
 func (this *logger) Level() Level {
@@ -253,33 +247,33 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 		return
 	}
 	if this.config.Limit {
-		if attr.countLimiter != nil && !attr.countLimiter(record) {
+		if attr.CountLimiter != nil && !attr.CountLimiter(record) {
 			return
 		}
-		if attr.timeLimiter != nil && !attr.timeLimiter(record) {
+		if attr.TimeLimiter != nil && !attr.TimeLimiter(record) {
 			return
 		}
 	}
 	if this.config.Prefix {
-		record.Aux.Prefix = attr.prefix
+		record.Aux.Prefix = attr.Prefix
 	}
 	if this.config.Context {
-		// the len and cap of attr.contexts are equal. next appending will reallocate memory
-		record.Aux.Contexts = attr.contexts
-		for _, context := range attr.dynamicContexts {
+		// the len and cap of attr.Contexts are equal. next appending will reallocate memory
+		record.Aux.Contexts = attr.Contexts
+		for _, context := range attr.DynamicContexts {
 			record.Aux.Contexts = append(record.Aux.Contexts, Context{
-				Key:   fmt.Sprint(context.key),
-				Value: fmt.Sprint(context.value(context.key)),
+				Key:   fmt.Sprint(context.Key),
+				Value: fmt.Sprint(context.Value(context.Key)),
 			})
 		}
 	}
 	if this.config.Mark {
-		record.Aux.Marked = attr.marked
+		record.Aux.Marked = attr.Marked
 	}
 	for _, link := range this.slots {
-		if link != nil && link.level <= level {
-			if link.filter == nil || link.filter(record) {
-				link.writer.Write(link.formatter.Format(record), record)
+		if link != nil && link.Level <= level {
+			if link.Filter == nil || link.Filter(record) {
+				link.Writer.Write(link.Formatter.Format(record), record)
 			}
 		}
 	}
