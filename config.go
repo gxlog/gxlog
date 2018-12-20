@@ -2,6 +2,8 @@ package gxlog
 
 type Config struct {
 	Level      Level
+	TimeLevel  Level
+	PanicLevel Level
 	TrackLevel Level
 	ExitLevel  Level
 	Filter     Filter
@@ -15,6 +17,8 @@ type Config struct {
 func NewConfig() *Config {
 	return &Config{
 		Level:      LevelTrace,
+		TimeLevel:  LevelTrace,
+		PanicLevel: LevelFatal,
 		TrackLevel: LevelFatal,
 		ExitLevel:  LevelOff,
 		Prefix:     true,
@@ -26,6 +30,16 @@ func NewConfig() *Config {
 
 func (this *Config) WithLevel(level Level) *Config {
 	this.Level = level
+	return this
+}
+
+func (this *Config) WithTimeLevel(level Level) *Config {
+	this.TimeLevel = level
+	return this
+}
+
+func (this *Config) WithPanicLevel(level Level) *Config {
+	this.PanicLevel = level
 	return this
 }
 

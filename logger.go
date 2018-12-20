@@ -55,170 +55,36 @@ func (this *logger) Logf(calldepth int, level Level, attr *attribute,
 
 func (this *logger) Panic(attr *attribute, args ...interface{}) {
 	msg := fmt.Sprint(args...)
-	if this.Level() <= LevelFatal {
-		this.write(0, LevelFatal, attr, msg)
+	logLevel, panicLevel := this.panicLevel()
+	if logLevel <= panicLevel {
+		this.write(0, panicLevel, attr, msg)
 	}
 	panic(msg)
 }
 
 func (this *logger) Panicf(attr *attribute, fmtstr string, args ...interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
-	if this.Level() <= LevelFatal {
-		this.write(0, LevelFatal, attr, msg)
+	logLevel, panicLevel := this.panicLevel()
+	if logLevel <= panicLevel {
+		this.write(0, panicLevel, attr, msg)
 	}
 	panic(msg)
 }
 
 func (this *logger) Time(attr *attribute, args ...interface{}) func() {
-	if this.Level() <= LevelTrace {
+	logLevel, timeLevel := this.timeLevel()
+	if logLevel <= timeLevel {
 		return this.genDone(attr, fmt.Sprint(args...))
 	}
 	return func() {}
 }
 
 func (this *logger) Timef(attr *attribute, fmtstr string, args ...interface{}) func() {
-	if this.Level() <= LevelTrace {
+	logLevel, timeLevel := this.timeLevel()
+	if logLevel <= timeLevel {
 		return this.genDone(attr, fmt.Sprintf(fmtstr, args...))
 	}
 	return func() {}
-}
-
-func (this *logger) Config() *Config {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	copyConfig := this.config
-	return &copyConfig
-}
-
-func (this *logger) SetConfig(config *Config) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config = *config
-	return nil
-}
-
-func (this *logger) UpdateConfig(fn func(*Config)) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	copyConfig := this.config
-	fn(&copyConfig)
-	this.config = copyConfig
-	return nil
-}
-
-func (this *logger) Level() Level {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Level
-}
-
-func (this *logger) SetLevel(level Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Level = level
-}
-
-func (this *logger) TrackLevel() Level {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.TrackLevel
-}
-
-func (this *logger) SetTrackLevel(level Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.TrackLevel = level
-}
-
-func (this *logger) ExitLevel() Level {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.ExitLevel
-}
-
-func (this *logger) SetExitLevel(level Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.ExitLevel = level
-}
-
-func (this *logger) Filter() Filter {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Filter
-}
-
-func (this *logger) SetFilter(filter Filter) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Filter = filter
-}
-
-func (this *logger) Prefix() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Prefix
-}
-
-func (this *logger) SetPrefix(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Prefix = ok
-}
-
-func (this *logger) Context() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Context
-}
-
-func (this *logger) SetContext(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Context = ok
-}
-
-func (this *logger) Mark() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Mark
-}
-
-func (this *logger) SetMark(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Mark = ok
-}
-
-func (this *logger) Limit() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Limit
-}
-
-func (this *logger) SetLimit(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Limit = ok
 }
 
 func (this *logger) levels() (Level, Level, Level) {
@@ -226,6 +92,20 @@ func (this *logger) levels() (Level, Level, Level) {
 	defer this.lock.Unlock()
 
 	return this.config.Level, this.config.TrackLevel, this.config.ExitLevel
+}
+
+func (this *logger) timeLevel() (Level, Level) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Level, this.config.TimeLevel
+}
+
+func (this *logger) panicLevel() (Level, Level) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Level, this.config.PanicLevel
 }
 
 func (this *logger) write(calldepth int, level Level, attr *attribute, msg string) {
@@ -283,8 +163,9 @@ func (this *logger) genDone(attr *attribute, msg string) func() {
 	now := time.Now()
 	return func() {
 		cost := time.Since(now)
-		if this.Level() <= LevelTrace {
-			this.write(-1, LevelTrace, attr, fmt.Sprintf("%s (cost: %v)", msg, cost))
+		logLevel, timeLevel := this.timeLevel()
+		if logLevel <= timeLevel {
+			this.write(-1, timeLevel, attr, fmt.Sprintf("%s (cost: %v)", msg, cost))
 		}
 	}
 }
