@@ -1,5 +1,9 @@
 package gxlog
 
+import (
+	"fmt"
+)
+
 type Slot int
 
 const (
@@ -45,7 +49,7 @@ func (this *logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...
 		case nil:
 			// noop
 		default:
-			panic("gxlog.Link: unknown link option type")
+			panic(fmt.Sprintf("gxlog.Link: unknown link option type: %T", opt))
 		}
 	}
 
