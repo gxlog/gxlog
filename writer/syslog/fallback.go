@@ -22,4 +22,8 @@ func (this *Writer) Close() error {
 
 func (this *Writer) Write(bs []byte, record *gxlog.Record) {}
 
+func (this *Writer) ReportOnErr() bool { return false }
+
+func (this *Writer) SetReportOnErr(ok bool) {}
+
 func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {}

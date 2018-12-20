@@ -66,6 +66,20 @@ func (this *Writer) Write(bs []byte, record *gxlog.Record) {
 	}
 }
 
+func (this *Writer) ReportOnErr() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.reportOnErr
+}
+
+func (this *Writer) SetReportOnErr(ok bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.reportOnErr = ok
+}
+
 func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
