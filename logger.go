@@ -123,17 +123,38 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 		Func:  fn,
 		Msg:   msg,
 	}
-	if this.config.Filter != nil && !this.config.Filter(record) {
+
+	if !this.filter(record, attr) {
 		return
+	}
+
+	this.attachAux(record, attr)
+
+	for _, link := range this.slots {
+		if link != nil && link.Level <= level {
+			if link.Filter == nil || link.Filter(record) {
+				link.Writer.Write(link.Formatter.Format(record), record)
+			}
+		}
+	}
+}
+
+func (this *logger) filter(record *Record, attr *attribute) bool {
+	if this.config.Filter != nil && !this.config.Filter(record) {
+		return false
 	}
 	if this.config.Limit {
 		if attr.CountLimiter != nil && !attr.CountLimiter(record) {
-			return
+			return false
 		}
 		if attr.TimeLimiter != nil && !attr.TimeLimiter(record) {
-			return
+			return false
 		}
 	}
+	return true
+}
+
+func (this *logger) attachAux(record *Record, attr *attribute) {
 	if this.config.Prefix {
 		record.Aux.Prefix = attr.Prefix
 	}
@@ -149,13 +170,6 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 	}
 	if this.config.Mark {
 		record.Aux.Marked = attr.Marked
-	}
-	for _, link := range this.slots {
-		if link != nil && link.Level <= level {
-			if link.Filter == nil || link.Filter(record) {
-				link.Writer.Write(link.Formatter.Format(record), record)
-			}
-		}
 	}
 }
 

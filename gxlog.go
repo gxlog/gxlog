@@ -73,10 +73,7 @@ func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 		}
 		n := this.countMap[loc]
 		this.countMap[loc]++
-		if n%batch < limit {
-			return true
-		}
-		return false
+		return n%batch < limit
 	}
 	return &clone
 }
