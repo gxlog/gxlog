@@ -138,6 +138,20 @@ func (this *logger) SetContext(ok bool) {
 	this.config.Context = ok
 }
 
+func (this *logger) Dynamic() bool {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	return this.config.Dynamic
+}
+
+func (this *logger) SetDynamic(ok bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
+
+	this.config.Dynamic = ok
+}
+
 func (this *logger) Mark() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()

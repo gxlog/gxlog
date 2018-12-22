@@ -10,6 +10,7 @@ type Config struct {
 
 	Prefix  bool
 	Context bool
+	Dynamic bool
 	Mark    bool
 	Limit   bool
 }
@@ -23,6 +24,7 @@ func NewConfig() *Config {
 		ExitLevel:  LevelOff,
 		Prefix:     true,
 		Context:    true,
+		Dynamic:    true,
 		Mark:       true,
 		Limit:      true,
 	}
@@ -65,6 +67,11 @@ func (this *Config) WithPrefix(ok bool) *Config {
 
 func (this *Config) WithContext(ok bool) *Config {
 	this.Context = ok
+	return this
+}
+
+func (this *Config) WithDynamic(ok bool) *Config {
+	this.Dynamic = ok
 	return this
 }
 

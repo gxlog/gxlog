@@ -161,11 +161,13 @@ func (this *logger) attachAux(record *Record, attr *attribute) {
 	if this.config.Context {
 		// the len and cap of attr.Contexts are equal. next appending will reallocate memory
 		record.Aux.Contexts = attr.Contexts
-		for _, context := range attr.DynamicContexts {
-			record.Aux.Contexts = append(record.Aux.Contexts, Context{
-				Key:   fmt.Sprint(context.Key),
-				Value: fmt.Sprint(context.Value(context.Key)),
-			})
+		if this.config.Dynamic {
+			for _, context := range attr.DynamicContexts {
+				record.Aux.Contexts = append(record.Aux.Contexts, Context{
+					Key:   fmt.Sprint(context.Key),
+					Value: fmt.Sprint(context.Value(context.Key)),
+				})
+			}
 		}
 	}
 	if this.config.Mark {
