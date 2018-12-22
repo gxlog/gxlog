@@ -101,7 +101,7 @@ func TestBizarreHeader(t *testing.T) {
 
 func TestColor(t *testing.T) {
 	formatter := text.New(text.NewConfig().WithHeader("{{msg}}").WithEnableColor(true))
-	expect := fmt.Sprintf("\033[%dm%s\033[0m", text.Purple, cMsg)
+	expect := fmt.Sprintf("\033[%dm%s\033[0m", text.Magenta, cMsg)
 	testFormat(t, formatter, &gTmplRecord, expect)
 
 	record := cloneRecord()

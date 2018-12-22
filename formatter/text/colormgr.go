@@ -14,7 +14,7 @@ const (
 	Green
 	Yellow
 	Blue
-	Purple
+	Magenta
 	Cyan
 	White
 )
@@ -44,9 +44,9 @@ func newColorMgr() *colorMgr {
 	}
 	mgr := &colorMgr{
 		colors:      colors,
-		markedColor: Purple,
+		markedColor: Magenta,
 		colorSeqs:   initColorSeqs(colors),
-		markedSeq:   makeSeq(Purple),
+		markedSeq:   makeSeq(Magenta),
 		resetSeq:    makeSeq(0),
 	}
 	return mgr
