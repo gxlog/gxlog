@@ -15,6 +15,8 @@ or hooks can be integrated into gxlog.
 - [Getting Started](#getting-started)
   - [Basic](#basic)
   - [Auxiliary](#auxiliary)
+  - [Slots](#slots)
+  - [Settings](#settings)
 
 ## Architecture ##
 
@@ -86,9 +88,9 @@ or hooks can be integrated into gxlog.
 
 ### Basic ###
 
-The default logger has text formatter and writer wrapper to os.Stderr linked in
-Slot0. The rest slots are free. Supported levels are trace, debug, info, warn,
-error and fatal.
+The default logger has text formatter and writer wrapper of os.Stderr linked in
+Slot0. The rest slots are free. Supported levels are TRACE, DEBUG, INFO, WARN,
+ERROR and FATAL.
 
 It is RECOMMENDED that all packages use the default logger, such the main package
 can control which, how and where to output logs by setting filters, formatters
@@ -124,14 +126,14 @@ func main() {
     log.Fatal("test Fatal")
     log.Fatalf("%s", "test Fatalf")
 
-    // The default level of Panic or Panicf is fatal.
+    // The default level of Panic or Panicf is FATAL.
     // It will always panic no matter at which level the logger is.
     // log.Panic("test Panic")
     // log.Panicf("%s", "test Panicf")
 
     // Time and Timef will return a function. When the function is called,
     //   it will output the log as well as the time cost.
-    // The default level of Time and Timef is trace.
+    // The default level of Time and Timef is TRACE.
     done := log.Time("test Time")
     time.Sleep(200 * time.Millisecond)
     done()
@@ -245,5 +247,130 @@ func main() {
         time.Sleep(time.Duration(rand.Intn(500)) * time.Millisecond)
     }
 }
-
 ```
+
+### Slots ###
+
+The logger has 8 slots, from `Slot0` to `Slot7`. The formatter and writer in each
+slot will be called in order from `Slot0` to `Slot7`. Custom formatters or writers
+can act as event triggers or hooks. The default level of each slot is TRACE. Each
+slot has independent level and filter.
+
+``` go
+package main
+
+import (
+    "fmt"
+
+    "github.com/gxlog/gxlog"
+    "github.com/gxlog/gxlog/defaults"
+    "github.com/gxlog/gxlog/formatter"
+    "github.com/gxlog/gxlog/formatter/json"
+    "github.com/gxlog/gxlog/writer"
+)
+
+var log = defaults.Logger()
+
+func main() {
+    // Only supported on systems that ANSI escape sequences are supported.
+    defaults.Formatter().EnableColor()
+
+    log.Info("this will print once")
+
+    // copy Slot0 with the default formatter and wrapper of os.Stderr to Slot1
+    log.CopySlot(gxlog.Slot1, gxlog.Slot0)
+    log.Info("this will print twice")
+
+    log.SetSlotFormatter(gxlog.Slot1, json.New(json.NewConfig()))
+    log.Info("this will print in text format and json format")
+
+    log.SwapSlot(gxlog.Slot0, gxlog.Slot1)
+    log.Info("json first and then text")
+
+    log.Unlink(gxlog.Slot0)
+    log.Infof("busy slots: %v, free slots: %v", log.BusySlots(), log.FreeSlots())
+
+    log.SetSlotLevel(gxlog.Slot1, gxlog.LevelWarn)
+    log.Info("this will not print")
+    log.Warn("this will print")
+
+    log.SetSlotLevel(gxlog.Slot1, gxlog.LevelTrace)
+    // ATTENTION: DO NOT call methods of logger in formatter, writer or filter
+    //   in the current goroutine, or it will deadlock.
+    hook := formatter.Func(func(record *gxlog.Record) []byte {
+        // log.Info("deadlock")
+        fmt.Println("hooks:", record.Msg)
+        return nil
+    })
+    filter := func(record *gxlog.Record) bool {
+        return record.Aux.Marked
+    }
+    // link at Slot0 will overwrite the current link at Slot0 if any
+    // If the log level is not lower than WARN and the log is marked, the hook
+    //   will be called.
+    // use writer.Null() instead of nil, or it will panic
+    log.Link(gxlog.Slot0, hook, writer.Null(), gxlog.LevelWarn, filter)
+    log.WithMark(true).Info("marked, but info")
+    log.Error("error, but not marked")
+    log.WithMark(true).Warn("warn and marked")
+}
+```
+
+### Settings ###
+
+The logger has a bundle of methods to get or set different levels, switches or
+the filter. They are all concurrent safe and you can alter the config of the
+logger at any time.
+
+``` go
+package main
+
+import (
+    "strings"
+
+    "github.com/gxlog/gxlog"
+    "github.com/gxlog/gxlog/defaults"
+)
+
+var log = defaults.Logger()
+
+func main() {
+    // Only supported on systems that ANSI escape sequences are supported.
+    defaults.Formatter().EnableColor()
+
+    log.Infof("config: %#v", log.Config())
+
+    log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal before update")
+    log.UpdateConfig(func(config *gxlog.Config) {
+        // disable prefix, the prefix of records will always be ""
+        config.Prefix = false
+        // disable context, the contexts of records will always be zero length
+        config.Context = false
+        // disable mark, the mark of records will always be false
+        config.Mark = false
+        // disable the auto backtracking
+        config.TrackLevel = gxlog.LevelOff
+    })
+    log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal after update")
+
+    // demonstrates the filter logic
+    log.SetFilter(gxlog.Or(important, gxlog.And(useful, interesting)))
+    log.Error("error") // this will print
+    log.Warn("warn")
+    log.Trace("trace, funny")
+    log.Info("info, funny") // this will print
+}
+
+func important(record *gxlog.Record) bool {
+    return record.Level >= gxlog.LevelError
+}
+
+func useful(record *gxlog.Record) bool {
+    return record.Level >= gxlog.LevelInfo
+}
+
+func interesting(record *gxlog.Record) bool {
+    return strings.Contains(record.Msg, "funny")
+}
+```
+
