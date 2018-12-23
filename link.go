@@ -79,7 +79,13 @@ func (this *logger) CopySlot(dst, src Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.slots[dst] = this.slots[src]
+	link := this.slots[src]
+	if link == nil {
+		this.slots[dst] = nil
+	} else {
+		copyLink := *link
+		this.slots[dst] = &copyLink
+	}
 }
 
 func (this *logger) MoveSlot(to, from Slot) {
