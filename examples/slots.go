@@ -7,7 +7,6 @@ import (
 	"github.com/gxlog/gxlog/defaults"
 	"github.com/gxlog/gxlog/formatter"
 	"github.com/gxlog/gxlog/formatter/json"
-	"github.com/gxlog/gxlog/writer"
 )
 
 var log = defaults.Logger()
@@ -28,8 +27,9 @@ func main() {
 	log.SwapSlot(gxlog.Slot0, gxlog.Slot1)
 	log.Info("json first and then text")
 
+	// set the formatter, writer and filter of Slot0 to nil and
+	//   set the level of Slot0 to off
 	log.Unlink(gxlog.Slot0)
-	log.Infof("busy slots: %v, free slots: %v", log.BusySlots(), log.FreeSlots())
 
 	log.SetSlotLevel(gxlog.Slot1, gxlog.LevelWarn)
 	log.Info("this will not print")
@@ -49,8 +49,7 @@ func main() {
 	// link at Slot0 will overwrite the current link at Slot0 if any
 	// If the log level is not lower than WARN and the log is marked, the hook
 	//   will be called.
-	// use writer.Null() instead of nil, or it will panic
-	log.Link(gxlog.Slot0, hook, writer.Null(), gxlog.LevelWarn, filter)
+	log.Link(gxlog.Slot0, hook, nil, gxlog.LevelWarn, filter)
 	log.WithMark(true).Info("marked, but info")
 	log.Error("error, but not marked")
 	log.WithMark(true).Warn("warn and marked")

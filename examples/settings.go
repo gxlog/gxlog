@@ -16,7 +16,7 @@ func main() {
 	log.Infof("config: %#v", log.Config())
 
 	log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal before update")
-	log.UpdateConfig(func(config *gxlog.Config) {
+	log.UpdateConfig(func(config gxlog.Config) gxlog.Config {
 		// disable prefix, the prefix of records will always be ""
 		config.Prefix = false
 		// disable context, the contexts of records will always be zero length
@@ -25,6 +25,7 @@ func main() {
 		config.Mark = false
 		// disable the auto backtracking
 		config.TrackLevel = gxlog.LevelOff
+		return config
 	})
 	log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal after update")
 
