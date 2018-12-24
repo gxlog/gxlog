@@ -76,13 +76,12 @@ func (this *Writer) SetConfig(config *Config) error {
 	return nil
 }
 
-func (this *Writer) UpdateConfig(fn func(*Config)) error {
+func (this *Writer) UpdateConfig(fn func(Config) Config) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	copyConfig := this.config
-	fn(&copyConfig)
-	if err := this.setConfig(&copyConfig); err != nil {
+	config := fn(this.config)
+	if err := this.setConfig(&config); err != nil {
 		return fmt.Errorf("writer/file.UpdateConfig: %v", err)
 	}
 	return nil

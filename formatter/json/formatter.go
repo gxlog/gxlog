@@ -89,17 +89,16 @@ func (this *Formatter) SetConfig(config *Config) error {
 	return nil
 }
 
-func (this *Formatter) UpdateConfig(fn func(*Config)) error {
+func (this *Formatter) UpdateConfig(fn func(Config) Config) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	copyConfig := this.config
-	fn(&copyConfig)
+	config := fn(this.config)
 
-	if copyConfig.MinBufSize < 0 {
+	if config.MinBufSize < 0 {
 		return errors.New("formatter/json.UpdateConfig: Config.MinBufSize must not be negative")
 	}
-	this.config = copyConfig
+	this.config = config
 	return nil
 }
 
