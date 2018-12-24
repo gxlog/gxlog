@@ -55,7 +55,6 @@ or hooks can be integrated into gxlog.
     - filter
   - **formatter**
     - formatter function wrapper
-    - null formatter
     - **text formatter**
       - custom header
       - custom property and format of fields
@@ -69,7 +68,6 @@ or hooks can be integrated into gxlog.
     - writer function wrapper
     - io.Writer wrapper
     - asynchronous wrapper
-    - null writer
     - **file writer**
       - custom file max size
       - custom file naming style
@@ -126,14 +124,14 @@ func main() {
     log.Fatal("test Fatal")
     log.Fatalf("%s", "test Fatalf")
 
-    // The default level of Panic or Panicf is FATAL.
+    // The default level of Panic or Panicf is fatal.
     // It will always panic no matter at which level the logger is.
     // log.Panic("test Panic")
     // log.Panicf("%s", "test Panicf")
 
     // Time and Timef will return a function. When the function is called,
     //   it will output the log as well as the time cost.
-    // The default level of Time and Timef is TRACE.
+    // The default level of Time and Timef is trace.
     done := log.Time("test Time")
     time.Sleep(200 * time.Millisecond)
     done()
@@ -144,7 +142,8 @@ func main() {
     // The calldepth can be specified in Log and Logf. That is useful when
     //   you want to customize your own log helper functions.
     log.Log(0, gxlog.LevelInfo, "test Log")
-    log.Logf(-1, gxlog.LevelWarn, "%s", "test Logf")
+    log.Logf(1, gxlog.LevelWarn, "%s: %d", "test Logf", 1)
+    log.Logf(-1, gxlog.LevelWarn, "%s: %d", "test Logf", -1)
 
     test1()
     test2()
@@ -163,17 +162,15 @@ func test2() error {
 
 ### Auxiliary ###
 
-The methods with the prefix `With` of Logger will attach auxiliary information to
-log records or limit log output. They can be chained together in any number.
+The methods with the prefix `With` of Logger will attach auxiliary information
+to log records or limit log output. They can be chained together in any number.
 Calls to `WithContext` will concatenate the context key-value pairs while calls
-to the others will overwrite coresponding settings.
+to the others will overwrite corresponding settings.
 
-In fact, each call to any of them will return a new instance of Logger. (Logger
-is just a shell of the internal logger and holds a pointer to it. Every instance
-of Logger returned by `With...` methods holds the same internal logger which is
-created by `gxlog.New`.) Each instance of Logger has its fields copied from the
-caller and then update its own fields. Such, the instances of Logger have the
-**lexical scope** and are concurrent safe.
+In fact, each call to any of them will return a new instance of Logger which is
+a shallow copy of the caller. The prefix, contexts, mark, count limiter and time
+limiter of Logger are copied before they are modified. Such, instances of Logger
+have the **lexical scope**.
 
 ``` go
 package main
@@ -253,8 +250,7 @@ func main() {
 
 The logger has 8 slots, from `Slot0` to `Slot7`. The formatter and writer in each
 slot will be called in order from `Slot0` to `Slot7`. Custom formatters or writers
-can act as event triggers or hooks. The default level of each slot is TRACE. Each
-slot has independent level and filter.
+can act as event triggers or hooks. Each slot has independent level and filter.
 
 ``` go
 package main
@@ -266,7 +262,6 @@ import (
     "github.com/gxlog/gxlog/defaults"
     "github.com/gxlog/gxlog/formatter"
     "github.com/gxlog/gxlog/formatter/json"
-    "github.com/gxlog/gxlog/writer"
 )
 
 var log = defaults.Logger()
@@ -287,8 +282,9 @@ func main() {
     log.SwapSlot(gxlog.Slot0, gxlog.Slot1)
     log.Info("json first and then text")
 
+    // set the formatter, writer and filter of Slot0 to nil and
+    //   set the level of Slot0 to off
     log.Unlink(gxlog.Slot0)
-    log.Infof("busy slots: %v, free slots: %v", log.BusySlots(), log.FreeSlots())
 
     log.SetSlotLevel(gxlog.Slot1, gxlog.LevelWarn)
     log.Info("this will not print")
@@ -308,8 +304,7 @@ func main() {
     // link at Slot0 will overwrite the current link at Slot0 if any
     // If the log level is not lower than WARN and the log is marked, the hook
     //   will be called.
-    // use writer.Null() instead of nil, or it will panic
-    log.Link(gxlog.Slot0, hook, writer.Null(), gxlog.LevelWarn, filter)
+    log.Link(gxlog.Slot0, hook, nil, gxlog.LevelWarn, filter)
     log.WithMark(true).Info("marked, but info")
     log.Error("error, but not marked")
     log.WithMark(true).Warn("warn and marked")
@@ -341,7 +336,7 @@ func main() {
     log.Infof("config: %#v", log.Config())
 
     log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal before update")
-    log.UpdateConfig(func(config *gxlog.Config) {
+    log.UpdateConfig(func(config gxlog.Config) gxlog.Config {
         // disable prefix, the prefix of records will always be ""
         config.Prefix = false
         // disable context, the contexts of records will always be zero length
@@ -350,6 +345,7 @@ func main() {
         config.Mark = false
         // disable the auto backtracking
         config.TrackLevel = gxlog.LevelOff
+        return config
     })
     log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal after update")
 
@@ -373,4 +369,3 @@ func interesting(record *gxlog.Record) bool {
     return strings.Contains(record.Msg, "funny")
 }
 ```
-
