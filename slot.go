@@ -25,7 +25,7 @@ type link struct {
 	Filter    Filter
 }
 
-func (this *logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
+func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
 	if formatter == nil {
 		panic("gxlog.Link: nil formatter")
 	}
@@ -59,14 +59,14 @@ func (this *logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...
 	this.slots[slot] = link
 }
 
-func (this *logger) Unlink(slot Slot) {
+func (this *Logger) Unlink(slot Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.slots[slot] = nil
 }
 
-func (this *logger) UnlinkAll() {
+func (this *Logger) UnlinkAll() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -75,7 +75,7 @@ func (this *logger) UnlinkAll() {
 	}
 }
 
-func (this *logger) CopySlot(dst, src Slot) {
+func (this *Logger) CopySlot(dst, src Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -88,7 +88,7 @@ func (this *logger) CopySlot(dst, src Slot) {
 	}
 }
 
-func (this *logger) MoveSlot(to, from Slot) {
+func (this *Logger) MoveSlot(to, from Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -96,21 +96,21 @@ func (this *logger) MoveSlot(to, from Slot) {
 	this.slots[from] = nil
 }
 
-func (this *logger) SwapSlot(left, right Slot) {
+func (this *Logger) SwapSlot(left, right Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.slots[left], this.slots[right] = this.slots[right], this.slots[left]
 }
 
-func (this *logger) Busy(slot Slot) bool {
+func (this *Logger) Busy(slot Slot) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.slots[slot] != nil
 }
 
-func (this *logger) BusySlots() []Slot {
+func (this *Logger) BusySlots() []Slot {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -123,7 +123,7 @@ func (this *logger) BusySlots() []Slot {
 	return slots
 }
 
-func (this *logger) FreeSlots() []Slot {
+func (this *Logger) FreeSlots() []Slot {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -136,7 +136,7 @@ func (this *logger) FreeSlots() []Slot {
 	return slots
 }
 
-func (this *logger) SlotFormatter(slot Slot) Formatter {
+func (this *Logger) SlotFormatter(slot Slot) Formatter {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -147,7 +147,7 @@ func (this *logger) SlotFormatter(slot Slot) Formatter {
 	return link.Formatter
 }
 
-func (this *logger) SetSlotFormatter(slot Slot, formatter Formatter) bool {
+func (this *Logger) SetSlotFormatter(slot Slot, formatter Formatter) bool {
 	if formatter == nil {
 		panic("gxlog.SetSlotFormatter: nil formatter")
 	}
@@ -163,7 +163,7 @@ func (this *logger) SetSlotFormatter(slot Slot, formatter Formatter) bool {
 	return false
 }
 
-func (this *logger) SlotWriter(slot Slot) Writer {
+func (this *Logger) SlotWriter(slot Slot) Writer {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -174,7 +174,7 @@ func (this *logger) SlotWriter(slot Slot) Writer {
 	return link.Writer
 }
 
-func (this *logger) SetSlotWriter(slot Slot, writer Writer) bool {
+func (this *Logger) SetSlotWriter(slot Slot, writer Writer) bool {
 	if writer == nil {
 		panic("gxlog.SetSlotWriter: nil writer")
 	}
@@ -190,7 +190,7 @@ func (this *logger) SetSlotWriter(slot Slot, writer Writer) bool {
 	return false
 }
 
-func (this *logger) SlotLevel(slot Slot) Level {
+func (this *Logger) SlotLevel(slot Slot) Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -201,7 +201,7 @@ func (this *logger) SlotLevel(slot Slot) Level {
 	return link.Level
 }
 
-func (this *logger) SetSlotLevel(slot Slot, level Level) bool {
+func (this *Logger) SetSlotLevel(slot Slot, level Level) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -213,7 +213,7 @@ func (this *logger) SetSlotLevel(slot Slot, level Level) bool {
 	return false
 }
 
-func (this *logger) SlotFilter(slot Slot) Filter {
+func (this *Logger) SlotFilter(slot Slot) Filter {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -224,7 +224,7 @@ func (this *logger) SlotFilter(slot Slot) Filter {
 	return link.Filter
 }
 
-func (this *logger) SetSlotFilter(slot Slot, filter Filter) bool {
+func (this *Logger) SetSlotFilter(slot Slot, filter Filter) bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

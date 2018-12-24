@@ -1,179 +1,179 @@
 package gxlog
 
-func (this *logger) Config() *Config {
+func (this *Logger) Config() *Config {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	copyConfig := this.config
+	copyConfig := *this.config
 	return &copyConfig
 }
 
-func (this *logger) SetConfig(config *Config) error {
+func (this *Logger) SetConfig(config *Config) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.config = *config
+	copyConfig := *config
+	this.config = &copyConfig
 	return nil
 }
 
-func (this *logger) UpdateConfig(fn func(*Config)) error {
+func (this *Logger) UpdateConfig(fn func(Config) Config) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	copyConfig := this.config
-	fn(&copyConfig)
-	this.config = copyConfig
+	config := fn(*this.config)
+	this.config = &config
 	return nil
 }
 
-func (this *logger) Level() Level {
+func (this *Logger) Level() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Level
 }
 
-func (this *logger) SetLevel(level Level) {
+func (this *Logger) SetLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.Level = level
 }
 
-func (this *logger) TimeLevel() Level {
+func (this *Logger) TimeLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.TimeLevel
 }
 
-func (this *logger) SetTimeLevel(level Level) {
+func (this *Logger) SetTimeLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.TimeLevel = level
 }
 
-func (this *logger) PanicLevel() Level {
+func (this *Logger) PanicLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.PanicLevel
 }
 
-func (this *logger) SetPanicLevel(level Level) {
+func (this *Logger) SetPanicLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.PanicLevel = level
 }
 
-func (this *logger) TrackLevel() Level {
+func (this *Logger) TrackLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.TrackLevel
 }
 
-func (this *logger) SetTrackLevel(level Level) {
+func (this *Logger) SetTrackLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.TrackLevel = level
 }
 
-func (this *logger) ExitLevel() Level {
+func (this *Logger) ExitLevel() Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.ExitLevel
 }
 
-func (this *logger) SetExitLevel(level Level) {
+func (this *Logger) SetExitLevel(level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.ExitLevel = level
 }
 
-func (this *logger) Filter() Filter {
+func (this *Logger) Filter() Filter {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Filter
 }
 
-func (this *logger) SetFilter(filter Filter) {
+func (this *Logger) SetFilter(filter Filter) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.Filter = filter
 }
 
-func (this *logger) Prefix() bool {
+func (this *Logger) Prefix() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Prefix
 }
 
-func (this *logger) SetPrefix(ok bool) {
+func (this *Logger) SetPrefix(ok bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.Prefix = ok
 }
 
-func (this *logger) Context() bool {
+func (this *Logger) Context() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Context
 }
 
-func (this *logger) SetContext(ok bool) {
+func (this *Logger) SetContext(ok bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.Context = ok
 }
 
-func (this *logger) Dynamic() bool {
+func (this *Logger) Dynamic() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Dynamic
 }
 
-func (this *logger) SetDynamic(ok bool) {
+func (this *Logger) SetDynamic(ok bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.Dynamic = ok
 }
 
-func (this *logger) Mark() bool {
+func (this *Logger) Mark() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Mark
 }
 
-func (this *logger) SetMark(ok bool) {
+func (this *Logger) SetMark(ok bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	this.config.Mark = ok
 }
 
-func (this *logger) Limit() bool {
+func (this *Logger) Limit() bool {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Limit
 }
 
-func (this *logger) SetLimit(ok bool) {
+func (this *Logger) SetLimit(ok bool) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 

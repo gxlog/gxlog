@@ -1,6 +1,7 @@
 package gxlog
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,33 +13,105 @@ import (
 )
 
 const (
-	cCallDepth = 4
+	cCallDepth = 3
 )
 
-type Filter func(*Record) bool
+type Logger struct {
+	config *Config
+	slots  *[MaxSlot]*link
 
-type logger struct {
-	config Config
+	countMap map[locator]int64
+	timeMap  map[locator]*timeQueue
 
-	slots [MaxSlot]*link
+	attr copyOnWrite
 
-	lock sync.Mutex
+	lock *sync.Mutex
 }
 
-func (this *logger) Log(calldepth int, level Level, attr *attribute, args ...interface{}) {
+func New(config *Config) *Logger {
+	copyConfig := *config
+	return &Logger{
+		config:   &copyConfig,
+		slots:    new([MaxSlot]*link),
+		countMap: make(map[locator]int64, cMapInitCap),
+		timeMap:  make(map[locator]*timeQueue, cMapInitCap),
+		lock:     new(sync.Mutex),
+	}
+}
+
+func (this *Logger) Trace(args ...interface{}) {
+	this.Log(1, LevelTrace, args...)
+}
+
+func (this *Logger) Tracef(fmtstr string, args ...interface{}) {
+	this.Logf(1, LevelTrace, fmtstr, args...)
+}
+
+func (this *Logger) Debug(args ...interface{}) {
+	this.Log(1, LevelDebug, args...)
+}
+
+func (this *Logger) Debugf(fmtstr string, args ...interface{}) {
+	this.Logf(1, LevelDebug, fmtstr, args...)
+}
+
+func (this *Logger) Info(args ...interface{}) {
+	this.Log(1, LevelInfo, args...)
+}
+
+func (this *Logger) Infof(fmtstr string, args ...interface{}) {
+	this.Logf(1, LevelInfo, fmtstr, args...)
+}
+
+func (this *Logger) Warn(args ...interface{}) {
+	this.Log(1, LevelWarn, args...)
+}
+
+func (this *Logger) Warnf(fmtstr string, args ...interface{}) {
+	this.Logf(1, LevelWarn, fmtstr, args...)
+}
+
+func (this *Logger) Error(args ...interface{}) {
+	this.Log(1, LevelError, args...)
+}
+
+func (this *Logger) Errorf(fmtstr string, args ...interface{}) {
+	this.Logf(1, LevelError, fmtstr, args...)
+}
+
+func (this *Logger) Fatal(args ...interface{}) {
+	this.Log(1, LevelFatal, args...)
+}
+
+func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
+	this.Logf(1, LevelFatal, fmtstr, args...)
+}
+
+func (this *Logger) LogError(level Level, text string) error {
+	this.Log(1, level, text)
+	return errors.New(text)
+}
+
+func (this *Logger) LogErrorf(level Level, fmtstr string, args ...interface{}) error {
+	err := fmt.Errorf(fmtstr, args...)
+	this.Log(1, level, err.Error())
+	return err
+}
+
+func (this *Logger) Log(calldepth int, level Level, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
 			args = append(args, "\n", string(debug.Stack()))
 		}
-		this.write(calldepth, level, attr, fmt.Sprint(args...))
+		this.write(calldepth, level, fmt.Sprint(args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
 	}
 }
 
-func (this *logger) Logf(calldepth int, level Level, attr *attribute,
+func (this *Logger) Logf(calldepth int, level Level,
 	fmtstr string, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
@@ -46,69 +119,69 @@ func (this *logger) Logf(calldepth int, level Level, attr *attribute,
 			fmtstr += "\n%s"
 			args = append(args, debug.Stack())
 		}
-		this.write(calldepth, level, attr, fmt.Sprintf(fmtstr, args...))
+		this.write(calldepth, level, fmt.Sprintf(fmtstr, args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
 	}
 }
 
-func (this *logger) Panic(attr *attribute, args ...interface{}) {
+func (this *Logger) Panic(args ...interface{}) {
 	msg := fmt.Sprint(args...)
 	logLevel, panicLevel := this.panicLevel()
 	if logLevel <= panicLevel {
-		this.write(0, panicLevel, attr, msg)
+		this.write(0, panicLevel, msg)
 	}
 	panic(msg)
 }
 
-func (this *logger) Panicf(attr *attribute, fmtstr string, args ...interface{}) {
+func (this *Logger) Panicf(fmtstr string, args ...interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
 	logLevel, panicLevel := this.panicLevel()
 	if logLevel <= panicLevel {
-		this.write(0, panicLevel, attr, msg)
+		this.write(0, panicLevel, msg)
 	}
 	panic(msg)
 }
 
-func (this *logger) Time(attr *attribute, args ...interface{}) func() {
+func (this *Logger) Time(args ...interface{}) func() {
 	logLevel, timeLevel := this.timeLevel()
 	if logLevel <= timeLevel {
-		return this.genDone(attr, fmt.Sprint(args...))
+		return this.genDone(fmt.Sprint(args...))
 	}
 	return func() {}
 }
 
-func (this *logger) Timef(attr *attribute, fmtstr string, args ...interface{}) func() {
+func (this *Logger) Timef(fmtstr string, args ...interface{}) func() {
 	logLevel, timeLevel := this.timeLevel()
 	if logLevel <= timeLevel {
-		return this.genDone(attr, fmt.Sprintf(fmtstr, args...))
+		return this.genDone(fmt.Sprintf(fmtstr, args...))
 	}
 	return func() {}
 }
 
-func (this *logger) levels() (Level, Level, Level) {
+func (this *Logger) levels() (Level, Level, Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Level, this.config.TrackLevel, this.config.ExitLevel
 }
 
-func (this *logger) timeLevel() (Level, Level) {
+func (this *Logger) timeLevel() (Level, Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Level, this.config.TimeLevel
 }
 
-func (this *logger) panicLevel() (Level, Level) {
+func (this *Logger) panicLevel() (Level, Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	return this.config.Level, this.config.PanicLevel
 }
 
-func (this *logger) write(calldepth int, level Level, attr *attribute, msg string) {
+func (this *Logger) write(calldepth int, level Level, msg string) {
 	file, line, pkg, fn := getPosInfo(calldepth + cCallDepth)
 
 	this.lock.Lock()
@@ -124,11 +197,11 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 		Msg:   msg,
 	}
 
-	if !this.filter(record, attr) {
+	if !this.filter(record) {
 		return
 	}
 
-	this.attachAux(record, attr)
+	this.attachAux(record)
 
 	for _, link := range this.slots {
 		if link != nil && link.Level <= level {
@@ -139,30 +212,31 @@ func (this *logger) write(calldepth int, level Level, attr *attribute, msg strin
 	}
 }
 
-func (this *logger) filter(record *Record, attr *attribute) bool {
+func (this *Logger) filter(record *Record) bool {
 	if this.config.Filter != nil && !this.config.Filter(record) {
 		return false
 	}
 	if this.config.Limit {
-		if attr.CountLimiter != nil && !attr.CountLimiter(record) {
+		if this.attr.CountLimiter != nil && !this.attr.CountLimiter(record) {
 			return false
 		}
-		if attr.TimeLimiter != nil && !attr.TimeLimiter(record) {
+		if this.attr.TimeLimiter != nil && !this.attr.TimeLimiter(record) {
 			return false
 		}
 	}
 	return true
 }
 
-func (this *logger) attachAux(record *Record, attr *attribute) {
+func (this *Logger) attachAux(record *Record) {
 	if this.config.Prefix {
-		record.Aux.Prefix = attr.Prefix
+		record.Aux.Prefix = this.attr.Prefix
 	}
 	if this.config.Context {
-		// the len and cap of attr.Contexts are equal. next appending will reallocate memory
-		record.Aux.Contexts = attr.Contexts
+		// The len and cap of this.attr.Contexts are equal,
+		//   next appending will reallocate memory
+		record.Aux.Contexts = this.attr.Contexts
 		if this.config.Dynamic {
-			for _, context := range attr.DynamicContexts {
+			for _, context := range this.attr.DynamicContexts {
 				record.Aux.Contexts = append(record.Aux.Contexts, Context{
 					Key:   fmt.Sprint(context.Key),
 					Value: fmt.Sprint(context.Value(context.Key)),
@@ -171,17 +245,17 @@ func (this *logger) attachAux(record *Record, attr *attribute) {
 		}
 	}
 	if this.config.Mark {
-		record.Aux.Marked = attr.Marked
+		record.Aux.Marked = this.attr.Marked
 	}
 }
 
-func (this *logger) genDone(attr *attribute, msg string) func() {
+func (this *Logger) genDone(msg string) func() {
 	now := time.Now()
 	return func() {
 		cost := time.Since(now)
 		logLevel, timeLevel := this.timeLevel()
 		if logLevel <= timeLevel {
-			this.write(-1, timeLevel, attr, fmt.Sprintf("%s (cost: %v)", msg, cost))
+			this.write(0, timeLevel, fmt.Sprintf("%s (cost: %v)", msg, cost))
 		}
 	}
 }

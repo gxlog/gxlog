@@ -21,29 +21,13 @@ type locator struct {
 	Line int
 }
 
-type attribute struct {
+type copyOnWrite struct {
 	Prefix          string
 	Contexts        []Context
 	DynamicContexts []dynamicContext
 	Marked          bool
 	CountLimiter    Filter
 	TimeLimiter     Filter
-}
-
-type Logger struct {
-	*logger
-
-	attr     attribute
-	countMap map[locator]int64
-	timeMap  map[locator]*timeQueue
-}
-
-func New(config *Config) *Logger {
-	return &Logger{
-		logger:   &logger{config: *config},
-		countMap: make(map[locator]int64, cMapInitCap),
-		timeMap:  make(map[locator]*timeQueue, cMapInitCap),
-	}
 }
 
 func (this *Logger) WithPrefix(prefix string) *Logger {
@@ -54,7 +38,8 @@ func (this *Logger) WithPrefix(prefix string) *Logger {
 
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	clone := *this
-	clone.appendContexts(kvs)
+	clone.attr.Contexts, clone.attr.DynamicContexts =
+		appendContexts(clone.attr.Contexts, clone.attr.DynamicContexts, kvs)
 	return &clone
 }
 
@@ -95,9 +80,8 @@ func (this *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 	return &clone
 }
 
-func (this *Logger) appendContexts(kvs []interface{}) {
-	contexts := this.attr.Contexts
-	dynamicContexts := this.attr.DynamicContexts
+func appendContexts(contexts []Context, dynamicContexts []dynamicContext,
+	kvs []interface{}) ([]Context, []dynamicContext) {
 	for len(kvs) >= 2 {
 		dynamic, ok := kvs[1].(Dynamic)
 		if ok {
@@ -114,6 +98,6 @@ func (this *Logger) appendContexts(kvs []interface{}) {
 		kvs = kvs[2:]
 	}
 	// slicing to set capacity to length, force next appending to reallocate memory
-	this.attr.Contexts = contexts[:len(contexts):len(contexts)]
-	this.attr.DynamicContexts = dynamicContexts[:len(dynamicContexts):len(dynamicContexts)]
+	return contexts[:len(contexts):len(contexts)],
+		dynamicContexts[:len(dynamicContexts):len(dynamicContexts)]
 }

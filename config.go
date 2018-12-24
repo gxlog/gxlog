@@ -1,5 +1,7 @@
 package gxlog
 
+type Filter func(*Record) bool
+
 type Config struct {
 	Level      Level
 	TimeLevel  Level
