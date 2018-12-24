@@ -18,7 +18,7 @@ const (
 
 type Logger struct {
 	config *Config
-	slots  *[MaxSlot]*link
+	slots  []link
 
 	countMap map[locator]int64
 	timeMap  map[locator]*timeQueue
@@ -30,13 +30,14 @@ type Logger struct {
 
 func New(config *Config) *Logger {
 	copyConfig := *config
-	return &Logger{
+	logger := &Logger{
 		config:   &copyConfig,
-		slots:    new([MaxSlot]*link),
 		countMap: make(map[locator]int64, cMapInitCap),
 		timeMap:  make(map[locator]*timeQueue, cMapInitCap),
 		lock:     new(sync.Mutex),
 	}
+	logger.initSlots()
+	return logger
 }
 
 func (this *Logger) Trace(args ...interface{}) {
@@ -111,8 +112,7 @@ func (this *Logger) Log(calldepth int, level Level, args ...interface{}) {
 	}
 }
 
-func (this *Logger) Logf(calldepth int, level Level,
-	fmtstr string, args ...interface{}) {
+func (this *Logger) Logf(calldepth int, level Level, fmtstr string, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := this.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
@@ -204,9 +204,15 @@ func (this *Logger) write(calldepth int, level Level, msg string) {
 	this.attachAux(record)
 
 	for _, link := range this.slots {
-		if link != nil && link.Level <= level {
+		if link.Level <= level {
 			if link.Filter == nil || link.Filter(record) {
-				link.Writer.Write(link.Formatter.Format(record), record)
+				var bs []byte
+				if link.Formatter != nil {
+					bs = link.Formatter.Format(record)
+				}
+				if link.Writer != nil {
+					link.Writer.Write(bs, record)
+				}
 			}
 		}
 	}
