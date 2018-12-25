@@ -24,11 +24,11 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		Level:      LevelTrace,
-		TimeLevel:  LevelTrace,
-		PanicLevel: LevelFatal,
-		TrackLevel: LevelFatal,
-		ExitLevel:  LevelOff,
+		Level:      Trace,
+		TimeLevel:  Trace,
+		PanicLevel: Fatal,
+		TrackLevel: Fatal,
+		ExitLevel:  Off,
 		Flags:      Prefix | Contexts | DynamicContexts | Mark | Limit,
 	}
 }

@@ -177,11 +177,11 @@ func (this *Writer) formatFilename(tm time.Time) string {
 func (this *Writer) formatDate(tm time.Time) string {
 	fmtstr := "%04d%02d%02d"
 	switch this.config.DateStyle {
-	case DateStyleDash:
+	case DateDash:
 		fmtstr = "%04d-%02d-%02d"
-	case DateStyleUnderscore:
+	case DateUnderscore:
 		fmtstr = "%04d_%02d_%02d"
-	case DateStyleDot:
+	case DateDot:
 		fmtstr = "%04d.%02d.%02d"
 	}
 	return fmt.Sprintf(fmtstr, tm.Year(), tm.Month(), tm.Day())
@@ -190,13 +190,13 @@ func (this *Writer) formatDate(tm time.Time) string {
 func (this *Writer) formatTime(tm time.Time) string {
 	fmtstr := "%02d%02d%02d.%06d"
 	switch this.config.TimeStyle {
-	case TimeStyleDash:
+	case TimeDash:
 		fmtstr = "%02d-%02d-%02d-%06d"
-	case TimeStyleUnderscore:
+	case TimeUnderscore:
 		fmtstr = "%02d_%02d_%02d_%06d"
-	case TimeStyleDot:
+	case TimeDot:
 		fmtstr = "%02d.%02d.%02d.%06d"
-	case TimeStyleColon:
+	case TimeColon:
 		fmtstr = "%02d:%02d:%02d.%06d"
 	}
 	return fmt.Sprintf(fmtstr, tm.Hour(), tm.Minute(), tm.Second(), tm.Nanosecond()/1000)

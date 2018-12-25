@@ -3,17 +3,17 @@ package json
 type OmitBits int
 
 const (
-	OmitTime OmitBits = 0x1 << iota
-	OmitLevel
-	OmitFile
-	OmitLine
-	OmitPkg
-	OmitFunc
-	OmitMsg
-	OmitPrefix
-	OmitContext
-	OmitMark
-	OmitAux = OmitPrefix | OmitContext | OmitMark
+	Time OmitBits = 0x1 << iota
+	Level
+	File
+	Line
+	Pkg
+	Func
+	Msg
+	Prefix
+	Context
+	Mark
+	Aux = Prefix | Context | Mark
 )
 
 type Config struct {

@@ -33,34 +33,34 @@ func (this *Formatter) Format(record *gxlog.Record) []byte {
 	buf := make([]byte, 0, this.config.MinBufSize)
 	sep := ""
 	buf = append(buf, "{"...)
-	if this.config.Omit&OmitTime == 0 {
+	if this.config.Omit&Time == 0 {
 		buf = formatStrField(buf, sep, "Time", record.Time.Format(time.RFC3339Nano), false)
 		sep = ","
 	}
-	if this.config.Omit&OmitLevel == 0 {
+	if this.config.Omit&Level == 0 {
 		buf = formatIntField(buf, sep, "Level", int(record.Level))
 		sep = ","
 	}
-	if this.config.Omit&OmitFile == 0 {
+	if this.config.Omit&File == 0 {
 		file := util.LastSegments(record.File, this.config.FileSegs, '/')
 		buf = formatStrField(buf, sep, "File", file, true)
 		sep = ","
 	}
-	if this.config.Omit&OmitLine == 0 {
+	if this.config.Omit&Line == 0 {
 		buf = formatIntField(buf, sep, "Line", record.Line)
 		sep = ","
 	}
-	if this.config.Omit&OmitPkg == 0 {
+	if this.config.Omit&Pkg == 0 {
 		pkg := util.LastSegments(record.Pkg, this.config.PkgSegs, '/')
 		buf = formatStrField(buf, sep, "Pkg", pkg, false)
 		sep = ","
 	}
-	if this.config.Omit&OmitFunc == 0 {
+	if this.config.Omit&Func == 0 {
 		fn := util.LastSegments(record.Func, this.config.FuncSegs, '.')
 		buf = formatStrField(buf, sep, "Func", fn, false)
 		sep = ","
 	}
-	if this.config.Omit&OmitMsg == 0 {
+	if this.config.Omit&Msg == 0 {
 		buf = formatStrField(buf, sep, "Msg", record.Msg, true)
 		sep = ","
 	}
@@ -103,28 +103,28 @@ func (this *Formatter) UpdateConfig(fn func(Config) Config) error {
 }
 
 func (this *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxiliary) []byte {
-	if this.config.Omit&OmitAux == OmitAux {
+	if this.config.Omit&Aux == Aux {
 		return buf
 	}
-	if this.config.OmitEmpty&OmitAux == OmitAux &&
+	if this.config.OmitEmpty&Aux == Aux &&
 		aux.Prefix == "" && len(aux.Contexts) == 0 && aux.Marked == false {
 		return buf
 	}
 	buf = append(buf, sep...)
 	sep = ""
 	buf = append(buf, `"Aux":{`...)
-	if this.config.Omit&OmitPrefix == 0 &&
-		!(this.config.OmitEmpty&OmitPrefix != 0 && aux.Prefix == "") {
+	if this.config.Omit&Prefix == 0 &&
+		!(this.config.OmitEmpty&Prefix != 0 && aux.Prefix == "") {
 		buf = formatStrField(buf, sep, "Prefix", aux.Prefix, true)
 		sep = ","
 	}
-	if this.config.Omit&OmitContext == 0 &&
-		!(this.config.OmitEmpty&OmitContext != 0 && len(aux.Contexts) == 0) {
+	if this.config.Omit&Context == 0 &&
+		!(this.config.OmitEmpty&Context != 0 && len(aux.Contexts) == 0) {
 		buf = formatContexts(buf, sep, aux.Contexts)
 		sep = ","
 	}
-	if this.config.Omit&OmitMark == 0 &&
-		!(this.config.OmitEmpty&OmitMark != 0 && aux.Marked == false) {
+	if this.config.Omit&Mark == 0 &&
+		!(this.config.OmitEmpty&Mark != 0 && aux.Marked == false) {
 		buf = formatBoolField(buf, sep, "Marked", aux.Marked)
 	}
 	buf = append(buf, "}"...)

@@ -31,11 +31,11 @@ func main() {
 	//   set the level of Slot0 to off
 	log.Unlink(gxlog.Slot0)
 
-	log.SetSlotLevel(gxlog.Slot1, gxlog.LevelWarn)
+	log.SetSlotLevel(gxlog.Slot1, gxlog.Warn)
 	log.Info("this will not print")
 	log.Warn("this will print")
 
-	log.SetSlotLevel(gxlog.Slot1, gxlog.LevelTrace)
+	log.SetSlotLevel(gxlog.Slot1, gxlog.Trace)
 	// ATTENTION: DO NOT call methods of logger in formatter, writer or filter
 	//   in the current goroutine, or it will deadlock.
 	hook := formatter.Func(func(record *gxlog.Record) []byte {
@@ -49,7 +49,7 @@ func main() {
 	// link at Slot0 will overwrite the current link at Slot0 if any
 	// If the log level is not lower than WARN and the log is marked, the hook
 	//   will be called.
-	log.Link(gxlog.Slot0, hook, nil, gxlog.LevelWarn, filter)
+	log.Link(gxlog.Slot0, hook, nil, gxlog.Warn, filter)
 	log.WithMark(true).Info("marked, but info")
 	log.Error("error, but not marked")
 	log.WithMark(true).Warn("warn and marked")

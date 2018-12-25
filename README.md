@@ -141,9 +141,9 @@ func main() {
 
     // The calldepth can be specified in Log and Logf. That is useful when
     //   you want to customize your own log helper functions.
-    log.Log(0, gxlog.LevelInfo, "test Log")
-    log.Logf(1, gxlog.LevelWarn, "%s: %d", "test Logf", 1)
-    log.Logf(-1, gxlog.LevelWarn, "%s: %d", "test Logf", -1)
+    log.Log(0, gxlog.Info, "test Log")
+    log.Logf(1, gxlog.Warn, "%s: %d", "test Logf", 1)
+    log.Logf(-1, gxlog.Warn, "%s: %d", "test Logf", -1)
 
     test1()
     test2()
@@ -151,12 +151,12 @@ func main() {
 
 func test1() error {
     // LogError will output log and call errors.New to generate an error
-    return log.LogError(gxlog.LevelError, "an error")
+    return log.LogError(gxlog.Error, "an error")
 }
 
 func test2() error {
     // LogErrorf will output log and call fmt.Errorf to generate an error
-    return log.LogErrorf(gxlog.LevelError, "%s", "another error")
+    return log.LogErrorf(gxlog.Error, "%s", "another error")
 }
 ```
 
@@ -286,11 +286,11 @@ func main() {
     //   set the level of Slot0 to off
     log.Unlink(gxlog.Slot0)
 
-    log.SetSlotLevel(gxlog.Slot1, gxlog.LevelWarn)
+    log.SetSlotLevel(gxlog.Slot1, gxlog.Warn)
     log.Info("this will not print")
     log.Warn("this will print")
 
-    log.SetSlotLevel(gxlog.Slot1, gxlog.LevelTrace)
+    log.SetSlotLevel(gxlog.Slot1, gxlog.Trace)
     // ATTENTION: DO NOT call methods of logger in formatter, writer or filter
     //   in the current goroutine, or it will deadlock.
     hook := formatter.Func(func(record *gxlog.Record) []byte {
@@ -304,7 +304,7 @@ func main() {
     // link at Slot0 will overwrite the current link at Slot0 if any
     // If the log level is not lower than WARN and the log is marked, the hook
     //   will be called.
-    log.Link(gxlog.Slot0, hook, nil, gxlog.LevelWarn, filter)
+    log.Link(gxlog.Slot0, hook, nil, gxlog.Warn, filter)
     log.WithMark(true).Info("marked, but info")
     log.Error("error, but not marked")
     log.WithMark(true).Warn("warn and marked")
@@ -341,7 +341,7 @@ func main() {
         // these attributes of records will always be the zero value of their type
         config.Flags &^= (gxlog.Prefix | gxlog.Contexts | gxlog.Mark)
         // disable the auto backtracking
-        config.TrackLevel = gxlog.LevelOff
+        config.TrackLevel = gxlog.Off
         return config
     })
     log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal after update")
@@ -355,11 +355,11 @@ func main() {
 }
 
 func important(record *gxlog.Record) bool {
-    return record.Level >= gxlog.LevelError
+    return record.Level >= gxlog.Error
 }
 
 func useful(record *gxlog.Record) bool {
-    return record.Level >= gxlog.LevelInfo
+    return record.Level >= gxlog.Info
 }
 
 func interesting(record *gxlog.Record) bool {

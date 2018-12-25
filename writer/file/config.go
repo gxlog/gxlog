@@ -10,20 +10,20 @@ import (
 type DateStyleID int
 
 const (
-	DateStyleCompact DateStyleID = iota
-	DateStyleDash
-	DateStyleUnderscore
-	DateStyleDot
+	DateCompact DateStyleID = iota
+	DateDash
+	DateUnderscore
+	DateDot
 )
 
 type TimeStyleID int
 
 const (
-	TimeStyleCompact TimeStyleID = iota
-	TimeStyleDash
-	TimeStyleUnderscore
-	TimeStyleDot
-	TimeStyleColon
+	TimeCompact TimeStyleID = iota
+	TimeDash
+	TimeUnderscore
+	TimeDot
+	TimeColon
 )
 
 type Config struct {
@@ -48,12 +48,12 @@ func NewConfig(path, base string) *Config {
 		Base:          base,
 		Ext:           ".log",
 		Separator:     ".",
-		DateStyle:     DateStyleCompact,
-		TimeStyle:     TimeStyleCompact,
+		DateStyle:     DateCompact,
+		TimeStyle:     TimeCompact,
 		MaxFileSize:   20 * 1024 * 1024,
 		CheckInterval: time.Second * 5,
 		GzipLevel:     flate.NoCompression,
-		BlockMode:     ModeCFB,
+		BlockMode:     CFB,
 		NewDirEachDay: true,
 		ReportOnErr:   true,
 	}
@@ -133,8 +133,8 @@ func (this *Config) Check() error {
 	if keyLen != 0 && keyLen != 16 && keyLen != 24 && keyLen != 32 {
 		return errors.New("Config.AESKey must be either empty, 128 bits, 192 bits or 256 bits")
 	}
-	if this.BlockMode < ModeCFB || this.BlockMode > ModeOFB {
-		return errors.New("Config.BlockMode must be either ModeCFB, ModeCTR or ModeOFB")
+	if this.BlockMode < CFB || this.BlockMode > OFB {
+		return errors.New("Config.BlockMode must be either CFB, CTR or OFB")
 	}
 	return nil
 }

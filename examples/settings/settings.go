@@ -21,7 +21,7 @@ func main() {
 		// these attributes of records will always be the zero value of their type
 		config.Flags &^= (gxlog.Prefix | gxlog.Contexts | gxlog.Mark)
 		// disable the auto backtracking
-		config.TrackLevel = gxlog.LevelOff
+		config.TrackLevel = gxlog.Off
 		return config
 	})
 	log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal after update")
@@ -35,11 +35,11 @@ func main() {
 }
 
 func important(record *gxlog.Record) bool {
-	return record.Level >= gxlog.LevelError
+	return record.Level >= gxlog.Error
 }
 
 func useful(record *gxlog.Record) bool {
-	return record.Level >= gxlog.LevelInfo
+	return record.Level >= gxlog.Info
 }
 
 func interesting(record *gxlog.Record) bool {

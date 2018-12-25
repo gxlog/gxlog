@@ -16,7 +16,7 @@ const (
 	cDate        = "2018-08-01"
 	cTime        = "07:12:07"
 	cDecimal     = "235605270"
-	cLevel       = gxlog.LevelInfo
+	cLevel       = gxlog.Info
 	cFile        = "/home/test/data/src/go/workspace/src/github.com/gxlog/gxlog/logger.go"
 	cLine        = 64
 	cPkg         = "github.com/gxlog/gxlog"
@@ -105,16 +105,16 @@ func TestColor(t *testing.T) {
 	testFormat(t, formatter, &gTmplRecord, expect)
 
 	record := cloneRecord()
-	record.Level = gxlog.LevelWarn
+	record.Level = gxlog.Warn
 	record.Aux.Marked = false
 	formatter.MapColors(map[gxlog.Level]text.ColorID{
-		gxlog.LevelWarn: text.Blue,
+		gxlog.Warn: text.Blue,
 	})
 	expect = fmt.Sprintf("\033[%dm%s\033[0m", text.Blue, cMsg)
 	testFormat(t, formatter, record, expect)
 
-	record.Level = gxlog.LevelError
-	formatter.SetColor(gxlog.LevelError, text.Yellow)
+	record.Level = gxlog.Error
+	formatter.SetColor(gxlog.Error, text.Yellow)
 	expect = fmt.Sprintf("\033[%dm%s\033[0m", text.Yellow, cMsg)
 	testFormat(t, formatter, record, expect)
 }

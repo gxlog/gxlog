@@ -15,8 +15,9 @@ const (
 	Slot5
 	Slot6
 	Slot7
-	MaxSlot
 )
+
+const MaxSlot = 8
 
 type link struct {
 	Formatter Formatter
@@ -26,14 +27,14 @@ type link struct {
 }
 
 var gNullLink = link{
-	Level: LevelOff,
+	Level: Off,
 }
 
 func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
 	link := link{
 		Formatter: formatter,
 		Writer:    writer,
-		Level:     LevelTrace,
+		Level:     Trace,
 	}
 	for _, opt := range opts {
 		switch opt := opt.(type) {
@@ -151,7 +152,7 @@ func (this *Logger) SetSlotFilter(slot Slot, filter Filter) {
 }
 
 func (this *Logger) initSlots() {
-	for i := 0; i < int(MaxSlot); i++ {
+	for i := 0; i < MaxSlot; i++ {
 		this.slots = append(this.slots, gNullLink)
 	}
 }

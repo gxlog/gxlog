@@ -12,9 +12,9 @@ import (
 type BlockCipherMode int
 
 const (
-	ModeCFB BlockCipherMode = iota
-	ModeCTR
-	ModeOFB
+	CFB BlockCipherMode = iota
+	CTR
+	OFB
 )
 
 const cBufInitCap = 256
@@ -39,11 +39,11 @@ func newStreamEncrypter(wt io.WriteCloser, block cipher.Block, iv []byte,
 	mode BlockCipherMode) (io.WriteCloser, error) {
 	var stream cipher.Stream
 	switch mode {
-	case ModeCFB:
+	case CFB:
 		stream = cipher.NewCFBEncrypter(block, iv)
-	case ModeCTR:
+	case CTR:
 		stream = cipher.NewCTR(block, iv)
-	case ModeOFB:
+	case OFB:
 		stream = cipher.NewOFB(block, iv)
 	default:
 		return wt, errors.New("unhandled block cipher mode")

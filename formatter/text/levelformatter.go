@@ -8,21 +8,21 @@ import (
 )
 
 var gLevelDesc = []string{
-	gxlog.LevelTrace: "TRACE",
-	gxlog.LevelDebug: "DEBUG",
-	gxlog.LevelInfo:  "INFO ",
-	gxlog.LevelWarn:  "WARN ",
-	gxlog.LevelError: "ERROR",
-	gxlog.LevelFatal: "FATAL",
+	gxlog.Trace: "TRACE",
+	gxlog.Debug: "DEBUG",
+	gxlog.Info:  "INFO ",
+	gxlog.Warn:  "WARN ",
+	gxlog.Error: "ERROR",
+	gxlog.Fatal: "FATAL",
 }
 
 var gLevelDescChar = []string{
-	gxlog.LevelTrace: "T",
-	gxlog.LevelDebug: "D",
-	gxlog.LevelInfo:  "I",
-	gxlog.LevelWarn:  "W",
-	gxlog.LevelError: "E",
-	gxlog.LevelFatal: "F",
+	gxlog.Trace: "T",
+	gxlog.Debug: "D",
+	gxlog.Info:  "I",
+	gxlog.Warn:  "W",
+	gxlog.Error: "E",
+	gxlog.Fatal: "F",
 }
 
 type levelFormatter struct {

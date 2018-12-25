@@ -34,12 +34,12 @@ func Open(cfg *Config) (*Writer, error) {
 		writer:      wt,
 	}
 	severityMap := map[gxlog.Level]Severity{
-		gxlog.LevelTrace: SevDebug,
-		gxlog.LevelDebug: SevDebug,
-		gxlog.LevelInfo:  SevInfo,
-		gxlog.LevelWarn:  SevWarning,
-		gxlog.LevelError: SevErr,
-		gxlog.LevelFatal: SevCrit,
+		gxlog.Trace: SevDebug,
+		gxlog.Debug: SevDebug,
+		gxlog.Info:  SevInfo,
+		gxlog.Warn:  SevWarning,
+		gxlog.Error: SevErr,
+		gxlog.Fatal: SevCrit,
 	}
 	writer.updateLogFuncs(severityMap)
 	writer.updateLogFuncs(cfg.SeverityMap)

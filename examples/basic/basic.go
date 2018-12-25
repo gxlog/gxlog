@@ -44,9 +44,9 @@ func main() {
 
 	// The calldepth can be specified in Log and Logf. That is useful when
 	//   you want to customize your own log helper functions.
-	log.Log(0, gxlog.LevelInfo, "test Log")
-	log.Logf(1, gxlog.LevelWarn, "%s: %d", "test Logf", 1)
-	log.Logf(-1, gxlog.LevelWarn, "%s: %d", "test Logf", -1)
+	log.Log(0, gxlog.Info, "test Log")
+	log.Logf(1, gxlog.Warn, "%s: %d", "test Logf", 1)
+	log.Logf(-1, gxlog.Warn, "%s: %d", "test Logf", -1)
 
 	test1()
 	test2()
@@ -54,10 +54,10 @@ func main() {
 
 func test1() error {
 	// LogError will output log and call errors.New to generate an error
-	return log.LogError(gxlog.LevelError, "an error")
+	return log.LogError(gxlog.Error, "an error")
 }
 
 func test2() error {
 	// LogErrorf will output log and call fmt.Errorf to generate an error
-	return log.LogErrorf(gxlog.LevelError, "%s", "another error")
+	return log.LogErrorf(gxlog.Error, "%s", "another error")
 }

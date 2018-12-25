@@ -41,51 +41,51 @@ func New(config *Config) *Logger {
 }
 
 func (this *Logger) Trace(args ...interface{}) {
-	this.Log(1, LevelTrace, args...)
+	this.Log(1, Trace, args...)
 }
 
 func (this *Logger) Tracef(fmtstr string, args ...interface{}) {
-	this.Logf(1, LevelTrace, fmtstr, args...)
+	this.Logf(1, Trace, fmtstr, args...)
 }
 
 func (this *Logger) Debug(args ...interface{}) {
-	this.Log(1, LevelDebug, args...)
+	this.Log(1, Debug, args...)
 }
 
 func (this *Logger) Debugf(fmtstr string, args ...interface{}) {
-	this.Logf(1, LevelDebug, fmtstr, args...)
+	this.Logf(1, Debug, fmtstr, args...)
 }
 
 func (this *Logger) Info(args ...interface{}) {
-	this.Log(1, LevelInfo, args...)
+	this.Log(1, Info, args...)
 }
 
 func (this *Logger) Infof(fmtstr string, args ...interface{}) {
-	this.Logf(1, LevelInfo, fmtstr, args...)
+	this.Logf(1, Info, fmtstr, args...)
 }
 
 func (this *Logger) Warn(args ...interface{}) {
-	this.Log(1, LevelWarn, args...)
+	this.Log(1, Warn, args...)
 }
 
 func (this *Logger) Warnf(fmtstr string, args ...interface{}) {
-	this.Logf(1, LevelWarn, fmtstr, args...)
+	this.Logf(1, Warn, fmtstr, args...)
 }
 
 func (this *Logger) Error(args ...interface{}) {
-	this.Log(1, LevelError, args...)
+	this.Log(1, Error, args...)
 }
 
 func (this *Logger) Errorf(fmtstr string, args ...interface{}) {
-	this.Logf(1, LevelError, fmtstr, args...)
+	this.Logf(1, Error, fmtstr, args...)
 }
 
 func (this *Logger) Fatal(args ...interface{}) {
-	this.Log(1, LevelFatal, args...)
+	this.Log(1, Fatal, args...)
 }
 
 func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
-	this.Logf(1, LevelFatal, fmtstr, args...)
+	this.Logf(1, Fatal, fmtstr, args...)
 }
 
 func (this *Logger) LogError(level Level, text string) error {

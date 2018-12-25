@@ -35,12 +35,12 @@ type colorMgr struct {
 
 func newColorMgr() *colorMgr {
 	colors := []ColorID{
-		gxlog.LevelTrace: Green,
-		gxlog.LevelDebug: Green,
-		gxlog.LevelInfo:  Green,
-		gxlog.LevelWarn:  Yellow,
-		gxlog.LevelError: Red,
-		gxlog.LevelFatal: Red,
+		gxlog.Trace: Green,
+		gxlog.Debug: Green,
+		gxlog.Info:  Green,
+		gxlog.Warn:  Yellow,
+		gxlog.Error: Red,
+		gxlog.Fatal: Red,
 	}
 	mgr := &colorMgr{
 		colors:      colors,

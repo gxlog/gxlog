@@ -7,15 +7,16 @@ import (
 type Level int
 
 const (
-	LevelTrace Level = iota
-	LevelDebug
-	LevelInfo
-	LevelWarn
-	LevelError
-	LevelFatal
-	LevelOff
-	LevelCount = LevelOff
+	Trace Level = iota
+	Debug
+	Info
+	Warn
+	Error
+	Fatal
+	Off
 )
+
+const LevelCount = 6
 
 type Context struct {
 	Key   string
