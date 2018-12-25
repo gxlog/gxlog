@@ -39,8 +39,8 @@ func main() {
 	//   end of static contexts
 	// dynamic contexts are very useful when you want to print some/all fields
 	//   of a struct value all the time.
-	// ATTENTION: you should be very careful to concurrent safety or dead locks
-	//   with dynamic contexts.
+	// ATTENTION: you should be very careful to concurrency safety or dead
+	//   locks with dynamic contexts.
 	n := 0
 	fn := gxlog.Dynamic(func(interface{}) interface{} {
 		n++

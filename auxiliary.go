@@ -9,6 +9,9 @@ const (
 	cMapInitCap = 256
 )
 
+// The Dynamic type defines a function type. A value of Dynamic will be regarded
+// as the value getter of a dynamic context key-value pair when it is as an
+// argument to (*Logger).WithContext.
 type Dynamic func(key interface{}) interface{}
 
 type dynamicContext struct {
@@ -30,12 +33,32 @@ type copyOnWrite struct {
 	TimeLimiter     Filter
 }
 
+// WithPrefix returns a new Logger that is a shallow copy of the caller.
+// With the new Logger, all the logs it outputs will have the prefix as
+// long as the Prefix flag of the Logger is set.
 func (this *Logger) WithPrefix(prefix string) *Logger {
 	clone := *this
 	clone.attr.Prefix = prefix
 	return &clone
 }
 
+// WithContext returns a new Logger that is a shallow copy of the caller.
+// With the new Logger, all the logs it outputs will have all contexts
+// concatenated as long as the Contexts flag of the Logger is set.
+//
+// The kvs is regarded as an interleaved key-value sequence,
+// e.g. key1, value1, key2, value2 ...
+// If the count of arguments is odd, the last argument will be ignored.
+//
+// WithContext also supports for dynamic context. If a value of type
+// Dynamic is as the value of a key-value pair passed to WithContext,
+// it will be regarded as the value getter of a dynamic context key-value
+// pair. The value getter will be called whenever a new log emits.
+// All the key-value pairs of dynamic contexts will be concatenated to the
+// end of static contexts.
+//
+// ATTENTION: you should be very careful to concurrency safety or dead
+// locks with dynamic contexts.
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	clone := *this
 	clone.attr.Contexts, clone.attr.DynamicContexts =
@@ -43,12 +66,22 @@ func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	return &clone
 }
 
+// WithMark returns a new Logger that is a shallow copy of the caller.
+// With the new Logger, all the logs it outputs will be marked as long
+// as the Mark flag of the Logger is set.
 func (this *Logger) WithMark(ok bool) *Logger {
 	clone := *this
 	clone.attr.Marked = ok
 	return &clone
 }
 
+// WithCountLimit returns a new Logger that is a shallow copy of the caller.
+// With the new Logger, the count of logs it outputs will be limited as long
+// as the Limit flag of the Logger is set. As a result, `limit' logs will be
+// output every `batch' logs.
+//
+// THINK TWICE before you limit the output count of logs, you may miss logs
+// which you need.
 func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 	clone := *this
 	clone.attr.CountLimiter = func(record *Record) bool {
@@ -63,6 +96,16 @@ func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 	return &clone
 }
 
+// WithTimeLimit returns a new Logger that is a shallow copy of the caller.
+// With the new Logger, the count of logs it outputs will be limited as long
+// as the Limit flag of the Logger is set. As a result, at most `limit' logs
+// will be output during any interval of `duration'.
+//
+// THINK TWICE before you limit the output count of logs, you may miss logs
+// which you need.
+//
+// NOTICE: The space complexity is O(`limit'). Try to specify reasonable
+// duration and limit.
 func (this *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 	clone := *this
 	clone.attr.TimeLimiter = func(record *Record) bool {

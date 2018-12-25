@@ -130,7 +130,8 @@ func main() {
     // log.Panicf("%s", "test Panicf")
 
     // Time and Timef will return a function. When the function is called,
-    //   it will output the log as well as the time cost.
+    //   it will output the log as well as the time cost since the call of
+    //   Time or Timef.
     // The default level of Time and Timef is trace.
     done := log.Time("test Time")
     time.Sleep(200 * time.Millisecond)
@@ -214,8 +215,8 @@ func main() {
     //   end of static contexts
     // dynamic contexts are very useful when you want to print some/all fields
     //   of a struct value all the time.
-    // ATTENTION: you should be very careful to concurrent safety or dead locks
-    //   with dynamic contexts.
+    // ATTENTION: you should be very careful to concurrency safety or dead
+    //   locks with dynamic contexts.
     n := 0
     fn := gxlog.Dynamic(func(interface{}) interface{} {
         n++
@@ -313,9 +314,9 @@ func main() {
 
 ### Settings ###
 
-The logger has a bundle of methods to get or set different levels, flags or
-the filter. They are all concurrent safe and you can alter the config of the
-logger at any time.
+The logger has a bundle of methods to get or set different levels, flags or the
+filter. They are all concurrency safe and you can alter the config of the logger
+at any time.
 
 ``` go
 package main
