@@ -110,72 +110,30 @@ func (this *Logger) SetFilter(filter Filter) {
 	this.config.Filter = filter
 }
 
-func (this *Logger) Prefix() bool {
+func (this *Logger) Flags() Flag {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.config.Prefix
+	return this.config.Flags
 }
 
-func (this *Logger) SetPrefix(ok bool) {
+func (this *Logger) SetFlags(flags Flag) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.config.Prefix = ok
+	this.config.Flags = flags
 }
 
-func (this *Logger) Context() bool {
+func (this *Logger) Enable(flags Flag) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	return this.config.Context
+	this.config.Flags |= flags
 }
 
-func (this *Logger) SetContext(ok bool) {
+func (this *Logger) Disable(flags Flag) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.config.Context = ok
-}
-
-func (this *Logger) Dynamic() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Dynamic
-}
-
-func (this *Logger) SetDynamic(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Dynamic = ok
-}
-
-func (this *Logger) Mark() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Mark
-}
-
-func (this *Logger) SetMark(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Mark = ok
-}
-
-func (this *Logger) Limit() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	return this.config.Limit
-}
-
-func (this *Logger) SetLimit(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
-
-	this.config.Limit = ok
+	this.config.Flags &^= flags
 }

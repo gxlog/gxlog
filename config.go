@@ -1,5 +1,15 @@
 package gxlog
 
+type Flag int
+
+const (
+	Prefix Flag = 0x01 << iota
+	Contexts
+	DynamicContexts
+	Mark
+	Limit
+)
+
 type Filter func(*Record) bool
 
 type Config struct {
@@ -9,12 +19,7 @@ type Config struct {
 	TrackLevel Level
 	ExitLevel  Level
 	Filter     Filter
-
-	Prefix  bool
-	Context bool
-	Dynamic bool
-	Mark    bool
-	Limit   bool
+	Flags      Flag
 }
 
 func NewConfig() *Config {
@@ -24,11 +29,7 @@ func NewConfig() *Config {
 		PanicLevel: LevelFatal,
 		TrackLevel: LevelFatal,
 		ExitLevel:  LevelOff,
-		Prefix:     true,
-		Context:    true,
-		Dynamic:    true,
-		Mark:       true,
-		Limit:      true,
+		Flags:      Prefix | Contexts | DynamicContexts | Mark | Limit,
 	}
 }
 
@@ -62,27 +63,17 @@ func (this *Config) WithFilter(filter Filter) *Config {
 	return this
 }
 
-func (this *Config) WithPrefix(ok bool) *Config {
-	this.Prefix = ok
+func (this *Config) WithFlags(flags Flag) *Config {
+	this.Flags = flags
 	return this
 }
 
-func (this *Config) WithContext(ok bool) *Config {
-	this.Context = ok
+func (this *Config) WithEnabled(flags Flag) *Config {
+	this.Flags |= flags
 	return this
 }
 
-func (this *Config) WithDynamic(ok bool) *Config {
-	this.Dynamic = ok
-	return this
-}
-
-func (this *Config) WithMark(ok bool) *Config {
-	this.Mark = ok
-	return this
-}
-
-func (this *Config) WithLimit(ok bool) *Config {
-	this.Limit = ok
+func (this *Config) WithDisabled(flags Flag) *Config {
+	this.Flags &^= flags
 	return this
 }

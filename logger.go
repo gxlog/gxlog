@@ -222,7 +222,7 @@ func (this *Logger) filter(record *Record) bool {
 	if this.config.Filter != nil && !this.config.Filter(record) {
 		return false
 	}
-	if this.config.Limit {
+	if this.config.Flags&Limit != 0 {
 		if this.attr.CountLimiter != nil && !this.attr.CountLimiter(record) {
 			return false
 		}
@@ -234,14 +234,14 @@ func (this *Logger) filter(record *Record) bool {
 }
 
 func (this *Logger) attachAux(record *Record) {
-	if this.config.Prefix {
+	if this.config.Flags&Prefix != 0 {
 		record.Aux.Prefix = this.attr.Prefix
 	}
-	if this.config.Context {
+	if this.config.Flags&Contexts != 0 {
 		// The len and cap of this.attr.Contexts are equal,
 		//   next appending will reallocate memory
 		record.Aux.Contexts = this.attr.Contexts
-		if this.config.Dynamic {
+		if this.config.Flags&DynamicContexts != 0 {
 			for _, context := range this.attr.DynamicContexts {
 				record.Aux.Contexts = append(record.Aux.Contexts, Context{
 					Key:   fmt.Sprint(context.Key),
@@ -250,7 +250,7 @@ func (this *Logger) attachAux(record *Record) {
 			}
 		}
 	}
-	if this.config.Mark {
+	if this.config.Flags&Mark != 0 {
 		record.Aux.Marked = this.attr.Marked
 	}
 }
