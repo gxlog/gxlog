@@ -17,12 +17,9 @@ func main() {
 
 	log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal before update")
 	log.UpdateConfig(func(config gxlog.Config) gxlog.Config {
-		// disable prefix, the prefix of records will always be ""
-		config.Prefix = false
-		// disable context, the contexts of records will always be zero length
-		config.Context = false
-		// disable mark, the mark of records will always be false
-		config.Mark = false
+		// disable prefix, contexts and mark
+		// these attributes of records will always be the zero value of their type
+		config.Flags &^= (gxlog.Prefix | gxlog.Contexts | gxlog.Mark)
 		// disable the auto backtracking
 		config.TrackLevel = gxlog.LevelOff
 		return config
