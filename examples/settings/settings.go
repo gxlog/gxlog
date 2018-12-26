@@ -17,6 +17,7 @@ func main() {
 
 	log.WithPrefix("**** ").WithContext("k1", "v1").WithMark(true).Fatal("fatal before update")
 	log.UpdateConfig(func(config gxlog.Config) gxlog.Config {
+        // Do NOT call methods of the Logger, or it will deadlock.
 		// disable prefix, contexts and mark
 		// these attributes of records will always be the zero value of their type
 		config.Flags &^= (gxlog.Prefix | gxlog.Contexts | gxlog.Mark)

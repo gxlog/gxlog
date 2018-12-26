@@ -57,8 +57,8 @@ func (this *Logger) WithPrefix(prefix string) *Logger {
 // All the key-value pairs of dynamic contexts will be concatenated to the
 // end of static contexts.
 //
-// ATTENTION: you should be very careful to concurrency safety or dead
-// locks with dynamic contexts.
+// ATTENTION: you should be very careful to concurrency safety or deadlocks
+// with dynamic contexts.
 func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 	clone := *this
 	clone.attr.Contexts, clone.attr.DynamicContexts =
@@ -77,12 +77,20 @@ func (this *Logger) WithMark(ok bool) *Logger {
 
 // WithCountLimit returns a new Logger that is a shallow copy of the caller.
 // With the new Logger, the count of logs it outputs will be limited as long
-// as the Limit flag of the Logger is set. As a result, `limit' logs will be
-// output every `batch' logs.
+// as the Limit flag of the Logger is set.
+//
+// The batch must be positive and the limit must NOT be negative. As a result,
+// limit logs will be output every batch logs.
 //
 // THINK TWICE before you limit the output count of logs, you may miss logs
 // which you need.
 func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
+	if batch <= 0 {
+		panic("gxlog.WithCountLimit: batch must be positive")
+	}
+	if limit < 0 {
+		panic("gxlog.WithCountLimit: negative limit")
+	}
 	clone := *this
 	clone.attr.CountLimiter = func(record *Record) bool {
 		loc := locator{
@@ -98,15 +106,23 @@ func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 
 // WithTimeLimit returns a new Logger that is a shallow copy of the caller.
 // With the new Logger, the count of logs it outputs will be limited as long
-// as the Limit flag of the Logger is set. As a result, at most `limit' logs
-// will be output during any interval of `duration'.
+// as the Limit flag of the Logger is set.
+//
+// The duration must be positive and the limit must NOT be negative. As a result,
+// at most limit logs will be output during any interval of duration.
 //
 // THINK TWICE before you limit the output count of logs, you may miss logs
 // which you need.
 //
-// NOTICE: The space complexity is O(`limit'). Try to specify reasonable
-// duration and limit.
+// NOTICE: The space complexity of WithTimeLimit is O(limit). Try to specify
+// reasonable duration and limit.
 func (this *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
+	if duration <= 0 {
+		panic("gxlog.WithTimeLimit: duration must be positive")
+	}
+	if limit < 0 {
+		panic("gxlog.WithTimeLimit: negative limit")
+	}
 	clone := *this
 	clone.attr.TimeLimiter = func(record *Record) bool {
 		loc := locator{

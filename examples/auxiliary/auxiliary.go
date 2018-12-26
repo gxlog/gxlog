@@ -19,6 +19,7 @@ func main() {
 	defaults.Formatter().EnableColor()
 
 	// logs with mark will be colorized with magenta by default
+	// prefix and mark allow you to highlight some logs while you are debugging
 	log.WithPrefix("**** ").WithMark(true).WithContext("k1", "v1", "k2", "v2").
 		Info("prefix, mark and contexts")
 	// the instance of log is left to be unchanged
@@ -39,8 +40,8 @@ func main() {
 	//   end of static contexts
 	// dynamic contexts are very useful when you want to print some/all fields
 	//   of a struct value all the time.
-	// ATTENTION: you should be very careful to concurrency safety or dead
-	//   locks with dynamic contexts.
+	// ATTENTION: you should be very careful to concurrency safety or deadlocks
+	//   with dynamic contexts.
 	n := 0
 	fn := gxlog.Dynamic(func(interface{}) interface{} {
 		n++

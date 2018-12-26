@@ -4,8 +4,10 @@ import (
 	"fmt"
 )
 
+// The Slot defines the slot type of Logger.
 type Slot int
 
+// All available slots of Logger here.
 const (
 	Slot0 Slot = iota
 	Slot1
@@ -17,6 +19,7 @@ const (
 	Slot7
 )
 
+// MaxSlot is the total count of available slots of Logger.
 const MaxSlot = 8
 
 type link struct {
@@ -30,8 +33,14 @@ var gNullLink = link{
 	Level: Off,
 }
 
+// Link sets the formatter and writer to the slot of Logger. The opts is used
+// to specify the slot level and/or the slot filter. An opt must be a value of
+// type Level, Filter or func(*Record)bool (the underlying type of the Filter).
+//
+// If the level of the slot is not specified, it is Trace by default.
+// If the filter of the slot is not specified, it is nil by default.
 func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
-	link := link{
+	lnk := link{
 		Formatter: formatter,
 		Writer:    writer,
 		Level:     Trace,
@@ -39,11 +48,11 @@ func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...
 	for _, opt := range opts {
 		switch opt := opt.(type) {
 		case Level:
-			link.Level = opt
+			lnk.Level = opt
 		case Filter:
-			link.Filter = opt
+			lnk.Filter = opt
 		case func(*Record) bool:
-			link.Filter = opt
+			lnk.Filter = opt
 		case nil:
 			// noop
 		default:
@@ -54,9 +63,11 @@ func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
-	this.slots[slot] = link
+	this.slots[slot] = lnk
 }
 
+// Unlink sets the formatter, writer and filter of the slot to nil and
+// the level of the slot to Off.
 func (this *Logger) Unlink(slot Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -64,6 +75,8 @@ func (this *Logger) Unlink(slot Slot) {
 	this.slots[slot] = gNullLink
 }
 
+// UnlinkAll sets the formatter, writer and filter of all slots to nil and
+// the level of all slots to Off.
 func (this *Logger) UnlinkAll() {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -73,6 +86,8 @@ func (this *Logger) UnlinkAll() {
 	}
 }
 
+// CopySlot copies the formatter, writer, level and filter of slot src
+// to slot dst.
 func (this *Logger) CopySlot(dst, src Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -80,6 +95,8 @@ func (this *Logger) CopySlot(dst, src Slot) {
 	this.slots[dst] = this.slots[src]
 }
 
+// MoveSlot copies the formatter, writer, level and filter of slot from
+// to slot to, and then unlinks the slot from.
 func (this *Logger) MoveSlot(to, from Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -88,6 +105,7 @@ func (this *Logger) MoveSlot(to, from Slot) {
 	this.slots[from] = gNullLink
 }
 
+// SwapSlot swaps the formatter, writer, level and filter of the slots.
 func (this *Logger) SwapSlot(left, right Slot) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -95,6 +113,7 @@ func (this *Logger) SwapSlot(left, right Slot) {
 	this.slots[left], this.slots[right] = this.slots[right], this.slots[left]
 }
 
+// SlotFormatter returns the formatter of the slot.
 func (this *Logger) SlotFormatter(slot Slot) Formatter {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -102,6 +121,7 @@ func (this *Logger) SlotFormatter(slot Slot) Formatter {
 	return this.slots[slot].Formatter
 }
 
+// SetSlotFormatter sets the formatter of the slot.
 func (this *Logger) SetSlotFormatter(slot Slot, formatter Formatter) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -109,6 +129,7 @@ func (this *Logger) SetSlotFormatter(slot Slot, formatter Formatter) {
 	this.slots[slot].Formatter = formatter
 }
 
+// SlotWriter returns the writer of the slot.
 func (this *Logger) SlotWriter(slot Slot) Writer {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -116,6 +137,7 @@ func (this *Logger) SlotWriter(slot Slot) Writer {
 	return this.slots[slot].Writer
 }
 
+// SetSlotWriter sets the writer of the slot.
 func (this *Logger) SetSlotWriter(slot Slot, writer Writer) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -123,6 +145,7 @@ func (this *Logger) SetSlotWriter(slot Slot, writer Writer) {
 	this.slots[slot].Writer = writer
 }
 
+// SlotLevel returns the level of the slot.
 func (this *Logger) SlotLevel(slot Slot) Level {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -130,6 +153,7 @@ func (this *Logger) SlotLevel(slot Slot) Level {
 	return this.slots[slot].Level
 }
 
+// SetSlotLevel sets the level of the slot.
 func (this *Logger) SetSlotLevel(slot Slot, level Level) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -137,6 +161,7 @@ func (this *Logger) SetSlotLevel(slot Slot, level Level) {
 	this.slots[slot].Level = level
 }
 
+// SlotFilter returns the filter of the slot.
 func (this *Logger) SlotFilter(slot Slot) Filter {
 	this.lock.Lock()
 	defer this.lock.Unlock()
@@ -144,6 +169,7 @@ func (this *Logger) SlotFilter(slot Slot) Filter {
 	return this.slots[slot].Filter
 }
 
+// SetSlotFilter sets the filter of the slot.
 func (this *Logger) SetSlotFilter(slot Slot, filter Filter) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
