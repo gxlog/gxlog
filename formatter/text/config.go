@@ -20,8 +20,9 @@ type Config struct {
 	// It is used to specify which and how the fields of a Record to be formatted.
 	// The pattern of a field specifier is {{<name>[:property][%fmtstr]}}.
 	// e.g. {{level:char}}, {{line%05d}}, {{pkg:1}}, {{context:list%40s}}
-	// All fields have support for the fmtstr. The fmtstr will be passed to
-	// fmt.Sprintf to format the field.
+	// All fields have support for the fmtstr. If the fmtstr is not the default
+	// one of a field, it will be passed to fmt.Sprintf to format the field and
+	// this affects the performance a little.
 	// The supported properties vary with fields.
 	// All supported fields are as follows:
 	//            supported property          defaults      property examples

@@ -47,12 +47,17 @@ type Record struct {
 }
 
 // Formatter is the interface that a formatter of a Logger needs to implement.
+// A Formatter must NOT modify the record. In case of asynchrony, a Formatter
+// needs to make a new byte slice each time.
+//
 // Do NOT call methods of the Logger within Format, or it will deadlock.
 type Formatter interface {
 	Format(record *Record) []byte
 }
 
 // Writer is the interface that a writer of a Logger needs to implement.
+// A Writer must NOT modify the record.
+//
 // Do NOT call methods of the Logger within Write, or it will deadlock.
 type Writer interface {
 	Write(bs []byte, record *Record)
