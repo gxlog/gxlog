@@ -1,13 +1,15 @@
 package gxlog
 
 // And returns a function that is the logic AND of all the filters.
-// Nil filters will be ignored. It has the short circuit feature.
-// If the count of non-nil filters is zero, the returned function
-// will always return true.
+// It has the short circuit feature.
+// There must be at least one filter and any filter must NOT be nil.
 func And(filters ...Filter) Filter {
+	if len(filters) == 0 {
+		panic("gxlog.And: no filters")
+	}
 	return func(record *Record) bool {
 		for _, filter := range filters {
-			if filter != nil && !filter(record) {
+			if !filter(record) {
 				return false
 			}
 		}
@@ -16,13 +18,15 @@ func And(filters ...Filter) Filter {
 }
 
 // Or returns a function that is the logic OR of all the filters.
-// Nil filters will be ignored. It has the short circuit feature.
-// If the count of non-nil filters is zero, the returned function
-// will always return false.
+// It has the short circuit feature.
+// There must be at least one filter and any filter must NOT be nil.
 func Or(filters ...Filter) Filter {
+	if len(filters) == 0 {
+		panic("gxlog.Or: no filters")
+	}
 	return func(record *Record) bool {
 		for _, filter := range filters {
-			if filter != nil && filter(record) {
+			if filter(record) {
 				return true
 			}
 		}
@@ -31,12 +35,9 @@ func Or(filters ...Filter) Filter {
 }
 
 // Not returns a function that is the logic NOT of the filter.
-// If the filter is nil, the returned function will always return false.
+// The filter must NOT be nil.
 func Not(filter Filter) Filter {
 	return func(record *Record) bool {
-		if filter != nil {
-			return !filter(record)
-		}
-		return false
+		return !filter(record)
 	}
 }

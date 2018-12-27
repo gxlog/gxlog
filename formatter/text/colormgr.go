@@ -6,8 +6,10 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
+// The ColorID defines the color type.
 type ColorID int
 
+// All available colors here.
 const (
 	Black ColorID = iota + 30
 	Red

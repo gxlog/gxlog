@@ -87,13 +87,16 @@ or hooks can be integrated into gxlog.
 
 ### Basic ###
 
-The default logger has text formatter and writer wrapper of os.Stderr linked in
-Slot0. The rest slots are free. Supported levels are TRACE, DEBUG, INFO, WARN,
-ERROR and FATAL.
+The default Logger has the default Formatter (a text formatter) and a writer
+wrapper of os.Stderr linked in Slot0. The rest slots are free.
 
 It is **RECOMMENDED** that all packages use the default logger, such the main
 package can control which, how and where to output logs by setting filters,
 formatters and writers of the default logger.
+
+Supported levels are TRACE, DEBUG, INFO, WARN, ERROR and FATAL.
+
+All methods of a Logger are concurrency safe.
 
 ``` go
 package main

@@ -10,6 +10,7 @@ type wrapper struct {
 	writer io.Writer
 }
 
+// Wrap wraps a writer of io.Writer to gxlog.Writer. The writer must NOT be nil.
 func Wrap(writer io.Writer) gxlog.Writer {
 	if writer == nil {
 		panic("writer.Wrap: nil writer")

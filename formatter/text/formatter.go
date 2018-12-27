@@ -1,3 +1,4 @@
+// Package text implements a text formatter which implements the gxlog.Formatter.
 package text
 
 import (
@@ -10,6 +11,11 @@ import (
 
 var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
+// A Formatter implements the interface gxlog.Formatter.
+//
+// All methods of a Formatter are concurrency safe.
+//
+// A Formatter must be created with New.
 type Formatter struct {
 	header      string
 	minBufSize  int
@@ -22,6 +28,7 @@ type Formatter struct {
 	lock sync.Mutex
 }
 
+// New creates a new Formatter with the config. The config must not be nil.
 func New(config *Config) *Formatter {
 	if config.MinBufSize < 0 {
 		panic("formatter/text.New: Config.MinBufSize must not be negative")
@@ -36,6 +43,7 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
+// Header returns the header of the Formatter.
 func (formatter *Formatter) Header() string {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -43,6 +51,7 @@ func (formatter *Formatter) Header() string {
 	return formatter.header
 }
 
+// SetHeader sets the header of the Formatter.
 func (formatter *Formatter) SetHeader(header string) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -66,6 +75,7 @@ func (formatter *Formatter) SetHeader(header string) {
 	formatter.suffix = staticText + header
 }
 
+// MinBufSize returns the min buf size of the Formatter.
 func (formatter *Formatter) MinBufSize() int {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -73,6 +83,8 @@ func (formatter *Formatter) MinBufSize() int {
 	return formatter.minBufSize
 }
 
+// SetMinBufSize sets the min buf size of the Formatter.
+// The size must NOT be negative.
 func (formatter *Formatter) SetMinBufSize(size int) {
 	if size < 0 {
 		panic("formatter/text.SetMinBufSize: size must not be negative")
@@ -84,6 +96,7 @@ func (formatter *Formatter) SetMinBufSize(size int) {
 	formatter.minBufSize = size
 }
 
+// ColorEnabled returns whether colorization is enabled in the Formatter.
 func (formatter *Formatter) ColorEnabled() bool {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -91,6 +104,7 @@ func (formatter *Formatter) ColorEnabled() bool {
 	return formatter.enableColor
 }
 
+// EnableColor enables colorization in the Formatter.
 func (formatter *Formatter) EnableColor() {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -98,6 +112,7 @@ func (formatter *Formatter) EnableColor() {
 	formatter.enableColor = true
 }
 
+// DisableColor disables colorization in the Formatter.
 func (formatter *Formatter) DisableColor() {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -105,6 +120,7 @@ func (formatter *Formatter) DisableColor() {
 	formatter.enableColor = false
 }
 
+// Color returns the color of the level in the Formatter.
 func (formatter *Formatter) Color(level gxlog.Level) ColorID {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -112,6 +128,7 @@ func (formatter *Formatter) Color(level gxlog.Level) ColorID {
 	return formatter.colorMgr.Color(level)
 }
 
+// SetColor sets the color of the level in the Formatter.
 func (formatter *Formatter) SetColor(level gxlog.Level, color ColorID) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -119,6 +136,7 @@ func (formatter *Formatter) SetColor(level gxlog.Level, color ColorID) {
 	formatter.colorMgr.SetColor(level, color)
 }
 
+// MapColors maps the color of levels in the Formatter by the colorMap.
 func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -126,6 +144,7 @@ func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 	formatter.colorMgr.MapColors(colorMap)
 }
 
+// MarkedColor returns the color of a log that is marked.
 func (formatter *Formatter) MarkedColor() ColorID {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -133,6 +152,7 @@ func (formatter *Formatter) MarkedColor() ColorID {
 	return formatter.colorMgr.MarkedColor()
 }
 
+// SetMarkedColor sets the color of a log that is marked.
 func (formatter *Formatter) SetMarkedColor(color ColorID) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -140,6 +160,7 @@ func (formatter *Formatter) SetMarkedColor(color ColorID) {
 	formatter.colorMgr.SetMarkedColor(color)
 }
 
+// Format implements the interface gxlog.Formatter. It formats a Record.
 func (formatter *Formatter) Format(record *gxlog.Record) []byte {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()

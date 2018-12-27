@@ -1,3 +1,4 @@
+// Package json implements a json formatter which implements the gxlog.Formatter.
 package json
 
 import (
@@ -10,12 +11,18 @@ import (
 	"github.com/gxlog/gxlog/formatter/internal/util"
 )
 
+// A Formatter implements the interface gxlog.Formatter.
+//
+// All methods of a Formatter are concurrency safe.
+//
+// A Formatter must be created with New.
 type Formatter struct {
 	config Config
 
 	lock sync.Mutex
 }
 
+// New creates a new Formatter with the config. The config must not be nil.
 func New(config *Config) *Formatter {
 	if config.MinBufSize < 0 {
 		panic("formatter/json.New: Config.MinBufSize must not be negative")
@@ -26,6 +33,7 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
+// Format implements the interface gxlog.Formatter. It formats a Record.
 func (formatter *Formatter) Format(record *gxlog.Record) []byte {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -69,6 +77,7 @@ func (formatter *Formatter) Format(record *gxlog.Record) []byte {
 	return buf
 }
 
+// Config returns a copy of Config of the Formatter.
 func (formatter *Formatter) Config() *Config {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -77,6 +86,7 @@ func (formatter *Formatter) Config() *Config {
 	return &copyConfig
 }
 
+// SetConfig sets the copy of config to the Formatter. The config must NOT be nil.
 func (formatter *Formatter) SetConfig(config *Config) error {
 	if config.MinBufSize < 0 {
 		return errors.New("formatter/json.SetConfig: Config.MinBufSize must not be negative")
@@ -89,6 +99,9 @@ func (formatter *Formatter) SetConfig(config *Config) error {
 	return nil
 }
 
+// UpdateConfig will call fn with copy of the config of the Formatter, and then
+// sets copy of the returned config to the Formatter. The fn must NOT be nil.
+// Do NOT call methods of the Formatter within fn, or it will deadlock.
 func (formatter *Formatter) UpdateConfig(fn func(Config) Config) error {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
