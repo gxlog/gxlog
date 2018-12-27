@@ -18,12 +18,12 @@ func NewConfig(pathname string) *Config {
 	}
 }
 
-func (this *Config) WithPerm(perm os.FileMode) *Config {
-	this.Perm = perm
-	return this
+func (cfg *Config) WithPerm(perm os.FileMode) *Config {
+	cfg.Perm = perm
+	return cfg
 }
 
-func (this *Config) WithOverwrite(ok bool) *Config {
-	this.Overwrite = ok
-	return this
+func (cfg *Config) WithOverwrite(ok bool) *Config {
+	cfg.Overwrite = ok
+	return cfg
 }

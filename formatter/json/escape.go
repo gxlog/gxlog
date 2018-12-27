@@ -4,20 +4,20 @@ import (
 	"fmt"
 )
 
-const cCtrlCharN = 0x20
+const ctrlCharCount = 0x20
 
-var gMapArray [cCtrlCharN]string
+var escapeMapArray [ctrlCharCount]string
 
 func init() {
-	for i := 0; i < cCtrlCharN; i++ {
-		gMapArray[i] = fmt.Sprintf(`\u00%02x`, i)
+	for i := 0; i < ctrlCharCount; i++ {
+		escapeMapArray[i] = fmt.Sprintf(`\u00%02x`, i)
 	}
 }
 
 func escape(buf []byte, str string) []byte {
 	for i := 0; i < len(str); i++ {
 		b := str[i]
-		if b < cCtrlCharN {
+		if b < ctrlCharCount {
 			switch b {
 			case '\n':
 				buf = append(buf, `\n`...)
@@ -26,7 +26,7 @@ func escape(buf []byte, str string) []byte {
 			case '\t':
 				buf = append(buf, `\t`...)
 			default:
-				buf = append(buf, gMapArray[b]...)
+				buf = append(buf, escapeMapArray[b]...)
 			}
 		} else {
 			switch b {

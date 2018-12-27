@@ -24,11 +24,11 @@ func newFileFormatter(property, fmtspec string) *fileFormatter {
 	}
 }
 
-func (this *fileFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	file := util.LastSegments(record.File, this.segments, '/')
-	if this.fmtspec == "%s" {
+func (formatter *fileFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+	file := util.LastSegments(record.File, formatter.segments, '/')
+	if formatter.fmtspec == "%s" {
 		return append(buf, file...)
 	} else {
-		return append(buf, fmt.Sprintf(this.fmtspec, file)...)
+		return append(buf, fmt.Sprintf(formatter.fmtspec, file)...)
 	}
 }

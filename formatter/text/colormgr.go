@@ -19,10 +19,7 @@ const (
 	White
 )
 
-const (
-	cEscSeq = "\033[%dm"
-	cReset  = 0
-)
+const escSeqFmt = "\033[%dm"
 
 type colorMgr struct {
 	colors      []ColorID
@@ -52,36 +49,36 @@ func newColorMgr() *colorMgr {
 	return mgr
 }
 
-func (this *colorMgr) Color(level gxlog.Level) ColorID {
-	return this.colors[level]
+func (mgr *colorMgr) Color(level gxlog.Level) ColorID {
+	return mgr.colors[level]
 }
 
-func (this *colorMgr) SetColor(level gxlog.Level, color ColorID) {
-	this.colors[level] = color
-	this.colorSeqs[level] = makeSeq(color)
+func (mgr *colorMgr) SetColor(level gxlog.Level, color ColorID) {
+	mgr.colors[level] = color
+	mgr.colorSeqs[level] = makeSeq(color)
 }
 
-func (this *colorMgr) MapColors(colorMap map[gxlog.Level]ColorID) {
+func (mgr *colorMgr) MapColors(colorMap map[gxlog.Level]ColorID) {
 	for level, color := range colorMap {
-		this.SetColor(level, color)
+		mgr.SetColor(level, color)
 	}
 }
 
-func (this *colorMgr) MarkedColor() ColorID {
-	return this.markedColor
+func (mgr *colorMgr) MarkedColor() ColorID {
+	return mgr.markedColor
 }
 
-func (this *colorMgr) SetMarkedColor(color ColorID) {
-	this.markedColor = color
-	this.markedSeq = makeSeq(color)
+func (mgr *colorMgr) SetMarkedColor(color ColorID) {
+	mgr.markedColor = color
+	mgr.markedSeq = makeSeq(color)
 }
 
-func (this *colorMgr) ColorEars(level gxlog.Level) ([]byte, []byte) {
-	return this.colorSeqs[level], this.resetSeq
+func (mgr *colorMgr) ColorEars(level gxlog.Level) ([]byte, []byte) {
+	return mgr.colorSeqs[level], mgr.resetSeq
 }
 
-func (this *colorMgr) MarkedColorEars() ([]byte, []byte) {
-	return this.markedSeq, this.resetSeq
+func (mgr *colorMgr) MarkedColorEars() ([]byte, []byte) {
+	return mgr.markedSeq, mgr.resetSeq
 }
 
 func initColorSeqs(colors []ColorID) [][]byte {
@@ -93,5 +90,5 @@ func initColorSeqs(colors []ColorID) [][]byte {
 }
 
 func makeSeq(color ColorID) []byte {
-	return []byte(fmt.Sprintf(cEscSeq, color))
+	return []byte(fmt.Sprintf(escSeqFmt, color))
 }

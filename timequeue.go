@@ -20,32 +20,32 @@ func newTimeQueue(duration time.Duration, size int) *timeQueue {
 	}
 }
 
-func (this *timeQueue) Enqueue(clock time.Time) bool {
-	this.dequeueExpired(clock)
-	if this.full() {
+func (queue *timeQueue) Enqueue(clock time.Time) bool {
+	queue.dequeueExpired(clock)
+	if queue.full() {
 		return false
 	}
-	this.slice[this.end] = clock
-	this.end++
-	this.end %= this.cap
+	queue.slice[queue.end] = clock
+	queue.end++
+	queue.end %= queue.cap
 	return true
 }
 
-func (this *timeQueue) dequeueExpired(clock time.Time) {
-	if !this.empty() && clock.Sub(this.slice[this.begin]) >= this.duration {
-		this.begin++
-		this.begin %= this.cap
+func (queue *timeQueue) dequeueExpired(clock time.Time) {
+	if !queue.empty() && clock.Sub(queue.slice[queue.begin]) >= queue.duration {
+		queue.begin++
+		queue.begin %= queue.cap
 	}
 }
 
-func (this *timeQueue) length() int {
-	return (this.end + this.cap - this.begin) % this.cap
+func (queue *timeQueue) length() int {
+	return (queue.end + queue.cap - queue.begin) % queue.cap
 }
 
-func (this *timeQueue) empty() bool {
-	return this.begin == this.end
+func (queue *timeQueue) empty() bool {
+	return queue.begin == queue.end
 }
 
-func (this *timeQueue) full() bool {
-	return this.length() == this.cap-1
+func (queue *timeQueue) full() bool {
+	return queue.length() == queue.cap-1
 }

@@ -21,18 +21,18 @@ func newGzipWriter(wt io.WriteCloser, level int) (io.WriteCloser, error) {
 	}, nil
 }
 
-func (this *gzipWriter) Close() error {
-	if err := this.writer.Close(); err != nil {
+func (gz *gzipWriter) Close() error {
+	if err := gz.writer.Close(); err != nil {
 		return err
 	}
-	return this.underlying.Close()
+	return gz.underlying.Close()
 
 }
 
-func (this *gzipWriter) Write(bs []byte) (n int, err error) {
-	n, err = this.writer.Write(bs)
+func (gz *gzipWriter) Write(bs []byte) (n int, err error) {
+	n, err = gz.writer.Write(bs)
 	if err == nil {
-		err = this.writer.Flush()
+		err = gz.writer.Flush()
 	}
 	return n, err
 }

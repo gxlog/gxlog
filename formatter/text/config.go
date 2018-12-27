@@ -26,22 +26,22 @@ func NewConfig() *Config {
 	}
 }
 
-func (this *Config) WithHeader(header string) *Config {
-	this.Header = header
-	return this
+func (cfg *Config) WithHeader(header string) *Config {
+	cfg.Header = header
+	return cfg
 }
 
-func (this *Config) WithMinBufSize(size int) *Config {
-	this.MinBufSize = size
-	return this
+func (cfg *Config) WithMinBufSize(size int) *Config {
+	cfg.MinBufSize = size
+	return cfg
 }
 
-func (this *Config) WithColorMap(colorMap map[gxlog.Level]ColorID) *Config {
-	this.ColorMap = colorMap
-	return this
+func (cfg *Config) WithColorMap(colorMap map[gxlog.Level]ColorID) *Config {
+	cfg.ColorMap = colorMap
+	return cfg
 }
 
-func (this *Config) WithEnableColor(enable bool) *Config {
-	this.EnableColor = enable
-	return this
+func (cfg *Config) WithEnableColor(enable bool) *Config {
+	cfg.EnableColor = enable
+	return cfg
 }

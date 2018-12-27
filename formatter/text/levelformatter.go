@@ -7,7 +7,7 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-var gLevelDesc = []string{
+var levelDesc = []string{
 	gxlog.Trace: "TRACE",
 	gxlog.Debug: "DEBUG",
 	gxlog.Info:  "INFO ",
@@ -16,7 +16,7 @@ var gLevelDesc = []string{
 	gxlog.Fatal: "FATAL",
 }
 
-var gLevelDescChar = []string{
+var levelDescChar = []string{
 	gxlog.Trace: "T",
 	gxlog.Debug: "D",
 	gxlog.Info:  "I",
@@ -40,18 +40,18 @@ func newLevelFormatter(property, fmtspec string) *levelFormatter {
 	}
 }
 
-func (this *levelFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	desc := this.descList[record.Level]
-	if this.fmtspec == "%s" {
+func (formatter *levelFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+	desc := formatter.descList[record.Level]
+	if formatter.fmtspec == "%s" {
 		return append(buf, desc...)
 	} else {
-		return append(buf, fmt.Sprintf(this.fmtspec, desc)...)
+		return append(buf, fmt.Sprintf(formatter.fmtspec, desc)...)
 	}
 }
 
 func selectDescList(property string) []string {
 	if strings.ToLower(property) == "char" {
-		return gLevelDescChar
+		return levelDescChar
 	}
-	return gLevelDesc
+	return levelDesc
 }

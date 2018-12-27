@@ -55,55 +55,55 @@ func NewConfig() *Config {
 }
 
 // WithLevel sets the Level of the Config and returns it.
-func (this *Config) WithLevel(level Level) *Config {
-	this.Level = level
-	return this
+func (cfg *Config) WithLevel(level Level) *Config {
+	cfg.Level = level
+	return cfg
 }
 
 // WithTimeLevel sets the TimeLevel of the Config and returns it.
-func (this *Config) WithTimeLevel(level Level) *Config {
-	this.TimeLevel = level
-	return this
+func (cfg *Config) WithTimeLevel(level Level) *Config {
+	cfg.TimeLevel = level
+	return cfg
 }
 
 // WithPanicLevel sets the PanicLevel of the Config and returns it.
-func (this *Config) WithPanicLevel(level Level) *Config {
-	this.PanicLevel = level
-	return this
+func (cfg *Config) WithPanicLevel(level Level) *Config {
+	cfg.PanicLevel = level
+	return cfg
 }
 
 // WithTrackLevel sets the TrackLevel of the Config and returns it.
-func (this *Config) WithTrackLevel(level Level) *Config {
-	this.TrackLevel = level
-	return this
+func (cfg *Config) WithTrackLevel(level Level) *Config {
+	cfg.TrackLevel = level
+	return cfg
 }
 
 // WithExitLevel sets the ExitLevel of the Config and returns it.
-func (this *Config) WithExitLevel(level Level) *Config {
-	this.ExitLevel = level
-	return this
+func (cfg *Config) WithExitLevel(level Level) *Config {
+	cfg.ExitLevel = level
+	return cfg
 }
 
 // WithFilter sets the Filter of the Config and returns it.
-func (this *Config) WithFilter(filter Filter) *Config {
-	this.Filter = filter
-	return this
+func (cfg *Config) WithFilter(filter Filter) *Config {
+	cfg.Filter = filter
+	return cfg
 }
 
 // WithFlags sets the Flags of the Config and returns it.
-func (this *Config) WithFlags(flags Flag) *Config {
-	this.Flags = flags
-	return this
+func (cfg *Config) WithFlags(flags Flag) *Config {
+	cfg.Flags = flags
+	return cfg
 }
 
 // WithEnabled enables flags of the Config and returns it.
-func (this *Config) WithEnabled(flags Flag) *Config {
-	this.Flags |= flags
-	return this
+func (cfg *Config) WithEnabled(flags Flag) *Config {
+	cfg.Flags |= flags
+	return cfg
 }
 
 // WithDisabled disables flags of the Config and returns it.
-func (this *Config) WithDisabled(flags Flag) *Config {
-	this.Flags &^= flags
-	return this
+func (cfg *Config) WithDisabled(flags Flag) *Config {
+	cfg.Flags &^= flags
+	return cfg
 }

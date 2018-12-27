@@ -31,32 +31,32 @@ func NewConfig() *Config {
 	}
 }
 
-func (this *Config) WithFileSegs(segs int) *Config {
-	this.FileSegs = segs
-	return this
+func (cfg *Config) WithFileSegs(segs int) *Config {
+	cfg.FileSegs = segs
+	return cfg
 }
 
-func (this *Config) WithPkgSegs(segs int) *Config {
-	this.PkgSegs = segs
-	return this
+func (cfg *Config) WithPkgSegs(segs int) *Config {
+	cfg.PkgSegs = segs
+	return cfg
 }
 
-func (this *Config) WithFuncSegs(segs int) *Config {
-	this.FuncSegs = segs
-	return this
+func (cfg *Config) WithFuncSegs(segs int) *Config {
+	cfg.FuncSegs = segs
+	return cfg
 }
 
-func (this *Config) WithOmit(bits OmitBits) *Config {
-	this.Omit = bits
-	return this
+func (cfg *Config) WithOmit(bits OmitBits) *Config {
+	cfg.Omit = bits
+	return cfg
 }
 
-func (this *Config) WithOmitEmpty(bits OmitBits) *Config {
-	this.OmitEmpty = bits
-	return this
+func (cfg *Config) WithOmitEmpty(bits OmitBits) *Config {
+	cfg.OmitEmpty = bits
+	return cfg
 }
 
-func (this *Config) WithMinBufSize(size int) *Config {
-	this.MinBufSize = size
-	return this
+func (cfg *Config) WithMinBufSize(size int) *Config {
+	cfg.MinBufSize = size
+	return cfg
 }

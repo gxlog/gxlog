@@ -59,22 +59,22 @@ func NewConfig(tag string) *Config {
 	}
 }
 
-func (this *Config) WithFacility(facility Facility) *Config {
-	this.Facility = facility
-	return this
+func (cfg *Config) WithFacility(facility Facility) *Config {
+	cfg.Facility = facility
+	return cfg
 }
 
-func (this *Config) WithAddr(network, addr string) *Config {
-	this.Network, this.Addr = network, addr
-	return this
+func (cfg *Config) WithAddr(network, addr string) *Config {
+	cfg.Network, cfg.Addr = network, addr
+	return cfg
 }
 
-func (this *Config) WithSeverityMap(severityMap map[gxlog.Level]Severity) *Config {
-	this.SeverityMap = severityMap
-	return this
+func (cfg *Config) WithSeverityMap(severityMap map[gxlog.Level]Severity) *Config {
+	cfg.SeverityMap = severityMap
+	return cfg
 }
 
-func (this *Config) WithReportOnErr(ok bool) *Config {
-	this.ReportOnErr = ok
-	return this
+func (cfg *Config) WithReportOnErr(ok bool) *Config {
+	cfg.ReportOnErr = ok
+	return cfg
 }

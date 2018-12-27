@@ -22,14 +22,14 @@ const (
 // MaxSlot is the total count of available slots of Logger.
 const MaxSlot = 8
 
-type link struct {
+type slotLink struct {
 	Formatter Formatter
 	Writer    Writer
 	Level     Level
 	Filter    Filter
 }
 
-var gNullLink = link{
+var nullSlotLink = slotLink{
 	Level: Off,
 }
 
@@ -39,8 +39,8 @@ var gNullLink = link{
 //
 // If the level of the slot is not specified, it is Trace by default.
 // If the filter of the slot is not specified, it is nil by default.
-func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
-	lnk := link{
+func (log *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
+	link := slotLink{
 		Formatter: formatter,
 		Writer:    writer,
 		Level:     Trace,
@@ -48,11 +48,11 @@ func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...
 	for _, opt := range opts {
 		switch opt := opt.(type) {
 		case Level:
-			lnk.Level = opt
+			link.Level = opt
 		case Filter:
-			lnk.Filter = opt
+			link.Filter = opt
 		case func(*Record) bool:
-			lnk.Filter = opt
+			link.Filter = opt
 		case nil:
 			// noop
 		default:
@@ -60,125 +60,125 @@ func (this *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...
 		}
 	}
 
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[slot] = lnk
+	log.slots[slot] = link
 }
 
 // Unlink sets the formatter, writer and filter of the slot to nil and
 // the level of the slot to Off.
-func (this *Logger) Unlink(slot Slot) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) Unlink(slot Slot) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[slot] = gNullLink
+	log.slots[slot] = nullSlotLink
 }
 
 // UnlinkAll sets the formatter, writer and filter of all slots to nil and
 // the level of all slots to Off.
-func (this *Logger) UnlinkAll() {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) UnlinkAll() {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	for i := range this.slots {
-		this.slots[i] = gNullLink
+	for i := range log.slots {
+		log.slots[i] = nullSlotLink
 	}
 }
 
 // CopySlot copies the formatter, writer, level and filter of slot src
 // to slot dst.
-func (this *Logger) CopySlot(dst, src Slot) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) CopySlot(dst, src Slot) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[dst] = this.slots[src]
+	log.slots[dst] = log.slots[src]
 }
 
 // MoveSlot copies the formatter, writer, level and filter of slot from
 // to slot to, and then unlinks the slot from.
-func (this *Logger) MoveSlot(to, from Slot) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) MoveSlot(to, from Slot) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[to] = this.slots[from]
-	this.slots[from] = gNullLink
+	log.slots[to] = log.slots[from]
+	log.slots[from] = nullSlotLink
 }
 
 // SwapSlot swaps the formatter, writer, level and filter of the slots.
-func (this *Logger) SwapSlot(left, right Slot) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SwapSlot(left, right Slot) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[left], this.slots[right] = this.slots[right], this.slots[left]
+	log.slots[left], log.slots[right] = log.slots[right], log.slots[left]
 }
 
 // SlotFormatter returns the formatter of the slot.
-func (this *Logger) SlotFormatter(slot Slot) Formatter {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SlotFormatter(slot Slot) Formatter {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.slots[slot].Formatter
+	return log.slots[slot].Formatter
 }
 
 // SetSlotFormatter sets the formatter of the slot.
-func (this *Logger) SetSlotFormatter(slot Slot, formatter Formatter) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SetSlotFormatter(slot Slot, formatter Formatter) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[slot].Formatter = formatter
+	log.slots[slot].Formatter = formatter
 }
 
 // SlotWriter returns the writer of the slot.
-func (this *Logger) SlotWriter(slot Slot) Writer {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SlotWriter(slot Slot) Writer {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.slots[slot].Writer
+	return log.slots[slot].Writer
 }
 
 // SetSlotWriter sets the writer of the slot.
-func (this *Logger) SetSlotWriter(slot Slot, writer Writer) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SetSlotWriter(slot Slot, writer Writer) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[slot].Writer = writer
+	log.slots[slot].Writer = writer
 }
 
 // SlotLevel returns the level of the slot.
-func (this *Logger) SlotLevel(slot Slot) Level {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SlotLevel(slot Slot) Level {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.slots[slot].Level
+	return log.slots[slot].Level
 }
 
 // SetSlotLevel sets the level of the slot.
-func (this *Logger) SetSlotLevel(slot Slot, level Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SetSlotLevel(slot Slot, level Level) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[slot].Level = level
+	log.slots[slot].Level = level
 }
 
 // SlotFilter returns the filter of the slot.
-func (this *Logger) SlotFilter(slot Slot) Filter {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SlotFilter(slot Slot) Filter {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.slots[slot].Filter
+	return log.slots[slot].Filter
 }
 
 // SetSlotFilter sets the filter of the slot.
-func (this *Logger) SetSlotFilter(slot Slot, filter Filter) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) SetSlotFilter(slot Slot, filter Filter) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	this.slots[slot].Filter = filter
+	log.slots[slot].Filter = filter
 }
 
-func (this *Logger) initSlots() {
+func (log *Logger) initSlots() {
 	for i := 0; i < MaxSlot; i++ {
-		this.slots = append(this.slots, gNullLink)
+		log.slots = append(log.slots, nullSlotLink)
 	}
 }

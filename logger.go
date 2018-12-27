@@ -15,9 +15,7 @@ import (
 	"time"
 )
 
-const (
-	cCallDepth = 3
-)
+const callDepthOffset = 3
 
 // A Logger is a framework that contains EIGHT slots. Each slot has a formatter
 // and a writer. A Logger has its own level and filter, while each slot has its
@@ -29,7 +27,7 @@ const (
 // A Logger must be created with New.
 type Logger struct {
 	config *Config
-	slots  []link
+	slots  []slotLink
 
 	countMap map[locator]int64
 	timeMap  map[locator]*timeQueue
@@ -44,8 +42,8 @@ func New(config *Config) *Logger {
 	copyConfig := *config
 	logger := &Logger{
 		config:   &copyConfig,
-		countMap: make(map[locator]int64, cMapInitCap),
-		timeMap:  make(map[locator]*timeQueue, cMapInitCap),
+		countMap: make(map[locator]int64, mapInitCap),
+		timeMap:  make(map[locator]*timeQueue, mapInitCap),
 		lock:     new(sync.Mutex),
 	}
 	logger.initSlots()
@@ -53,77 +51,77 @@ func New(config *Config) *Logger {
 }
 
 // Trace calls Log with level Trace to output log.
-func (this *Logger) Trace(args ...interface{}) {
-	this.Log(1, Trace, args...)
+func (log *Logger) Trace(args ...interface{}) {
+	log.Log(1, Trace, args...)
 }
 
 // Tracef calls Logf with level Trace to output log.
-func (this *Logger) Tracef(fmtstr string, args ...interface{}) {
-	this.Logf(1, Trace, fmtstr, args...)
+func (log *Logger) Tracef(fmtstr string, args ...interface{}) {
+	log.Logf(1, Trace, fmtstr, args...)
 }
 
 // Debug calls Log with level Debug to output log.
-func (this *Logger) Debug(args ...interface{}) {
-	this.Log(1, Debug, args...)
+func (log *Logger) Debug(args ...interface{}) {
+	log.Log(1, Debug, args...)
 }
 
 // Debugf calls Logf with level Debug to output log.
-func (this *Logger) Debugf(fmtstr string, args ...interface{}) {
-	this.Logf(1, Debug, fmtstr, args...)
+func (log *Logger) Debugf(fmtstr string, args ...interface{}) {
+	log.Logf(1, Debug, fmtstr, args...)
 }
 
 // Info calls Log with level Info to output log.
-func (this *Logger) Info(args ...interface{}) {
-	this.Log(1, Info, args...)
+func (log *Logger) Info(args ...interface{}) {
+	log.Log(1, Info, args...)
 }
 
 // Infof calls Logf with level Info to output log.
-func (this *Logger) Infof(fmtstr string, args ...interface{}) {
-	this.Logf(1, Info, fmtstr, args...)
+func (log *Logger) Infof(fmtstr string, args ...interface{}) {
+	log.Logf(1, Info, fmtstr, args...)
 }
 
 // Warn calls Log with level Warn to output log.
-func (this *Logger) Warn(args ...interface{}) {
-	this.Log(1, Warn, args...)
+func (log *Logger) Warn(args ...interface{}) {
+	log.Log(1, Warn, args...)
 }
 
 // Warnf calls Logf with level Warn to output log.
-func (this *Logger) Warnf(fmtstr string, args ...interface{}) {
-	this.Logf(1, Warn, fmtstr, args...)
+func (log *Logger) Warnf(fmtstr string, args ...interface{}) {
+	log.Logf(1, Warn, fmtstr, args...)
 }
 
 // Error calls Log with level Error to output log.
-func (this *Logger) Error(args ...interface{}) {
-	this.Log(1, Error, args...)
+func (log *Logger) Error(args ...interface{}) {
+	log.Log(1, Error, args...)
 }
 
 // Errorf calls Logf with level Error to output log.
-func (this *Logger) Errorf(fmtstr string, args ...interface{}) {
-	this.Logf(1, Error, fmtstr, args...)
+func (log *Logger) Errorf(fmtstr string, args ...interface{}) {
+	log.Logf(1, Error, fmtstr, args...)
 }
 
 // Fatal calls Log with level Fatal to output log.
-func (this *Logger) Fatal(args ...interface{}) {
-	this.Log(1, Fatal, args...)
+func (log *Logger) Fatal(args ...interface{}) {
+	log.Log(1, Fatal, args...)
 }
 
 // Fatalf calls Logf with level Fatal to output log.
-func (this *Logger) Fatalf(fmtstr string, args ...interface{}) {
-	this.Logf(1, Fatal, fmtstr, args...)
+func (log *Logger) Fatalf(fmtstr string, args ...interface{}) {
+	log.Logf(1, Fatal, fmtstr, args...)
 }
 
 // LogError calls Log to output log and calls errors.New to return an error.
 // The level must be between Trace and Fatal inclusive.
-func (this *Logger) LogError(level Level, text string) error {
-	this.Log(1, level, text)
+func (log *Logger) LogError(level Level, text string) error {
+	log.Log(1, level, text)
 	return errors.New(text)
 }
 
 // LogErrorf calls Logf to output log and calls fmt.Errorf to return an error.
 // The level must be between Trace and Fatal inclusive.
-func (this *Logger) LogErrorf(level Level, fmtstr string, args ...interface{}) error {
+func (log *Logger) LogErrorf(level Level, fmtstr string, args ...interface{}) error {
 	err := fmt.Errorf(fmtstr, args...)
-	this.Log(1, level, err.Error())
+	log.Log(1, level, err.Error())
 	return err
 }
 
@@ -142,13 +140,13 @@ func (this *Logger) LogErrorf(level Level, fmtstr string, args ...interface{}) e
 // The args are handled in the manner of fmt.Sprint.
 //
 // ATTENTION: log may NOT be output in asynchronous mode if os.Exit has been called.
-func (this *Logger) Log(calldepth int, level Level, args ...interface{}) {
-	logLevel, trackLevel, exitLevel := this.levels()
+func (log *Logger) Log(calldepth int, level Level, args ...interface{}) {
+	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
 			args = append(args, "\n", string(debug.Stack()))
 		}
-		this.write(calldepth, level, fmt.Sprint(args...))
+		log.write(calldepth, level, fmt.Sprint(args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
@@ -158,14 +156,14 @@ func (this *Logger) Log(calldepth int, level Level, args ...interface{}) {
 // Logf does the same with Log except that it calls fmt.Sprintf to do the format.
 //
 // ATTENTION: log may NOT be output in asynchronous mode if os.Exit has been called.
-func (this *Logger) Logf(calldepth int, level Level, fmtstr string, args ...interface{}) {
-	logLevel, trackLevel, exitLevel := this.levels()
+func (log *Logger) Logf(calldepth int, level Level, fmtstr string, args ...interface{}) {
+	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
 			fmtstr += "\n%s"
 			args = append(args, debug.Stack())
 		}
-		this.write(calldepth, level, fmt.Sprintf(fmtstr, args...))
+		log.write(calldepth, level, fmt.Sprintf(fmtstr, args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
@@ -182,11 +180,11 @@ func (this *Logger) Logf(calldepth int, level Level, fmtstr string, args ...inte
 // The args are handled in the manner of fmt.Sprint.
 //
 // ATTENTION: log may NOT be output in asynchronous mode if there is no recovery.
-func (this *Logger) Panic(args ...interface{}) {
+func (log *Logger) Panic(args ...interface{}) {
 	msg := fmt.Sprint(args...)
-	logLevel, panicLevel := this.panicLevel()
+	logLevel, panicLevel := log.panicLevel()
 	if logLevel <= panicLevel {
-		this.write(0, panicLevel, msg)
+		log.write(0, panicLevel, msg)
 	}
 	panic(msg)
 }
@@ -194,11 +192,11 @@ func (this *Logger) Panic(args ...interface{}) {
 // Panicf does the same with Panic except that it calls fmt.Sprintf to do the format.
 //
 // ATTENTION: log may NOT be output in asynchronous mode if there is no recovery.
-func (this *Logger) Panicf(fmtstr string, args ...interface{}) {
+func (log *Logger) Panicf(fmtstr string, args ...interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
-	logLevel, panicLevel := this.panicLevel()
+	logLevel, panicLevel := log.panicLevel()
 	if logLevel <= panicLevel {
-		this.write(0, panicLevel, msg)
+		log.write(0, panicLevel, msg)
 	}
 	panic(msg)
 }
@@ -211,49 +209,49 @@ func (this *Logger) Panicf(fmtstr string, args ...interface{}) {
 // The level of this call is the time level of Logger. If the level is lower
 // than the level of Logger, NO log will output. If the level is lower than
 // the level of a slot, the formatter and writer of the slot will NOT be called.
-func (this *Logger) Time(args ...interface{}) func() {
-	logLevel, timeLevel := this.timeLevel()
+func (log *Logger) Time(args ...interface{}) func() {
+	logLevel, timeLevel := log.timeLevel()
 	if logLevel <= timeLevel {
-		return this.genDone(fmt.Sprint(args...))
+		return log.genDone(fmt.Sprint(args...))
 	}
 	return func() {}
 }
 
 // Timef does the same with Time except that it calls fmt.Sprintf to do the format.
-func (this *Logger) Timef(fmtstr string, args ...interface{}) func() {
-	logLevel, timeLevel := this.timeLevel()
+func (log *Logger) Timef(fmtstr string, args ...interface{}) func() {
+	logLevel, timeLevel := log.timeLevel()
 	if logLevel <= timeLevel {
-		return this.genDone(fmt.Sprintf(fmtstr, args...))
+		return log.genDone(fmt.Sprintf(fmtstr, args...))
 	}
 	return func() {}
 }
 
-func (this *Logger) levels() (Level, Level, Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) levels() (Level, Level, Level) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.config.Level, this.config.TrackLevel, this.config.ExitLevel
+	return log.config.Level, log.config.TrackLevel, log.config.ExitLevel
 }
 
-func (this *Logger) timeLevel() (Level, Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) timeLevel() (Level, Level) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.config.Level, this.config.TimeLevel
+	return log.config.Level, log.config.TimeLevel
 }
 
-func (this *Logger) panicLevel() (Level, Level) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (log *Logger) panicLevel() (Level, Level) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
-	return this.config.Level, this.config.PanicLevel
+	return log.config.Level, log.config.PanicLevel
 }
 
-func (this *Logger) write(calldepth int, level Level, msg string) {
-	file, line, pkg, fn := getPosInfo(calldepth + cCallDepth)
+func (log *Logger) write(calldepth int, level Level, msg string) {
+	file, line, pkg, fn := getPosInfo(calldepth + callDepthOffset)
 
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	log.lock.Lock()
+	defer log.lock.Unlock()
 
 	record := &Record{
 		Time:  time.Now(),
@@ -265,13 +263,13 @@ func (this *Logger) write(calldepth int, level Level, msg string) {
 		Msg:   msg,
 	}
 
-	if !this.filter(record) {
+	if !log.filter(record) {
 		return
 	}
 
-	this.attachAux(record)
+	log.attachAux(record)
 
-	for _, link := range this.slots {
+	for _, link := range log.slots {
 		if link.Level <= level {
 			if link.Filter == nil || link.Filter(record) {
 				var bs []byte
@@ -286,31 +284,31 @@ func (this *Logger) write(calldepth int, level Level, msg string) {
 	}
 }
 
-func (this *Logger) filter(record *Record) bool {
-	if this.config.Filter != nil && !this.config.Filter(record) {
+func (log *Logger) filter(record *Record) bool {
+	if log.config.Filter != nil && !log.config.Filter(record) {
 		return false
 	}
-	if this.config.Flags&Limit != 0 {
-		if this.attr.CountLimiter != nil && !this.attr.CountLimiter(record) {
+	if log.config.Flags&Limit != 0 {
+		if log.attr.CountLimiter != nil && !log.attr.CountLimiter(record) {
 			return false
 		}
-		if this.attr.TimeLimiter != nil && !this.attr.TimeLimiter(record) {
+		if log.attr.TimeLimiter != nil && !log.attr.TimeLimiter(record) {
 			return false
 		}
 	}
 	return true
 }
 
-func (this *Logger) attachAux(record *Record) {
-	if this.config.Flags&Prefix != 0 {
-		record.Aux.Prefix = this.attr.Prefix
+func (log *Logger) attachAux(record *Record) {
+	if log.config.Flags&Prefix != 0 {
+		record.Aux.Prefix = log.attr.Prefix
 	}
-	if this.config.Flags&Contexts != 0 {
-		// The len and cap of this.attr.Contexts are equal,
+	if log.config.Flags&Contexts != 0 {
+		// The len and cap of log.attr.Contexts are equal,
 		//   next appending will reallocate memory
-		record.Aux.Contexts = this.attr.Contexts
-		if this.config.Flags&DynamicContexts != 0 {
-			for _, context := range this.attr.DynamicContexts {
+		record.Aux.Contexts = log.attr.Contexts
+		if log.config.Flags&DynamicContexts != 0 {
+			for _, context := range log.attr.DynamicContexts {
 				record.Aux.Contexts = append(record.Aux.Contexts, Context{
 					Key:   fmt.Sprint(context.Key),
 					Value: fmt.Sprint(context.Value(context.Key)),
@@ -318,18 +316,18 @@ func (this *Logger) attachAux(record *Record) {
 			}
 		}
 	}
-	if this.config.Flags&Mark != 0 {
-		record.Aux.Marked = this.attr.Marked
+	if log.config.Flags&Mark != 0 {
+		record.Aux.Marked = log.attr.Marked
 	}
 }
 
-func (this *Logger) genDone(msg string) func() {
+func (log *Logger) genDone(msg string) func() {
 	now := time.Now()
 	return func() {
 		cost := time.Since(now)
-		logLevel, timeLevel := this.timeLevel()
+		logLevel, timeLevel := log.timeLevel()
 		if logLevel <= timeLevel {
-			this.write(0, timeLevel, fmt.Sprintf("%s (cost: %v)", msg, cost))
+			log.write(0, timeLevel, fmt.Sprintf("%s (cost: %v)", msg, cost))
 		}
 	}
 }

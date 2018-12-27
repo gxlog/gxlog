@@ -29,15 +29,15 @@ func Open(config *Config) (*Writer, error) {
 	return &Writer{writer: writer}, nil
 }
 
-func (this *Writer) Close() error {
-	if err := this.writer.Close(); err != nil {
+func (writer *Writer) Close() error {
+	if err := writer.writer.Close(); err != nil {
 		return fmt.Errorf("writer/socket/unix.Close: %v", err)
 	}
 	return nil
 }
 
-func (this *Writer) Write(bs []byte, record *gxlog.Record) {
-	this.writer.Write(bs, record)
+func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+	writer.writer.Write(bs, record)
 }
 
 func checkAndRemove(pathname string) error {

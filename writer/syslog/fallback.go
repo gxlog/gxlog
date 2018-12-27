@@ -8,22 +8,22 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-const cError = "not implemented on nacl, plan9 or windows"
+const generalError = "not implemented on nacl, plan9 or windows"
 
 type Writer struct{}
 
 func Open(cfg *Config) (*Writer, error) {
-	return nil, fmt.Errorf("writer/syslog.Open: %s", cError)
+	return nil, fmt.Errorf("writer/syslog.Open: %s", generalError)
 }
 
-func (this *Writer) Close() error {
-	return fmt.Errorf("writer/syslog.Close: %s", cError)
+func (writer *Writer) Close() error {
+	return fmt.Errorf("writer/syslog.Close: %s", generalError)
 }
 
-func (this *Writer) Write(bs []byte, record *gxlog.Record) {}
+func (writer *Writer) Write(bs []byte, record *gxlog.Record) {}
 
-func (this *Writer) ReportOnErr() bool { return false }
+func (writer *Writer) ReportOnErr() bool { return false }
 
-func (this *Writer) SetReportOnErr(ok bool) {}
+func (writer *Writer) SetReportOnErr(ok bool) {}
 
-func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {}
+func (writer *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {}

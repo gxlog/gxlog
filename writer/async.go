@@ -28,33 +28,33 @@ func NewAsync(writer gxlog.Writer, cap int) *Async {
 	return async
 }
 
-func (this *Async) Write(bs []byte, record *gxlog.Record) {
-	this.chanData <- logData{Bytes: bs, Record: record}
+func (async *Async) Write(bs []byte, record *gxlog.Record) {
+	async.chanData <- logData{Bytes: bs, Record: record}
 }
 
-func (this *Async) Close() {
-	close(this.chanClose)
-	close(this.chanData)
-	for data := range this.chanData {
-		this.writer.Write(data.Bytes, data.Record)
+func (async *Async) Close() {
+	close(async.chanClose)
+	close(async.chanData)
+	for data := range async.chanData {
+		async.writer.Write(data.Bytes, data.Record)
 	}
 }
 
-func (this *Async) Abort() {
-	close(this.chanClose)
-	close(this.chanData)
+func (async *Async) Abort() {
+	close(async.chanClose)
+	close(async.chanData)
 }
 
-func (this *Async) Len() int {
-	return len(this.chanData)
+func (async *Async) Len() int {
+	return len(async.chanData)
 }
 
-func (this *Async) serve() {
+func (async *Async) serve() {
 	for {
 		select {
-		case data := <-this.chanData:
-			this.writer.Write(data.Bytes, data.Record)
-		case <-this.chanClose:
+		case data := <-async.chanData:
+			async.writer.Write(data.Bytes, data.Record)
+		case <-async.chanClose:
 			break
 		}
 	}

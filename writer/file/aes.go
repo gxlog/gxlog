@@ -17,7 +17,7 @@ const (
 	OFB
 )
 
-const cBufInitCap = 256
+const bufInitCap = 256
 
 func newAESWriter(wt io.WriteCloser, key string, mode BlockCipherMode) (io.WriteCloser, error) {
 	keyBytes, err := hex.DecodeString(key)
@@ -52,7 +52,7 @@ func newStreamEncrypter(wt io.WriteCloser, block cipher.Block, iv []byte,
 		underlying: wt,
 		stream:     stream,
 		iv:         iv,
-		buf:        make([]byte, 0, cBufInitCap),
+		buf:        make([]byte, 0, bufInitCap),
 	}, nil
 }
 
@@ -63,28 +63,28 @@ type streamEncrypter struct {
 	buf        []byte
 }
 
-func (this *streamEncrypter) Close() error {
-	return this.underlying.Close()
+func (enc *streamEncrypter) Close() error {
+	return enc.underlying.Close()
 }
 
-func (this *streamEncrypter) Write(bs []byte) (int, error) {
+func (enc *streamEncrypter) Write(bs []byte) (int, error) {
 	var count int
-	if len(this.iv) > 0 {
-		n, err := this.underlying.Write(this.iv)
+	if len(enc.iv) > 0 {
+		n, err := enc.underlying.Write(enc.iv)
 		count += n
-		this.iv = this.iv[n:]
+		enc.iv = enc.iv[n:]
 		if err != nil {
 			return count, err
 		}
 	}
 
 	size := len(bs)
-	for cap(this.buf) < size {
-		this.buf = make([]byte, 0, cap(this.buf)<<1)
+	for cap(enc.buf) < size {
+		enc.buf = make([]byte, 0, cap(enc.buf)<<1)
 	}
-	buf := this.buf[:size]
-	this.stream.XORKeyStream(buf, bs)
-	n, err := this.underlying.Write(buf)
+	buf := enc.buf[:size]
+	enc.stream.XORKeyStream(buf, bs)
+	n, err := enc.underlying.Write(buf)
 	count += n
 
 	return count, err

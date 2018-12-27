@@ -33,150 +33,150 @@ func Open(config *Config) (*Writer, error) {
 	return &Writer{config: *config}, nil
 }
 
-func (this *Writer) Close() error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) Close() error {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	if err := this.closeFile(); err != nil {
+	if err := writer.closeFile(); err != nil {
 		return fmt.Errorf("writer/file.Close: %v", err)
 	}
 	return nil
 }
 
-func (this *Writer) Write(bs []byte, record *gxlog.Record) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	err := this.checkFile(record)
+	err := writer.checkFile(record)
 	if err == nil {
 		var n int
-		n, err = this.writer.Write(bs)
-		this.fileSize += int64(n)
+		n, err = writer.writer.Write(bs)
+		writer.fileSize += int64(n)
 	}
-	if this.config.ReportOnErr && err != nil {
+	if writer.config.ReportOnErr && err != nil {
 		log.Println("writer/file.Write:", err)
 	}
 }
 
-func (this *Writer) Config() *Config {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) Config() *Config {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	copyConfig := this.config
+	copyConfig := writer.config
 	return &copyConfig
 }
 
-func (this *Writer) SetConfig(config *Config) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) SetConfig(config *Config) error {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	if err := this.setConfig(config); err != nil {
+	if err := writer.setConfig(config); err != nil {
 		return fmt.Errorf("writer/file.SetConfig: %v", err)
 	}
 	return nil
 }
 
-func (this *Writer) UpdateConfig(fn func(Config) Config) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) UpdateConfig(fn func(Config) Config) error {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	config := fn(this.config)
-	if err := this.setConfig(&config); err != nil {
+	config := fn(writer.config)
+	if err := writer.setConfig(&config); err != nil {
 		return fmt.Errorf("writer/file.UpdateConfig: %v", err)
 	}
 	return nil
 }
 
-func (this *Writer) checkFile(record *gxlog.Record) error {
-	if this.writer == nil ||
-		this.day != record.Time.YearDay() ||
-		this.fileSize >= this.config.MaxFileSize {
-		return this.createFile(record)
-	} else if time.Since(this.checkTime) >= this.config.CheckInterval {
-		this.checkTime = time.Now()
-		if _, err := os.Stat(this.pathname); err != nil {
-			return this.createFile(record)
+func (writer *Writer) checkFile(record *gxlog.Record) error {
+	if writer.writer == nil ||
+		writer.day != record.Time.YearDay() ||
+		writer.fileSize >= writer.config.MaxFileSize {
+		return writer.createFile(record)
+	} else if time.Since(writer.checkTime) >= writer.config.CheckInterval {
+		writer.checkTime = time.Now()
+		if _, err := os.Stat(writer.pathname); err != nil {
+			return writer.createFile(record)
 		}
 	}
 	return nil
 }
 
-func (this *Writer) createFile(record *gxlog.Record) error {
-	if err := this.closeFile(); err != nil {
+func (writer *Writer) createFile(record *gxlog.Record) error {
+	if err := writer.closeFile(); err != nil {
 		return err
 	}
 
-	path := this.formatPath(record.Time)
+	path := writer.formatPath(record.Time)
 	if err := os.MkdirAll(path, 0777); err != nil {
 		return err
 	}
 
-	filename := this.formatFilename(record.Time)
+	filename := writer.formatFilename(record.Time)
 	pathname := filepath.Join(path, filename)
 	file, err := os.Create(pathname)
 	if err != nil {
 		return err
 	}
 
-	var writer io.WriteCloser = file
-	if this.config.AESKey != "" {
+	var wt io.WriteCloser = file
+	if writer.config.AESKey != "" {
 		// newAESWriter will return the input writer when an error occurs
-		writer, err = newAESWriter(writer, this.config.AESKey, this.config.BlockMode)
+		wt, err = newAESWriter(wt, writer.config.AESKey, writer.config.BlockMode)
 		if err != nil {
-			writer.Close()
+			wt.Close()
 			return err
 		}
 	}
-	if this.config.GzipLevel != flate.NoCompression {
+	if writer.config.GzipLevel != flate.NoCompression {
 		// newGzipWriter will return the input writer when an error occurs
-		writer, err = newGzipWriter(writer, this.config.GzipLevel)
+		wt, err = newGzipWriter(wt, writer.config.GzipLevel)
 		if err != nil {
-			writer.Close()
+			wt.Close()
 			return err
 		}
 	}
 
-	this.writer = writer
-	this.pathname = pathname
-	this.day = record.Time.YearDay()
-	this.fileSize = 0
+	writer.writer = wt
+	writer.pathname = pathname
+	writer.day = record.Time.YearDay()
+	writer.fileSize = 0
 
 	return nil
 }
 
-func (this *Writer) closeFile() error {
-	if this.writer != nil {
-		if err := this.writer.Close(); err != nil {
+func (writer *Writer) closeFile() error {
+	if writer.writer != nil {
+		if err := writer.writer.Close(); err != nil {
 			return err
 		}
-		this.writer = nil
+		writer.writer = nil
 	}
 	return nil
 }
 
-func (this *Writer) formatPath(tm time.Time) string {
-	path := this.config.Path
-	if this.config.NewDirEachDay {
-		path = filepath.Join(path, this.formatDate(tm))
+func (writer *Writer) formatPath(tm time.Time) string {
+	path := writer.config.Path
+	if writer.config.NewDirEachDay {
+		path = filepath.Join(path, writer.formatDate(tm))
 	}
 	return path
 }
 
-func (this *Writer) formatFilename(tm time.Time) string {
+func (writer *Writer) formatFilename(tm time.Time) string {
 	elements := []string{}
-	if this.config.Base != "" {
-		elements = append(elements, this.config.Base)
+	if writer.config.Base != "" {
+		elements = append(elements, writer.config.Base)
 	}
-	if !this.config.NewDirEachDay {
-		elements = append(elements, this.formatDate(tm))
+	if !writer.config.NewDirEachDay {
+		elements = append(elements, writer.formatDate(tm))
 	}
-	elements = append(elements, this.formatTime(tm))
-	return strings.Join(elements, this.config.Separator) + this.config.Ext
+	elements = append(elements, writer.formatTime(tm))
+	return strings.Join(elements, writer.config.Separator) + writer.config.Ext
 }
 
-func (this *Writer) formatDate(tm time.Time) string {
+func (writer *Writer) formatDate(tm time.Time) string {
 	fmtstr := "%04d%02d%02d"
-	switch this.config.DateStyle {
+	switch writer.config.DateStyle {
 	case DateDash:
 		fmtstr = "%04d-%02d-%02d"
 	case DateUnderscore:
@@ -187,9 +187,9 @@ func (this *Writer) formatDate(tm time.Time) string {
 	return fmt.Sprintf(fmtstr, tm.Year(), tm.Month(), tm.Day())
 }
 
-func (this *Writer) formatTime(tm time.Time) string {
+func (writer *Writer) formatTime(tm time.Time) string {
 	fmtstr := "%02d%02d%02d.%06d"
-	switch this.config.TimeStyle {
+	switch writer.config.TimeStyle {
 	case TimeDash:
 		fmtstr = "%02d-%02d-%02d-%06d"
 	case TimeUnderscore:
@@ -202,31 +202,31 @@ func (this *Writer) formatTime(tm time.Time) string {
 	return fmt.Sprintf(fmtstr, tm.Hour(), tm.Minute(), tm.Second(), tm.Nanosecond()/1000)
 }
 
-func (this *Writer) needNewFile(config *Config) bool {
-	if config.Path != this.config.Path ||
-		config.Base != this.config.Base ||
-		config.Ext != this.config.Ext ||
-		config.Separator != this.config.Separator ||
-		config.DateStyle != this.config.DateStyle ||
-		config.TimeStyle != this.config.TimeStyle ||
-		config.GzipLevel != this.config.GzipLevel ||
-		config.AESKey != this.config.AESKey ||
-		config.BlockMode != this.config.BlockMode ||
-		config.NewDirEachDay != this.config.NewDirEachDay {
+func (writer *Writer) needNewFile(config *Config) bool {
+	if config.Path != writer.config.Path ||
+		config.Base != writer.config.Base ||
+		config.Ext != writer.config.Ext ||
+		config.Separator != writer.config.Separator ||
+		config.DateStyle != writer.config.DateStyle ||
+		config.TimeStyle != writer.config.TimeStyle ||
+		config.GzipLevel != writer.config.GzipLevel ||
+		config.AESKey != writer.config.AESKey ||
+		config.BlockMode != writer.config.BlockMode ||
+		config.NewDirEachDay != writer.config.NewDirEachDay {
 		return true
 	}
 	return false
 }
 
-func (this *Writer) setConfig(config *Config) error {
+func (writer *Writer) setConfig(config *Config) error {
 	if err := config.Check(); err != nil {
 		return err
 	}
-	if this.needNewFile(config) {
-		if err := this.closeFile(); err != nil {
+	if writer.needNewFile(config) {
+		if err := writer.closeFile(); err != nil {
 			return err
 		}
 	}
-	this.config = *config
+	writer.config = *config
 	return nil
 }

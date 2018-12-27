@@ -31,50 +31,50 @@ func Open(network, addr string) (*Writer, error) {
 	return wt, nil
 }
 
-func (this *Writer) Close() error {
-	if err := this.listener.Close(); err != nil {
+func (writer *Writer) Close() error {
+	if err := writer.listener.Close(); err != nil {
 		return fmt.Errorf("socket.Close: %v", err)
 	}
 
-	this.wg.Wait()
+	writer.wg.Wait()
 
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	for id, conn := range this.conns {
+	for id, conn := range writer.conns {
 		conn.Close()
-		delete(this.conns, id)
+		delete(writer.conns, id)
 	}
 
 	return nil
 }
 
-func (this *Writer) Write(bs []byte, record *gxlog.Record) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	for id, conn := range this.conns {
+	for id, conn := range writer.conns {
 		if _, err := conn.Write(bs); err != nil {
 			conn.Close()
-			delete(this.conns, id)
+			delete(writer.conns, id)
 		}
 	}
 }
 
-func (this *Writer) serve() {
+func (writer *Writer) serve() {
 	for {
-		conn, err := this.listener.Accept()
+		conn, err := writer.listener.Accept()
 		if err != nil {
 			break
 		}
 
-		this.lock.Lock()
+		writer.lock.Lock()
 
-		id := this.id
-		this.id++
-		this.conns[id] = conn
+		id := writer.id
+		writer.id++
+		writer.conns[id] = conn
 
-		this.lock.Unlock()
+		writer.lock.Unlock()
 	}
-	this.wg.Done()
+	writer.wg.Done()
 }

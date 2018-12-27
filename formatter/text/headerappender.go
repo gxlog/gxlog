@@ -41,7 +41,7 @@ func newHeaderAppender(element, property, fmtspec, staticText string) *headerApp
 	return nil
 }
 
-func (this *headerAppender) AppendHeader(buf []byte, record *gxlog.Record) []byte {
-	buf = append(buf, this.staticText...)
-	return this.formatter.FormatElement(buf, record)
+func (appender *headerAppender) AppendHeader(buf []byte, record *gxlog.Record) []byte {
+	buf = append(buf, appender.staticText...)
+	return appender.formatter.FormatElement(buf, record)
 }

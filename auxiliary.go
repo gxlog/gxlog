@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-const (
-	cMapInitCap = 256
-)
+const mapInitCap = 256
 
 // The Dynamic type defines a function type. A value of Dynamic will be regarded
 // as the value getter of a dynamic context key-value pair when it is as an
@@ -36,8 +34,8 @@ type copyOnWrite struct {
 // WithPrefix returns a new Logger that is a shallow copy of the caller.
 // With the new Logger, all the logs it outputs will have the prefix as
 // long as the Prefix flag of the Logger is set.
-func (this *Logger) WithPrefix(prefix string) *Logger {
-	clone := *this
+func (log *Logger) WithPrefix(prefix string) *Logger {
+	clone := *log
 	clone.attr.Prefix = prefix
 	return &clone
 }
@@ -59,8 +57,8 @@ func (this *Logger) WithPrefix(prefix string) *Logger {
 //
 // ATTENTION: you should be very careful to concurrency safety or deadlocks
 // with dynamic contexts.
-func (this *Logger) WithContext(kvs ...interface{}) *Logger {
-	clone := *this
+func (log *Logger) WithContext(kvs ...interface{}) *Logger {
+	clone := *log
 	clone.attr.Contexts, clone.attr.DynamicContexts =
 		appendContexts(clone.attr.Contexts, clone.attr.DynamicContexts, kvs)
 	return &clone
@@ -69,8 +67,8 @@ func (this *Logger) WithContext(kvs ...interface{}) *Logger {
 // WithMark returns a new Logger that is a shallow copy of the caller.
 // With the new Logger, all the logs it outputs will be marked as long
 // as the Mark flag of the Logger is set.
-func (this *Logger) WithMark(ok bool) *Logger {
-	clone := *this
+func (log *Logger) WithMark(ok bool) *Logger {
+	clone := *log
 	clone.attr.Marked = ok
 	return &clone
 }
@@ -84,21 +82,21 @@ func (this *Logger) WithMark(ok bool) *Logger {
 //
 // THINK TWICE before you limit the output count of logs, you may miss logs
 // which you need.
-func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
+func (log *Logger) WithCountLimit(batch, limit int64) *Logger {
 	if batch <= 0 {
 		panic("gxlog.WithCountLimit: batch must be positive")
 	}
 	if limit < 0 {
 		panic("gxlog.WithCountLimit: negative limit")
 	}
-	clone := *this
+	clone := *log
 	clone.attr.CountLimiter = func(record *Record) bool {
 		loc := locator{
 			File: record.File,
 			Line: record.Line,
 		}
-		n := this.countMap[loc]
-		this.countMap[loc]++
+		n := log.countMap[loc]
+		log.countMap[loc]++
 		return n%batch < limit
 	}
 	return &clone
@@ -116,23 +114,23 @@ func (this *Logger) WithCountLimit(batch, limit int64) *Logger {
 //
 // NOTICE: The space complexity of WithTimeLimit is O(limit). Try to specify
 // reasonable duration and limit.
-func (this *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
+func (log *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 	if duration <= 0 {
 		panic("gxlog.WithTimeLimit: duration must be positive")
 	}
 	if limit < 0 {
 		panic("gxlog.WithTimeLimit: negative limit")
 	}
-	clone := *this
+	clone := *log
 	clone.attr.TimeLimiter = func(record *Record) bool {
 		loc := locator{
 			File: record.File,
 			Line: record.Line,
 		}
-		queue := this.timeMap[loc]
+		queue := log.timeMap[loc]
 		if queue == nil {
 			queue = newTimeQueue(duration, limit)
-			this.timeMap[loc] = queue
+			log.timeMap[loc] = queue
 		}
 		return queue.Enqueue(record.Time)
 	}

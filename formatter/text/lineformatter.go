@@ -19,10 +19,10 @@ func newLineFormatter(property, fmtspec string) *lineFormatter {
 	return &lineFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *lineFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	if this.fmtspec == "%d" {
+func (formatter *lineFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+	if formatter.fmtspec == "%d" {
 		return append(buf, strconv.Itoa(record.Line)...)
 	} else {
-		return append(buf, fmt.Sprintf(this.fmtspec, record.Line)...)
+		return append(buf, fmt.Sprintf(formatter.fmtspec, record.Line)...)
 	}
 }

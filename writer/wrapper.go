@@ -17,6 +17,6 @@ func Wrap(writer io.Writer) gxlog.Writer {
 	return &wrapper{writer: writer}
 }
 
-func (this *wrapper) Write(bs []byte, _ *gxlog.Record) {
-	this.writer.Write(bs)
+func (wrap *wrapper) Write(bs []byte, _ *gxlog.Record) {
+	wrap.writer.Write(bs)
 }

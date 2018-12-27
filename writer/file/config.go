@@ -59,73 +59,73 @@ func NewConfig(path, base string) *Config {
 	}
 }
 
-func (this *Config) WithExt(ext string) *Config {
-	this.Ext = ext
-	return this
+func (cfg *Config) WithExt(ext string) *Config {
+	cfg.Ext = ext
+	return cfg
 }
 
-func (this *Config) WithSeparator(sep string) *Config {
-	this.Separator = sep
-	return this
+func (cfg *Config) WithSeparator(sep string) *Config {
+	cfg.Separator = sep
+	return cfg
 }
 
-func (this *Config) WithDateStyle(style DateStyleID) *Config {
-	this.DateStyle = style
-	return this
+func (cfg *Config) WithDateStyle(style DateStyleID) *Config {
+	cfg.DateStyle = style
+	return cfg
 }
 
-func (this *Config) WithTimeStyle(style TimeStyleID) *Config {
-	this.TimeStyle = style
-	return this
+func (cfg *Config) WithTimeStyle(style TimeStyleID) *Config {
+	cfg.TimeStyle = style
+	return cfg
 }
 
-func (this *Config) WithMaxFileSize(size int64) *Config {
-	this.MaxFileSize = size
-	return this
+func (cfg *Config) WithMaxFileSize(size int64) *Config {
+	cfg.MaxFileSize = size
+	return cfg
 }
 
-func (this *Config) WithCheckInterval(interval time.Duration) *Config {
-	this.CheckInterval = interval
-	return this
+func (cfg *Config) WithCheckInterval(interval time.Duration) *Config {
+	cfg.CheckInterval = interval
+	return cfg
 }
 
-func (this *Config) WithGzipLevel(level int) *Config {
-	this.GzipLevel = level
-	return this
+func (cfg *Config) WithGzipLevel(level int) *Config {
+	cfg.GzipLevel = level
+	return cfg
 }
 
-func (this *Config) WithAESKey(key string) *Config {
-	this.AESKey = key
-	return this
+func (cfg *Config) WithAESKey(key string) *Config {
+	cfg.AESKey = key
+	return cfg
 }
 
-func (this *Config) WithBlockMode(mode BlockCipherMode) *Config {
-	this.BlockMode = mode
-	return this
+func (cfg *Config) WithBlockMode(mode BlockCipherMode) *Config {
+	cfg.BlockMode = mode
+	return cfg
 }
 
-func (this *Config) WithNewDirEachDay(ok bool) *Config {
-	this.NewDirEachDay = ok
-	return this
+func (cfg *Config) WithNewDirEachDay(ok bool) *Config {
+	cfg.NewDirEachDay = ok
+	return cfg
 }
 
-func (this *Config) WithReportOnErr(ok bool) *Config {
-	this.ReportOnErr = ok
-	return this
+func (cfg *Config) WithReportOnErr(ok bool) *Config {
+	cfg.ReportOnErr = ok
+	return cfg
 }
 
-func (this *Config) Check() error {
-	if this.MaxFileSize <= 0 {
+func (cfg *Config) Check() error {
+	if cfg.MaxFileSize <= 0 {
 		return errors.New("Config.MaxFileSize must be greater than 0")
 	}
-	if this.CheckInterval <= 0 {
+	if cfg.CheckInterval <= 0 {
 		return errors.New("Config.CheckInterval must be greater than 0")
 	}
-	if this.GzipLevel < flate.HuffmanOnly || this.GzipLevel > flate.BestCompression {
+	if cfg.GzipLevel < flate.HuffmanOnly || cfg.GzipLevel > flate.BestCompression {
 		return errors.New("Config.GzipLevel must be DefaultCompression, NoCompression, " +
 			"HuffmanOnly or any integer value between BestSpeed and BestCompression inclusive")
 	}
-	key, err := hex.DecodeString(this.AESKey)
+	key, err := hex.DecodeString(cfg.AESKey)
 	if err != nil {
 		return errors.New("Config.AESKey must be hexadecimal encoded without prefix 0X or 0x")
 	}
@@ -133,7 +133,7 @@ func (this *Config) Check() error {
 	if keyLen != 0 && keyLen != 16 && keyLen != 24 && keyLen != 32 {
 		return errors.New("Config.AESKey must be either empty, 128 bits, 192 bits or 256 bits")
 	}
-	if this.BlockMode < CFB || this.BlockMode > OFB {
+	if cfg.BlockMode < CFB || cfg.BlockMode > OFB {
 		return errors.New("Config.BlockMode must be either CFB, CTR or OFB")
 	}
 	return nil

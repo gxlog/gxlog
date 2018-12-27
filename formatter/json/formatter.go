@@ -26,105 +26,105 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
-func (this *Formatter) Format(record *gxlog.Record) []byte {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (formatter *Formatter) Format(record *gxlog.Record) []byte {
+	formatter.lock.Lock()
+	defer formatter.lock.Unlock()
 
-	buf := make([]byte, 0, this.config.MinBufSize)
+	buf := make([]byte, 0, formatter.config.MinBufSize)
 	sep := ""
 	buf = append(buf, "{"...)
-	if this.config.Omit&Time == 0 {
+	if formatter.config.Omit&Time == 0 {
 		buf = formatStrField(buf, sep, "Time", record.Time.Format(time.RFC3339Nano), false)
 		sep = ","
 	}
-	if this.config.Omit&Level == 0 {
+	if formatter.config.Omit&Level == 0 {
 		buf = formatIntField(buf, sep, "Level", int(record.Level))
 		sep = ","
 	}
-	if this.config.Omit&File == 0 {
-		file := util.LastSegments(record.File, this.config.FileSegs, '/')
+	if formatter.config.Omit&File == 0 {
+		file := util.LastSegments(record.File, formatter.config.FileSegs, '/')
 		buf = formatStrField(buf, sep, "File", file, true)
 		sep = ","
 	}
-	if this.config.Omit&Line == 0 {
+	if formatter.config.Omit&Line == 0 {
 		buf = formatIntField(buf, sep, "Line", record.Line)
 		sep = ","
 	}
-	if this.config.Omit&Pkg == 0 {
-		pkg := util.LastSegments(record.Pkg, this.config.PkgSegs, '/')
+	if formatter.config.Omit&Pkg == 0 {
+		pkg := util.LastSegments(record.Pkg, formatter.config.PkgSegs, '/')
 		buf = formatStrField(buf, sep, "Pkg", pkg, false)
 		sep = ","
 	}
-	if this.config.Omit&Func == 0 {
-		fn := util.LastSegments(record.Func, this.config.FuncSegs, '.')
+	if formatter.config.Omit&Func == 0 {
+		fn := util.LastSegments(record.Func, formatter.config.FuncSegs, '.')
 		buf = formatStrField(buf, sep, "Func", fn, false)
 		sep = ","
 	}
-	if this.config.Omit&Msg == 0 {
+	if formatter.config.Omit&Msg == 0 {
 		buf = formatStrField(buf, sep, "Msg", record.Msg, true)
 		sep = ","
 	}
-	buf = this.formatAux(buf, sep, &record.Aux)
+	buf = formatter.formatAux(buf, sep, &record.Aux)
 	buf = append(buf, "}\n"...)
 	return buf
 }
 
-func (this *Formatter) Config() *Config {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (formatter *Formatter) Config() *Config {
+	formatter.lock.Lock()
+	defer formatter.lock.Unlock()
 
-	copyConfig := this.config
+	copyConfig := formatter.config
 	return &copyConfig
 }
 
-func (this *Formatter) SetConfig(config *Config) error {
+func (formatter *Formatter) SetConfig(config *Config) error {
 	if config.MinBufSize < 0 {
 		return errors.New("formatter/json.SetConfig: Config.MinBufSize must not be negative")
 	}
 
-	this.lock.Lock()
-	defer this.lock.Unlock()
+	formatter.lock.Lock()
+	defer formatter.lock.Unlock()
 
-	this.config = *config
+	formatter.config = *config
 	return nil
 }
 
-func (this *Formatter) UpdateConfig(fn func(Config) Config) error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (formatter *Formatter) UpdateConfig(fn func(Config) Config) error {
+	formatter.lock.Lock()
+	defer formatter.lock.Unlock()
 
-	config := fn(this.config)
+	config := fn(formatter.config)
 
 	if config.MinBufSize < 0 {
 		return errors.New("formatter/json.UpdateConfig: Config.MinBufSize must not be negative")
 	}
-	this.config = config
+	formatter.config = config
 	return nil
 }
 
-func (this *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxiliary) []byte {
-	if this.config.Omit&Aux == Aux {
+func (formatter *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxiliary) []byte {
+	if formatter.config.Omit&Aux == Aux {
 		return buf
 	}
-	if this.config.OmitEmpty&Aux == Aux &&
+	if formatter.config.OmitEmpty&Aux == Aux &&
 		aux.Prefix == "" && len(aux.Contexts) == 0 && aux.Marked == false {
 		return buf
 	}
 	buf = append(buf, sep...)
 	sep = ""
 	buf = append(buf, `"Aux":{`...)
-	if this.config.Omit&Prefix == 0 &&
-		!(this.config.OmitEmpty&Prefix != 0 && aux.Prefix == "") {
+	if formatter.config.Omit&Prefix == 0 &&
+		!(formatter.config.OmitEmpty&Prefix != 0 && aux.Prefix == "") {
 		buf = formatStrField(buf, sep, "Prefix", aux.Prefix, true)
 		sep = ","
 	}
-	if this.config.Omit&Context == 0 &&
-		!(this.config.OmitEmpty&Context != 0 && len(aux.Contexts) == 0) {
+	if formatter.config.Omit&Context == 0 &&
+		!(formatter.config.OmitEmpty&Context != 0 && len(aux.Contexts) == 0) {
 		buf = formatContexts(buf, sep, aux.Contexts)
 		sep = ","
 	}
-	if this.config.Omit&Mark == 0 &&
-		!(this.config.OmitEmpty&Mark != 0 && aux.Marked == false) {
+	if formatter.config.Omit&Mark == 0 &&
+		!(formatter.config.OmitEmpty&Mark != 0 && aux.Marked == false) {
 		buf = formatBoolField(buf, sep, "Marked", aux.Marked)
 	}
 	buf = append(buf, "}"...)

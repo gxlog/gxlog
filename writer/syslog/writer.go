@@ -11,7 +11,7 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-const cSeverityMask = 0x07
+const severityMask = 0x07
 
 type syslogFunc func(string) error
 
@@ -46,68 +46,68 @@ func Open(cfg *Config) (*Writer, error) {
 	return writer, nil
 }
 
-func (this *Writer) Close() error {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) Close() error {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	if err := this.writer.Close(); err != nil {
+	if err := writer.writer.Close(); err != nil {
 		return fmt.Errorf("writer/syslog.Close: %v", err)
 	}
 	return nil
 }
 
-func (this *Writer) Write(bs []byte, record *gxlog.Record) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	err := this.logFuncs[record.Level](string(bs))
-	if this.reportOnErr && err != nil {
+	err := writer.logFuncs[record.Level](string(bs))
+	if writer.reportOnErr && err != nil {
 		log.Println("writer/syslog.Write:", err)
 	}
 }
 
-func (this *Writer) ReportOnErr() bool {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) ReportOnErr() bool {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	return this.reportOnErr
+	return writer.reportOnErr
 }
 
-func (this *Writer) SetReportOnErr(ok bool) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) SetReportOnErr(ok bool) {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	this.reportOnErr = ok
+	writer.reportOnErr = ok
 }
 
-func (this *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {
-	this.lock.Lock()
-	defer this.lock.Unlock()
+func (writer *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {
+	writer.lock.Lock()
+	defer writer.lock.Unlock()
 
-	this.updateLogFuncs(severityMap)
+	writer.updateLogFuncs(severityMap)
 }
 
-func (this *Writer) updateLogFuncs(severityMap map[gxlog.Level]Severity) {
+func (writer *Writer) updateLogFuncs(severityMap map[gxlog.Level]Severity) {
 	for level, severity := range severityMap {
 		var fn syslogFunc
-		switch severity & cSeverityMask {
+		switch severity & severityMask {
 		case SevDebug:
-			fn = this.writer.Debug
+			fn = writer.writer.Debug
 		case SevInfo:
-			fn = this.writer.Info
+			fn = writer.writer.Info
 		case SevNotice:
-			fn = this.writer.Notice
+			fn = writer.writer.Notice
 		case SevWarning:
-			fn = this.writer.Warning
+			fn = writer.writer.Warning
 		case SevErr:
-			fn = this.writer.Err
+			fn = writer.writer.Err
 		case SevCrit:
-			fn = this.writer.Crit
+			fn = writer.writer.Crit
 		case SevAlert:
-			fn = this.writer.Alert
+			fn = writer.writer.Alert
 		case SevEmerg:
-			fn = this.writer.Emerg
+			fn = writer.writer.Emerg
 		}
-		this.logFuncs[level] = fn
+		writer.logFuncs[level] = fn
 	}
 }

@@ -18,10 +18,10 @@ func newMsgFormatter(property, fmtspec string) *msgFormatter {
 	return &msgFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (this *msgFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
-	if this.fmtspec == "%s" {
+func (formatter *msgFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+	if formatter.fmtspec == "%s" {
 		return append(buf, record.Msg...)
 	} else {
-		return append(buf, fmt.Sprintf(this.fmtspec, record.Msg)...)
+		return append(buf, fmt.Sprintf(formatter.fmtspec, record.Msg)...)
 	}
 }
