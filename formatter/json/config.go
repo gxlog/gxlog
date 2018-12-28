@@ -49,37 +49,37 @@ func NewConfig() *Config {
 	}
 }
 
-// WithFileSegs sets the FileSegs of the Config and returns it.
+// WithFileSegs sets the FileSegs of the Config and returns the Config.
 func (cfg *Config) WithFileSegs(segs int) *Config {
 	cfg.FileSegs = segs
 	return cfg
 }
 
-// WithPkgSegs sets the PkgSegs of the Config and returns it.
+// WithPkgSegs sets the PkgSegs of the Config and returns the Config.
 func (cfg *Config) WithPkgSegs(segs int) *Config {
 	cfg.PkgSegs = segs
 	return cfg
 }
 
-// WithFuncSegs sets the FuncSegs of the Config and returns it.
+// WithFuncSegs sets the FuncSegs of the Config and returns the Config.
 func (cfg *Config) WithFuncSegs(segs int) *Config {
 	cfg.FuncSegs = segs
 	return cfg
 }
 
-// WithOmit sets the Omit of the Config and returns it.
+// WithOmit sets the Omit of the Config and returns the Config.
 func (cfg *Config) WithOmit(bits OmitBits) *Config {
 	cfg.Omit = bits
 	return cfg
 }
 
-// WithOmitEmpty sets the OmitEmpty of the Config and returns it.
+// WithOmitEmpty sets the OmitEmpty of the Config and returns the Config.
 func (cfg *Config) WithOmitEmpty(bits OmitBits) *Config {
 	cfg.OmitEmpty = bits
 	return cfg
 }
 
-// WithMinBufSize sets the MinBufSize of the Config and returns it.
+// WithMinBufSize sets the MinBufSize of the Config and returns the Config.
 func (cfg *Config) WithMinBufSize(size int) *Config {
 	cfg.MinBufSize = size
 	return cfg

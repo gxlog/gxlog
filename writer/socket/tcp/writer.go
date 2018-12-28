@@ -1,3 +1,12 @@
+// Package tcp implements a tcp socket writer which implements the gxlog.Writer.
+//
+// The tcp socket writer aims at log watching. For log transmission, use a syslog
+// writer instead. With a tcp socket writer, one can use netcat to receive logs
+// rather than to tail a log file which is inconvenient because a new log file
+// will be created when a log file reaches the max size.
+//
+// For performance and security, use a unix writer instead as long as the system
+// has support for unix domain socket.
 package tcp
 
 import (
@@ -7,10 +16,16 @@ import (
 	"github.com/gxlog/gxlog/writer/socket/internal/socket"
 )
 
+// A Writer implements the interface gxlog.Writer.
+//
+// All methods of a Writer are concurrency safe.
+//
+// A Writer must be created with Open.
 type Writer struct {
 	writer *socket.Writer
 }
 
+// Open creates a new Writer with the config. The config must NOT be nil.
 func Open(config *Config) (*Writer, error) {
 	writer, err := socket.Open("tcp", config.Addr)
 	if err != nil {
@@ -19,6 +34,7 @@ func Open(config *Config) (*Writer, error) {
 	return &Writer{writer: writer}, nil
 }
 
+// Close closes the Writer.
 func (writer *Writer) Close() error {
 	if err := writer.writer.Close(); err != nil {
 		return fmt.Errorf("writer/socket/tcp.Close: %v", err)
@@ -26,6 +42,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
+// Write implements the interface gxlog.Writer. It writes logs to tcp sockets.
 func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
 	writer.writer.Write(bs, record)
 }

@@ -24,7 +24,7 @@ type Config struct {
 	// one of a field, it will be passed to fmt.Sprintf to format the field and
 	// this affects the performance a little.
 	// The supported properties vary with fields.
-	// All supported fields are as follows:
+	// All supported fields are as the follows:
 	//            supported property          defaults      property examples
 	// --------------------------------------------------------------------------
 	//   time     <date|time>[.ms|.us|.ns]    date.us %s    date.ns, time
@@ -61,25 +61,25 @@ func NewConfig() *Config {
 	}
 }
 
-// WithHeader sets the Header of the Config and returns it.
+// WithHeader sets the Header of the Config and returns the Config.
 func (cfg *Config) WithHeader(header string) *Config {
 	cfg.Header = header
 	return cfg
 }
 
-// WithMinBufSize sets the MinBufSize of the Config and returns it.
+// WithMinBufSize sets the MinBufSize of the Config and returns the Config.
 func (cfg *Config) WithMinBufSize(size int) *Config {
 	cfg.MinBufSize = size
 	return cfg
 }
 
-// WithColorMap sets the ColorMap of the Config and returns it.
+// WithColorMap sets the ColorMap of the Config and returns the Config.
 func (cfg *Config) WithColorMap(colorMap map[gxlog.Level]ColorID) *Config {
 	cfg.ColorMap = colorMap
 	return cfg
 }
 
-// WithEnableColor sets the EnableColor of the Config and returns it.
+// WithEnableColor sets the EnableColor of the Config and returns the Config.
 func (cfg *Config) WithEnableColor(enable bool) *Config {
 	cfg.EnableColor = enable
 	return cfg

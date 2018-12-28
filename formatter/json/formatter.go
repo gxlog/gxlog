@@ -77,7 +77,7 @@ func (formatter *Formatter) Format(record *gxlog.Record) []byte {
 	return buf
 }
 
-// Config returns a copy of Config of the Formatter.
+// Config returns a copy of config of the Formatter.
 func (formatter *Formatter) Config() *Config {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -87,6 +87,8 @@ func (formatter *Formatter) Config() *Config {
 }
 
 // SetConfig sets the copy of config to the Formatter. The config must NOT be nil.
+// If the config is invalid, it returns an error and the config of the Formatter
+// is left to be unchanged.
 func (formatter *Formatter) SetConfig(config *Config) error {
 	if config.MinBufSize < 0 {
 		return errors.New("formatter/json.SetConfig: Config.MinBufSize must not be negative")
@@ -101,6 +103,9 @@ func (formatter *Formatter) SetConfig(config *Config) error {
 
 // UpdateConfig will call fn with copy of the config of the Formatter, and then
 // sets copy of the returned config to the Formatter. The fn must NOT be nil.
+// If the returned config is invalid, it returns an error and the config of
+// the Formatter is left to be unchanged.
+//
 // Do NOT call methods of the Formatter within fn, or it will deadlock.
 func (formatter *Formatter) UpdateConfig(fn func(Config) Config) error {
 	formatter.lock.Lock()

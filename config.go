@@ -54,55 +54,55 @@ func NewConfig() *Config {
 	}
 }
 
-// WithLevel sets the Level of the Config and returns it.
+// WithLevel sets the Level of the Config and returns the Config.
 func (cfg *Config) WithLevel(level Level) *Config {
 	cfg.Level = level
 	return cfg
 }
 
-// WithTimeLevel sets the TimeLevel of the Config and returns it.
+// WithTimeLevel sets the TimeLevel of the Config and returns the Config.
 func (cfg *Config) WithTimeLevel(level Level) *Config {
 	cfg.TimeLevel = level
 	return cfg
 }
 
-// WithPanicLevel sets the PanicLevel of the Config and returns it.
+// WithPanicLevel sets the PanicLevel of the Config and returns the Config.
 func (cfg *Config) WithPanicLevel(level Level) *Config {
 	cfg.PanicLevel = level
 	return cfg
 }
 
-// WithTrackLevel sets the TrackLevel of the Config and returns it.
+// WithTrackLevel sets the TrackLevel of the Config and returns the Config.
 func (cfg *Config) WithTrackLevel(level Level) *Config {
 	cfg.TrackLevel = level
 	return cfg
 }
 
-// WithExitLevel sets the ExitLevel of the Config and returns it.
+// WithExitLevel sets the ExitLevel of the Config and returns the Config.
 func (cfg *Config) WithExitLevel(level Level) *Config {
 	cfg.ExitLevel = level
 	return cfg
 }
 
-// WithFilter sets the Filter of the Config and returns it.
+// WithFilter sets the Filter of the Config and returns the Config.
 func (cfg *Config) WithFilter(filter Filter) *Config {
 	cfg.Filter = filter
 	return cfg
 }
 
-// WithFlags sets the Flags of the Config and returns it.
+// WithFlags sets the Flags of the Config and returns the Config.
 func (cfg *Config) WithFlags(flags Flag) *Config {
 	cfg.Flags = flags
 	return cfg
 }
 
-// WithEnabled enables flags of the Config and returns it.
+// WithEnabled enables flags of the Config and returns the Config.
 func (cfg *Config) WithEnabled(flags Flag) *Config {
 	cfg.Flags |= flags
 	return cfg
 }
 
-// WithDisabled disables flags of the Config and returns it.
+// WithDisabled disables flags of the Config and returns the Config.
 func (cfg *Config) WithDisabled(flags Flag) *Config {
 	cfg.Flags &^= flags
 	return cfg

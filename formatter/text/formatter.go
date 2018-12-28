@@ -28,7 +28,7 @@ type Formatter struct {
 	lock sync.Mutex
 }
 
-// New creates a new Formatter with the config. The config must not be nil.
+// New creates a new Formatter with the config. The config must NOT be nil.
 func New(config *Config) *Formatter {
 	if config.MinBufSize < 0 {
 		panic("formatter/text.New: Config.MinBufSize must not be negative")
@@ -137,6 +137,7 @@ func (formatter *Formatter) SetColor(level gxlog.Level, color ColorID) {
 }
 
 // MapColors maps the color of levels in the Formatter by the colorMap.
+// The color of a level is left to be unchanged if it is not in the map.
 func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()

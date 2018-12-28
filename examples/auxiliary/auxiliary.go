@@ -44,6 +44,7 @@ func main() {
 	//   with dynamic contexts.
 	n := 0
 	fn := gxlog.Dynamic(func(interface{}) interface{} {
+		// Do NOT call methods of the Logger, or it will deadlock.
 		n++
 		return n
 	})

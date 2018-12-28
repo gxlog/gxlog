@@ -9,8 +9,10 @@ import (
 	"io"
 )
 
+// The BlockCipherMode defines the type of block mode of AES.
 type BlockCipherMode int
 
+// All available block modes here.
 const (
 	CFB BlockCipherMode = iota
 	CTR

@@ -1,5 +1,6 @@
 // +build !nacl,!plan9,!windows
 
+// Package syslog implements a syslog writer which implements the gxlog.Writer.
 package syslog
 
 import (
@@ -15,6 +16,11 @@ const severityMask = 0x07
 
 type syslogFunc func(string) error
 
+// A Writer implements the interface gxlog.Writer.
+//
+// All methods of a Writer are concurrency safe.
+//
+// A Writer must be created with Open.
 type Writer struct {
 	reportOnErr bool
 
@@ -24,6 +30,7 @@ type Writer struct {
 	lock sync.Mutex
 }
 
+// Open creates a new Writer with the cfg. The cfg must NOT be nil.
 func Open(cfg *Config) (*Writer, error) {
 	wt, err := syslog.Dial(cfg.Network, cfg.Addr, syslog.Priority(cfg.Facility), cfg.Tag)
 	if err != nil {
@@ -46,6 +53,7 @@ func Open(cfg *Config) (*Writer, error) {
 	return writer, nil
 }
 
+// Close closes the Writer.
 func (writer *Writer) Close() error {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -56,6 +64,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
+// Write implements the interface gxlog.Writer. It writes logs to the syslog.
 func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -66,6 +75,7 @@ func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
 	}
 }
 
+// ReportOnErr returns the reportOnErr of the Writer.
 func (writer *Writer) ReportOnErr() bool {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -73,6 +83,7 @@ func (writer *Writer) ReportOnErr() bool {
 	return writer.reportOnErr
 }
 
+// SetReportOnErr sets the reportOnErr of the Writer.
 func (writer *Writer) SetReportOnErr(ok bool) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -80,6 +91,8 @@ func (writer *Writer) SetReportOnErr(ok bool) {
 	writer.reportOnErr = ok
 }
 
+// MapSeverity maps the severity of levels in the Writer by the severityMap.
+// The severity of a level is left to be unchanged if it is not in the map.
 func (writer *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()

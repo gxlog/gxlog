@@ -10,6 +10,8 @@ const mapInitCap = 256
 // The Dynamic type defines a function type. A value of Dynamic will be regarded
 // as the value getter of a dynamic context key-value pair when it is as an
 // argument to (*Logger).WithContext.
+//
+// Do NOT call methods of the Logger within the function, or it will deadlock.
 type Dynamic func(key interface{}) interface{}
 
 type dynamicContext struct {

@@ -1,3 +1,4 @@
+// Package file implements a file writer which implements the gxlog.Writer.
 package file
 
 import (
@@ -14,6 +15,11 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
+// A Writer implements the interface gxlog.Writer.
+//
+// All methods of a Writer are concurrency safe.
+//
+// A Writer must be created with Open.
 type Writer struct {
 	config Config
 
@@ -26,6 +32,8 @@ type Writer struct {
 	lock sync.Mutex
 }
 
+// Open creates a new Writer with the config. The config must NOT be nil.
+// Open returns an error only if the config is invalid.
 func Open(config *Config) (*Writer, error) {
 	if err := config.Check(); err != nil {
 		return nil, fmt.Errorf("writer/file.Open: %v", err)
@@ -33,6 +41,7 @@ func Open(config *Config) (*Writer, error) {
 	return &Writer{config: *config}, nil
 }
 
+// Close closes the Writer.
 func (writer *Writer) Close() error {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -43,6 +52,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
+// Write implements the interface gxlog.Writer. It writes logs to files.
 func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -58,6 +68,7 @@ func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
 	}
 }
 
+// Config returns a copy of config of the Writer.
 func (writer *Writer) Config() *Config {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -66,6 +77,9 @@ func (writer *Writer) Config() *Config {
 	return &copyConfig
 }
 
+// SetConfig sets the copy of config to the Writer. The config must NOT be nil.
+// If the config is invalid, it returns an error and the config of the Writer
+// is left to be unchanged.
 func (writer *Writer) SetConfig(config *Config) error {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -76,6 +90,12 @@ func (writer *Writer) SetConfig(config *Config) error {
 	return nil
 }
 
+// UpdateConfig will call fn with copy of the config of the Writer, and then
+// sets copy of the returned config to the Writer. The fn must NOT be nil.
+// If the returned config is invalid, it returns an error and the config of
+// the Writer is left to be unchanged.
+//
+// Do NOT call methods of the Writer within fn, or it will deadlock.
 func (writer *Writer) UpdateConfig(fn func(Config) Config) error {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()

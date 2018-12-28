@@ -7,9 +7,10 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
+// The Facility defines the facility type of syslog.
 type Facility int
 
-// Facility definitions here to be cross compilation friendly
+// Facility definitions here to be cross compilation friendly.
 const (
 	FacKern Facility = iota << 3
 	FacUser
@@ -25,9 +26,10 @@ const (
 	FacFTP
 )
 
+// The Severity defines the severity type of syslog.
 type Severity int
 
-// Severity definitions here to be cross compilation friendly
+// Severity definitions here to be cross compilation friendly.
 const (
 	SevEmerg Severity = iota
 	SevAlert
@@ -39,15 +41,33 @@ const (
 	SevDebug
 )
 
+// A Config is used to configure a syslog writer.
+// A Config should be created with NewConfig.
 type Config struct {
-	Tag         string
-	Facility    Facility
-	Network     string
-	Addr        string
+	// If Tag is empty, it will be filepath.Base(os.Args[0]).
+	Tag      string
+	Facility Facility
+	// If Network is empty, it will connect to the local syslog server.
+	// Otherwise, it will be passed to net.Dial.
+	Network string
+	// Addr will be passed to net.Dial if Network is not empty.
+	Addr string
+	// SeverityMap is used to remap the severity of each level.
+	// The severity of a level is left to be unchanged if it is not in the map.
+	// The default mapping is as the follows:
+	//     Trace: SevDebug
+	//     Debug: SevDebug
+	//     Info:  SevInfo
+	//     Warn:  SevWarning
+	//     Error: SevErr
+	//     Fatal: SevCrit
 	SeverityMap map[gxlog.Level]Severity
+	// ReportOnErr specifies whether to report errors by log.Println.
 	ReportOnErr bool
 }
 
+// NewConfig creates a new Config. By default, the Facility is FacUser and
+// the ReportOnErr is true.
 func NewConfig(tag string) *Config {
 	if tag == "" {
 		tag = filepath.Base(os.Args[0])
@@ -59,21 +79,25 @@ func NewConfig(tag string) *Config {
 	}
 }
 
+// WithFacility sets the Facility of the Config and returns the Config.
 func (cfg *Config) WithFacility(facility Facility) *Config {
 	cfg.Facility = facility
 	return cfg
 }
 
+// WithNetwork sets the Network and Addr of the Config and returns the Config.
 func (cfg *Config) WithAddr(network, addr string) *Config {
 	cfg.Network, cfg.Addr = network, addr
 	return cfg
 }
 
+// WithSeverityMap sets the SeverityMap of the Config and returns the Config.
 func (cfg *Config) WithSeverityMap(severityMap map[gxlog.Level]Severity) *Config {
 	cfg.SeverityMap = severityMap
 	return cfg
 }
 
+// WithReportOnErr sets the ReportOnErr of the Config and returns the Config.
 func (cfg *Config) WithReportOnErr(ok bool) *Config {
 	cfg.ReportOnErr = ok
 	return cfg

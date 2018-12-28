@@ -10,6 +10,8 @@ func (log *Logger) Config() *Config {
 }
 
 // SetConfig sets the copy of config to the Logger. The config must NOT be nil.
+// If the config is invalid, it returns an error and the config of the Logger
+// is left to be unchanged.
 func (log *Logger) SetConfig(config *Config) error {
 	log.lock.Lock()
 	defer log.lock.Unlock()
@@ -21,6 +23,9 @@ func (log *Logger) SetConfig(config *Config) error {
 
 // UpdateConfig will call fn with copy of the config of the Logger, and then
 // sets copy of the returned config to the Logger. The fn must NOT be nil.
+// If the returned config is invalid, it returns an error and the config of
+// the Logger is left to be unchanged.
+//
 // Do NOT call methods of the Logger within fn, or it will deadlock.
 func (log *Logger) UpdateConfig(fn func(Config) Config) error {
 	log.lock.Lock()

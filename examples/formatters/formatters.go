@@ -19,6 +19,9 @@ func main() {
 	log.Info("a simple formatter that just returns record.Msg")
 
 	// text formatter
+	// the default color mapping is Trace, Debug and Info to Green, Warn to
+	//   Yellow, Error and Fatal to Red and marked logs to Magenta no matter
+	//   at which level they are.
 	textFmt := text.New(text.NewConfig().
 		WithEnableColor(true).
 		WithHeader(text.CompactHeader))
@@ -46,13 +49,15 @@ func main() {
 	textFmt.DisableColor()
 	log.Trace("default color")
 
-	// json formatter
+	// json formatter, with the config that only the last segment of the File
+	//   field will be formatted
 	jsonFmt := json.New(json.NewConfig().WithFileSegs(1))
 	log.SetSlotFormatter(gxlog.Slot0, jsonFmt)
 	log.Trace("json")
 
 	// update settings of the json formatter
 	jsonFmt.UpdateConfig(func(config json.Config) json.Config {
+		// Do NOT call methods of the json formatter, or it will deadlock.
 		config.OmitEmpty = json.Aux
 		config.Omit = json.Pkg | json.Func
 		return config
