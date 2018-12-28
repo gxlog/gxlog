@@ -21,7 +21,6 @@ func newMsgFormatter(property, fmtspec string) *msgFormatter {
 func (formatter *msgFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return append(buf, record.Msg...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, record.Msg)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, record.Msg)...)
 }

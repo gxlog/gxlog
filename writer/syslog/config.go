@@ -85,7 +85,7 @@ func (cfg *Config) WithFacility(facility Facility) *Config {
 	return cfg
 }
 
-// WithNetwork sets the Network and Addr of the Config and returns the Config.
+// WithAddr sets the Network and Addr of the Config and returns the Config.
 func (cfg *Config) WithAddr(network, addr string) *Config {
 	cfg.Network, cfg.Addr = network, addr
 	return cfg

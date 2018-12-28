@@ -44,9 +44,8 @@ func (formatter *levelFormatter) FormatElement(buf []byte, record *gxlog.Record)
 	desc := formatter.descList[record.Level]
 	if formatter.fmtspec == "%s" {
 		return append(buf, desc...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, desc)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, desc)...)
 }
 
 func selectDescList(property string) []string {

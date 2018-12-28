@@ -21,7 +21,6 @@ func newPrefixFormatter(property, fmtspec string) *prefixFormatter {
 func (formatter *prefixFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return append(buf, record.Aux.Prefix...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, record.Aux.Prefix)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, record.Aux.Prefix)...)
 }

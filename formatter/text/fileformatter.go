@@ -28,7 +28,6 @@ func (formatter *fileFormatter) FormatElement(buf []byte, record *gxlog.Record) 
 	file := util.LastSegments(record.File, formatter.segments, '/')
 	if formatter.fmtspec == "%s" {
 		return append(buf, file...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, file)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, file)...)
 }

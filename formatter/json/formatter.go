@@ -125,7 +125,7 @@ func (formatter *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxilia
 		return buf
 	}
 	if formatter.config.OmitEmpty&Aux == Aux &&
-		aux.Prefix == "" && len(aux.Contexts) == 0 && aux.Marked == false {
+		aux.Prefix == "" && len(aux.Contexts) == 0 && !aux.Marked {
 		return buf
 	}
 	buf = append(buf, sep...)
@@ -142,7 +142,7 @@ func (formatter *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxilia
 		sep = ","
 	}
 	if formatter.config.Omit&Mark == 0 &&
-		!(formatter.config.OmitEmpty&Mark != 0 && aux.Marked == false) {
+		!(formatter.config.OmitEmpty&Mark != 0 && !aux.Marked) {
 		buf = formatBoolField(buf, sep, "Marked", aux.Marked)
 	}
 	buf = append(buf, "}"...)

@@ -8,6 +8,6 @@ import "github.com/gxlog/gxlog"
 type Func func(bs []byte, record *gxlog.Record)
 
 // Write calls the underlying function. It implements the gxlog.Writer.
-func (self Func) Write(bs []byte, record *gxlog.Record) {
-	self(bs, record)
+func (fn Func) Write(bs []byte, record *gxlog.Record) {
+	fn(bs, record)
 }

@@ -35,9 +35,8 @@ func (formatter *timeFormatter) FormatElement(buf []byte, record *gxlog.Record) 
 	desc := record.Time.Format(formatter.layout)
 	if formatter.fmtspec == "%s" {
 		return append(buf, desc...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, desc)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, desc)...)
 }
 
 func makeTimeLayout(property string) string {

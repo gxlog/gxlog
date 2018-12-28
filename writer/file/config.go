@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-// The DateStyleID defines the type of date format style for naming log files.
-type DateStyleID int
+// The DateStyle defines the type of date format style for naming log files.
+type DateStyle int
 
 // All available date format styles here.
 const (
 	// YYYYMMDD
-	DateCompact DateStyleID = iota
+	DateCompact DateStyle = iota
 	// YYYY-MM-DD
 	DateDash
 	// YYYY_MM_DD
@@ -22,13 +22,13 @@ const (
 	DateDot
 )
 
-// The TimeStyleID defines the type of time format style for naming log files.
-type TimeStyleID int
+// The TimeStyle defines the type of time format style for naming log files.
+type TimeStyle int
 
 // All available time format styles here.
 const (
 	// hhmmss.uuuuuu
-	TimeCompact TimeStyleID = iota
+	TimeCompact TimeStyle = iota
 	// hh-mm-ss-uuuuuu
 	TimeDash
 	// hh_mm_ss_uuuuuu
@@ -51,9 +51,9 @@ type Config struct {
 	// Separator is the segment separator of log files' name.
 	Separator string
 	// DateStyle is the date format style for naming log files.
-	DateStyle DateStyleID
+	DateStyle DateStyle
 	// TimeStyle is the time format style for naming log files.
-	TimeStyle TimeStyleID
+	TimeStyle TimeStyle
 	// MaxFileSize is the max size of a log file BEFORE compression because of
 	// that (*gzip.Writer).Write returns the count of bytes before compression.
 	// It must be positive.
@@ -117,13 +117,13 @@ func (cfg *Config) WithSeparator(sep string) *Config {
 }
 
 // WithDateStyle sets the DateStyle of the Config and returns the Config.
-func (cfg *Config) WithDateStyle(style DateStyleID) *Config {
+func (cfg *Config) WithDateStyle(style DateStyle) *Config {
 	cfg.DateStyle = style
 	return cfg
 }
 
 // WithTimeStyle sets the TimeStyle of the Config and returns the Config.
-func (cfg *Config) WithTimeStyle(style TimeStyleID) *Config {
+func (cfg *Config) WithTimeStyle(style TimeStyle) *Config {
 	cfg.TimeStyle = style
 	return cfg
 }

@@ -28,8 +28,8 @@ const (
 )
 
 var tmplContexts = []gxlog.Context{
-	{"k1", "v1"},
-	{"k2", "v2"},
+	{Key: "k1", Value: "v1"},
+	{Key: "k2", Value: "v2"},
 }
 
 var tmplRecord gxlog.Record

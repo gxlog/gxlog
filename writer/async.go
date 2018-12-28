@@ -70,7 +70,7 @@ func (async *Async) serve() {
 		case data := <-async.chanData:
 			async.writer.Write(data.Bytes, data.Record)
 		case <-async.chanClose:
-			break
+			return
 		}
 	}
 }

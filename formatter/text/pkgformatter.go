@@ -28,7 +28,6 @@ func (formatter *pkgFormatter) FormatElement(buf []byte, record *gxlog.Record) [
 	pkg := util.LastSegments(record.Pkg, formatter.segments, '/')
 	if formatter.fmtspec == "%s" {
 		return append(buf, pkg...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, pkg)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, pkg)...)
 }

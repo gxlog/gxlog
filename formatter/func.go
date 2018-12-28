@@ -8,6 +8,6 @@ import "github.com/gxlog/gxlog"
 type Func func(record *gxlog.Record) []byte
 
 // Format calls the underlying function. It implements the gxlog.Formatter.
-func (self Func) Format(record *gxlog.Record) []byte {
-	return self(record)
+func (fn Func) Format(record *gxlog.Record) []byte {
+	return fn(record)
 }

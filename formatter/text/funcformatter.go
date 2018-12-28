@@ -28,7 +28,6 @@ func (formatter *funcFormatter) FormatElement(buf []byte, record *gxlog.Record) 
 	fn := util.LastSegments(record.Func, formatter.segments, '.')
 	if formatter.fmtspec == "%s" {
 		return append(buf, fn...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, fn)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, fn)...)
 }

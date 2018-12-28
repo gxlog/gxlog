@@ -22,7 +22,6 @@ func newLineFormatter(property, fmtspec string) *lineFormatter {
 func (formatter *lineFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if formatter.fmtspec == "%d" {
 		return append(buf, strconv.Itoa(record.Line)...)
-	} else {
-		return append(buf, fmt.Sprintf(formatter.fmtspec, record.Line)...)
 	}
+	return append(buf, fmt.Sprintf(formatter.fmtspec, record.Line)...)
 }

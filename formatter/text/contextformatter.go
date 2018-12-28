@@ -26,11 +26,10 @@ func newContextFormatter(property, fmtspec string) *contextFormatter {
 func (formatter *contextFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return formatter.formatter(buf, record.Aux.Contexts)
-	} else {
-		formatter.buf = formatter.buf[:0]
-		formatter.buf = formatter.formatter(formatter.buf, record.Aux.Contexts)
-		return append(buf, fmt.Sprintf(formatter.fmtspec, formatter.buf)...)
 	}
+	formatter.buf = formatter.buf[:0]
+	formatter.buf = formatter.formatter(formatter.buf, record.Aux.Contexts)
+	return append(buf, fmt.Sprintf(formatter.fmtspec, formatter.buf)...)
 }
 
 func selectFormatter(property string) func([]byte, []gxlog.Context) []byte {
