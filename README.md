@@ -1,12 +1,14 @@
 # gxlog #
 
 Gxlog is short for **G**o e**X**tensible **LOG**ger. It is concise, functional,
-flexible and extensible. Easy-to-use is also an important design goal. Besides
-the basic functionality of logging, gxlog also provides many advanced features,
-such as context, dynamic context, log limitation and so on. With the interface
-**Formatter** and **Writer**, gxlog can be extended to support any log formats
-or any log backends. In addition, with the design of **Slots**, logging, events
-or hooks can be integrated into gxlog.
+flexible and extensible. Easy-to-use is also an important design goal. It only
+depends on the standard library.
+
+Besides the basic functionality of logging, gxlog also provides many advanced
+features, such as context, dynamic context, log limitation and so on. With the
+interface **Formatter** and **Writer**, gxlog can be extended to support any
+log formats or any log backends. In addition, with the design of **Slots**,
+logging, events or hooks can be integrated into gxlog.
 
 ## Table of Contents ##
 
@@ -675,4 +677,3 @@ func testSyslogWriter() {
     log.Info("this will be severity err")
 }
 ```
-
