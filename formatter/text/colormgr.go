@@ -6,12 +6,12 @@ import (
 	"github.com/gxlog/gxlog"
 )
 
-// The ColorID defines the color type.
-type ColorID int
+// The Color defines the color type.
+type Color int
 
 // All available colors here.
 const (
-	Black ColorID = iota + 30
+	Black Color = iota + 30
 	Red
 	Green
 	Yellow
@@ -24,8 +24,8 @@ const (
 const escSeqFmt = "\033[%dm"
 
 type colorMgr struct {
-	colors      []ColorID
-	markedColor ColorID
+	colors      []Color
+	markedColor Color
 
 	colorSeqs [][]byte
 	markedSeq []byte
@@ -33,7 +33,7 @@ type colorMgr struct {
 }
 
 func newColorMgr() *colorMgr {
-	colors := []ColorID{
+	colors := []Color{
 		gxlog.Trace: Green,
 		gxlog.Debug: Green,
 		gxlog.Info:  Green,
@@ -51,26 +51,26 @@ func newColorMgr() *colorMgr {
 	return mgr
 }
 
-func (mgr *colorMgr) Color(level gxlog.Level) ColorID {
+func (mgr *colorMgr) Color(level gxlog.Level) Color {
 	return mgr.colors[level]
 }
 
-func (mgr *colorMgr) SetColor(level gxlog.Level, color ColorID) {
+func (mgr *colorMgr) SetColor(level gxlog.Level, color Color) {
 	mgr.colors[level] = color
 	mgr.colorSeqs[level] = makeSeq(color)
 }
 
-func (mgr *colorMgr) MapColors(colorMap map[gxlog.Level]ColorID) {
+func (mgr *colorMgr) MapColors(colorMap map[gxlog.Level]Color) {
 	for level, color := range colorMap {
 		mgr.SetColor(level, color)
 	}
 }
 
-func (mgr *colorMgr) MarkedColor() ColorID {
+func (mgr *colorMgr) MarkedColor() Color {
 	return mgr.markedColor
 }
 
-func (mgr *colorMgr) SetMarkedColor(color ColorID) {
+func (mgr *colorMgr) SetMarkedColor(color Color) {
 	mgr.markedColor = color
 	mgr.markedSeq = makeSeq(color)
 }
@@ -83,7 +83,7 @@ func (mgr *colorMgr) MarkedColorEars() ([]byte, []byte) {
 	return mgr.markedSeq, mgr.resetSeq
 }
 
-func initColorSeqs(colors []ColorID) [][]byte {
+func initColorSeqs(colors []Color) [][]byte {
 	colorSeqs := make([][]byte, len(colors))
 	for i := range colors {
 		colorSeqs[i] = makeSeq(colors[i])
@@ -91,6 +91,6 @@ func initColorSeqs(colors []ColorID) [][]byte {
 	return colorSeqs
 }
 
-func makeSeq(color ColorID) []byte {
+func makeSeq(color Color) []byte {
 	return []byte(fmt.Sprintf(escSeqFmt, color))
 }

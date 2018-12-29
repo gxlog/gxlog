@@ -34,7 +34,7 @@ func main() {
 	// update settings of the text formatter
 	textFmt.SetHeader(text.DefaultHeader)
 	textFmt.SetColor(gxlog.Trace, text.Blue)
-	textFmt.MapColors(map[gxlog.Level]text.ColorID{
+	textFmt.MapColors(map[gxlog.Level]text.Color{
 		gxlog.Warn:  text.Red,
 		gxlog.Error: text.Magenta,
 	})

@@ -121,7 +121,7 @@ func (formatter *Formatter) DisableColor() {
 }
 
 // Color returns the color of the level in the Formatter.
-func (formatter *Formatter) Color(level gxlog.Level) ColorID {
+func (formatter *Formatter) Color(level gxlog.Level) Color {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -129,7 +129,7 @@ func (formatter *Formatter) Color(level gxlog.Level) ColorID {
 }
 
 // SetColor sets the color of the level in the Formatter.
-func (formatter *Formatter) SetColor(level gxlog.Level, color ColorID) {
+func (formatter *Formatter) SetColor(level gxlog.Level, color Color) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -138,7 +138,7 @@ func (formatter *Formatter) SetColor(level gxlog.Level, color ColorID) {
 
 // MapColors maps the color of levels in the Formatter by the colorMap.
 // The color of a level is left to be unchanged if it is not in the map.
-func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
+func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]Color) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -146,7 +146,7 @@ func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]ColorID) {
 }
 
 // MarkedColor returns the color of a log that is marked.
-func (formatter *Formatter) MarkedColor() ColorID {
+func (formatter *Formatter) MarkedColor() Color {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -154,7 +154,7 @@ func (formatter *Formatter) MarkedColor() ColorID {
 }
 
 // SetMarkedColor sets the color of a log that is marked.
-func (formatter *Formatter) SetMarkedColor(color ColorID) {
+func (formatter *Formatter) SetMarkedColor(color Color) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 

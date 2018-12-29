@@ -109,7 +109,7 @@ func TestColor(t *testing.T) {
 	record := cloneRecord()
 	record.Level = gxlog.Warn
 	record.Aux.Marked = false
-	formatter.MapColors(map[gxlog.Level]text.ColorID{
+	formatter.MapColors(map[gxlog.Level]text.Color{
 		gxlog.Warn: text.Blue,
 	})
 	expect = fmt.Sprintf("\033[%dm%s\033[0m", text.Blue, tmplMsg)

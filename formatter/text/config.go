@@ -47,7 +47,7 @@ type Config struct {
 	// By default, the color of level Trace, Debug and Info is Green, the color
 	// of level Warn is Yellow, the color of level Error and Fatal is Red and
 	// the color of a marked log is Magenta no matter at which level it is.
-	ColorMap map[gxlog.Level]ColorID
+	ColorMap map[gxlog.Level]Color
 	// EnableColor enables colorization if it is true.
 	EnableColor bool
 }
@@ -74,7 +74,7 @@ func (cfg *Config) WithMinBufSize(size int) *Config {
 }
 
 // WithColorMap sets the ColorMap of the Config and returns the Config.
-func (cfg *Config) WithColorMap(colorMap map[gxlog.Level]ColorID) *Config {
+func (cfg *Config) WithColorMap(colorMap map[gxlog.Level]Color) *Config {
 	cfg.ColorMap = colorMap
 	return cfg
 }
