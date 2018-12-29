@@ -57,7 +57,7 @@ func init() {
 	}
 }
 
-func TestDefaultHeader(t *testing.T) {
+func TestFullHeader(t *testing.T) {
 	formatter := text.New(text.NewConfig())
 	expect := fmt.Sprintf("%s %s.%s %s %s:%d %s.%s %s[%s] %s\n",
 		tmplDate, tmplTime, tmplDecimal[:6], "INFO ", tmplFile, tmplLine,

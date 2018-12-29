@@ -6,7 +6,7 @@ import (
 
 // All predefined headers here.
 const (
-	DefaultHeader = "{{time}} {{level}} {{file}}:{{line}} {{pkg}}.{{func}} " +
+	FullHeader = "{{time}} {{level}} {{file}}:{{line}} {{pkg}}.{{func}} " +
 		"{{prefix}}[{{context}}] {{msg}}\n"
 	CompactHeader = "{{time:time.us}} {{level}} {{file:1}}:{{line}} {{pkg}}.{{func}} " +
 		"{{prefix}}[{{context}}] {{msg}}\n"
@@ -52,11 +52,11 @@ type Config struct {
 	EnableColor bool
 }
 
-// NewConfig creates a new Config. By default, the Header is the DefaultHeader,
+// NewConfig creates a new Config. By default, the Header is the FullHeader,
 // the MinBufSize is 256, the ColorMap is nil, the EnableColor is false.
 func NewConfig() *Config {
 	return &Config{
-		Header:     DefaultHeader,
+		Header:     FullHeader,
 		MinBufSize: 256,
 	}
 }
