@@ -8,6 +8,7 @@ import (
 // A Config should be created with NewConfig.
 type Config struct {
 	// Pathname is the pathname of the socket file that will be created.
+	// Shell expansion is NOT supported.
 	Pathname string
 	// Perm is permission of the socket file that will be created.
 	Perm os.FileMode

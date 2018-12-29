@@ -42,8 +42,8 @@ func (async *Async) Write(bs []byte, record *gxlog.Record) {
 	async.chanData <- logData{Bytes: bs, Record: record}
 }
 
-// Close closes the internal channel and waits until all the logs already in the
-// channel are output. It does NOT close the underlying writer.
+// Close closes the internal channel and waits until all logs in the channel
+// have been output. It does NOT close the underlying writer.
 func (async *Async) Close() {
 	close(async.chanClose)
 	close(async.chanData)
@@ -52,7 +52,7 @@ func (async *Async) Close() {
 	}
 }
 
-// Abort closes the internal channel and ignores all the logs in the channel.
+// Abort closes the internal channel and ignores all logs in the channel.
 // It does NOT close the underlying writer.
 func (async *Async) Abort() {
 	close(async.chanClose)

@@ -42,17 +42,23 @@ const (
 // A Config is used to configure a file writer.
 // A Config should be created with NewConfig.
 type Config struct {
-	// Path is the path to where logs output.
+	// Path is the path to where logs output. Shell expansion is NOT supported.
+	// When it is modified, a new log file will be created.
 	Path string
 	// Base is the first segment of log files' name. It is better NOT to be empty.
+	// When it is modified, a new log file will be created.
 	Base string
 	// Ext is the extension of log files' name.
+	// When it is modified, a new log file will be created.
 	Ext string
 	// Separator is the segment separator of log files' name.
+	// When it is modified, a new log file will be created.
 	Separator string
 	// DateStyle is the date format style for naming log files.
+	// When it is modified, a new log file will be created.
 	DateStyle DateStyle
 	// TimeStyle is the time format style for naming log files.
+	// When it is modified, a new log file will be created.
 	TimeStyle TimeStyle
 	// MaxFileSize is the max size of a log file BEFORE compression because of
 	// that (*gzip.Writer).Write returns the count of bytes before compression.
@@ -67,16 +73,21 @@ type Config struct {
 	// compress/gzip. It must be flate.DefaultCompression, flate.NoCompression,
 	// flate.HuffmanOnly or any integer value between flate.BestSpeed and
 	// flate.BestCompression inclusive.
+	// When it is modified, a new log file will be created.
 	GzipLevel int
 	// AESKey is a hexadecimal encoded AES key. It must be either empty, 128 bits,
 	// 192 bits or 256 bits, e.g. 70856575b161fbcca8fc12e1f70fc1c8.
-	// If it is not empty, the AES encryption is enabled.
+	// If it is not empty, the AES encryption is enabled. Each log file will have
+	// an independent initialization vector.
+	// When it is modified, a new log file will be created.
 	AESKey string
 	// Available block modes are CFB, CTR and OFB.
+	// When it is modified, a new log file will be created.
 	BlockMode BlockCipherMode
 	// NewDirEachDay specifies whether to create a new directory each day.
 	// If NewDirEachDay is true, the pattern of log files' name is
 	// <base><sep><time><ext>, otherwise it is <base><sep><date><sep><time><ext>.
+	// When it is modified, a new log file will be created.
 	NewDirEachDay bool
 	// ReportOnErr specifies whether to report errors by log.Println.
 	ReportOnErr bool

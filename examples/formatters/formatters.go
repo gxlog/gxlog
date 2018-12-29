@@ -23,6 +23,7 @@ func main() {
 	//   Yellow, Error and Fatal to Red and marked logs to Magenta no matter
 	//   at which level they are.
 	textFmt := text.New(text.NewConfig().
+		// Only supported on systems that ANSI escape sequences are supported.
 		WithEnableColor(true).
 		WithHeader(text.CompactHeader))
 	log.SetSlotFormatter(gxlog.Slot0, textFmt)

@@ -65,6 +65,8 @@ func (writer *Writer) Close() error {
 }
 
 // Write implements the interface gxlog.Writer. It writes logs to the syslog.
+// NOTICE: the std syslog package will get the timestamp itself which is a
+// tiny bit later than Record.Time.
 func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
