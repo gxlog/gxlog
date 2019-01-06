@@ -3,7 +3,7 @@ package text
 import (
 	"fmt"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type msgFormatter struct {
@@ -18,7 +18,7 @@ func newMsgFormatter(property, fmtspec string) *msgFormatter {
 	return &msgFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (formatter *msgFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *msgFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return append(buf, record.Msg...)
 	}

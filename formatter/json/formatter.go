@@ -1,4 +1,4 @@
-// Package json implements a json formatter which implements the gxlog.Formatter.
+// Package json implements a json formatter which implements the iface.Formatter.
 package json
 
 import (
@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gxlog/gxlog"
 	"github.com/gxlog/gxlog/formatter/internal/util"
+	"github.com/gxlog/gxlog/iface"
 )
 
-// A Formatter implements the interface gxlog.Formatter.
+// A Formatter implements the interface iface.Formatter.
 //
 // All methods of a Formatter are concurrency safe.
 //
@@ -33,8 +33,8 @@ func New(config *Config) *Formatter {
 	return formatter
 }
 
-// Format implements the interface gxlog.Formatter. It formats a Record.
-func (formatter *Formatter) Format(record *gxlog.Record) []byte {
+// Format implements the interface iface.Formatter. It formats a Record.
+func (formatter *Formatter) Format(record *iface.Record) []byte {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -120,7 +120,7 @@ func (formatter *Formatter) UpdateConfig(fn func(Config) Config) error {
 	return nil
 }
 
-func (formatter *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxiliary) []byte {
+func (formatter *Formatter) formatAux(buf []byte, sep string, aux *iface.Auxiliary) []byte {
 	if formatter.config.Omit&Aux == Aux {
 		return buf
 	}
@@ -149,7 +149,7 @@ func (formatter *Formatter) formatAux(buf []byte, sep string, aux *gxlog.Auxilia
 	return buf
 }
 
-func formatContexts(buf []byte, sep string, contexts []gxlog.Context) []byte {
+func formatContexts(buf []byte, sep string, contexts []iface.Context) []byte {
 	buf = append(buf, sep...)
 	sep = ""
 	if len(contexts) == 0 {

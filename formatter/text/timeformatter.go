@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 const (
@@ -31,7 +31,7 @@ func newTimeFormatter(property, fmtspec string) *timeFormatter {
 	}
 }
 
-func (formatter *timeFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *timeFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	desc := record.Time.Format(formatter.layout)
 	if formatter.fmtspec == "%s" {
 		return append(buf, desc...)

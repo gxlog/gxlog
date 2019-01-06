@@ -1,8 +1,10 @@
-package gxlog
+package logger
 
 import (
 	"fmt"
 	"time"
+
+	"github.com/gxlog/gxlog/iface"
 )
 
 const mapInitCap = 256
@@ -26,7 +28,7 @@ type locator struct {
 
 type copyOnWrite struct {
 	Prefix          string
-	Contexts        []Context
+	Contexts        []iface.Context
 	DynamicContexts []dynamicContext
 	Marked          bool
 	CountLimiter    Filter
@@ -86,13 +88,13 @@ func (log *Logger) WithMark(ok bool) *Logger {
 // which you need.
 func (log *Logger) WithCountLimit(batch, limit int64) *Logger {
 	if batch <= 0 {
-		panic("gxlog.WithCountLimit: batch must be positive")
+		panic("logger.WithCountLimit: batch must be positive")
 	}
 	if limit < 0 {
-		panic("gxlog.WithCountLimit: negative limit")
+		panic("logger.WithCountLimit: negative limit")
 	}
 	clone := *log
-	clone.attr.CountLimiter = func(record *Record) bool {
+	clone.attr.CountLimiter = func(record *iface.Record) bool {
 		loc := locator{
 			File: record.File,
 			Line: record.Line,
@@ -118,13 +120,13 @@ func (log *Logger) WithCountLimit(batch, limit int64) *Logger {
 // reasonable duration and limit.
 func (log *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 	if duration <= 0 {
-		panic("gxlog.WithTimeLimit: duration must be positive")
+		panic("logger.WithTimeLimit: duration must be positive")
 	}
 	if limit < 0 {
-		panic("gxlog.WithTimeLimit: negative limit")
+		panic("logger.WithTimeLimit: negative limit")
 	}
 	clone := *log
-	clone.attr.TimeLimiter = func(record *Record) bool {
+	clone.attr.TimeLimiter = func(record *iface.Record) bool {
 		loc := locator{
 			File: record.File,
 			Line: record.Line,
@@ -139,8 +141,8 @@ func (log *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 	return &clone
 }
 
-func appendContexts(contexts []Context, dynamicContexts []dynamicContext,
-	kvs []interface{}) ([]Context, []dynamicContext) {
+func appendContexts(contexts []iface.Context, dynamicContexts []dynamicContext,
+	kvs []interface{}) ([]iface.Context, []dynamicContext) {
 	for len(kvs) >= 2 {
 		dynamic, ok := kvs[1].(Dynamic)
 		if ok {
@@ -149,7 +151,7 @@ func appendContexts(contexts []Context, dynamicContexts []dynamicContext,
 				Value: dynamic,
 			})
 		} else {
-			contexts = append(contexts, Context{
+			contexts = append(contexts, iface.Context{
 				Key:   fmt.Sprint(kvs[0]),
 				Value: fmt.Sprint(kvs[1]),
 			})

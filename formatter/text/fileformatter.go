@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gxlog/gxlog"
 	"github.com/gxlog/gxlog/formatter/internal/util"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type fileFormatter struct {
@@ -24,7 +24,7 @@ func newFileFormatter(property, fmtspec string) *fileFormatter {
 	}
 }
 
-func (formatter *fileFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *fileFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	file := util.LastSegments(record.File, formatter.segments, '/')
 	if formatter.fmtspec == "%s" {
 		return append(buf, file...)

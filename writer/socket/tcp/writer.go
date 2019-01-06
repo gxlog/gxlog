@@ -1,4 +1,4 @@
-// Package tcp implements a tcp socket writer which implements the gxlog.Writer.
+// Package tcp implements a tcp socket writer which implements the iface.Writer.
 //
 // The tcp socket writer aims at log watching. For log transmission, use a syslog
 // writer instead. With a tcp socket writer, one can use netcat to receive logs
@@ -12,11 +12,11 @@ package tcp
 import (
 	"fmt"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 	"github.com/gxlog/gxlog/writer/socket/internal/socket"
 )
 
-// A Writer implements the interface gxlog.Writer.
+// A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
 //
@@ -42,7 +42,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface gxlog.Writer. It writes logs to tcp sockets.
-func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+// Write implements the interface iface.Writer. It writes logs to tcp sockets.
+func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.writer.Write(bs, record)
 }

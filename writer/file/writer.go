@@ -1,4 +1,4 @@
-// Package file implements a file writer which implements the gxlog.Writer.
+// Package file implements a file writer which implements the iface.Writer.
 package file
 
 import (
@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
-// A Writer implements the interface gxlog.Writer.
+// A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
 //
@@ -52,8 +52,8 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface gxlog.Writer. It writes logs to files.
-func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+// Write implements the interface iface.Writer. It writes logs to files.
+func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
@@ -107,7 +107,7 @@ func (writer *Writer) UpdateConfig(fn func(Config) Config) error {
 	return nil
 }
 
-func (writer *Writer) checkFile(record *gxlog.Record) error {
+func (writer *Writer) checkFile(record *iface.Record) error {
 	if writer.writer == nil ||
 		writer.day != record.Time.YearDay() ||
 		writer.fileSize >= writer.config.MaxFileSize {
@@ -121,7 +121,7 @@ func (writer *Writer) checkFile(record *gxlog.Record) error {
 	return nil
 }
 
-func (writer *Writer) createFile(record *gxlog.Record) error {
+func (writer *Writer) createFile(record *iface.Record) error {
 	if err := writer.closeFile(); err != nil {
 		return err
 	}

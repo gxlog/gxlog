@@ -1,6 +1,6 @@
 // +build !nacl,!plan9,!windows
 
-// Package syslog implements a syslog writer which implements the gxlog.Writer.
+// Package syslog implements a syslog writer which implements the iface.Writer.
 package syslog
 
 import (
@@ -9,14 +9,14 @@ import (
 	"log/syslog"
 	"sync"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 const severityMask = 0x07
 
 type syslogFunc func(string) error
 
-// A Writer implements the interface gxlog.Writer.
+// A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
 //
@@ -24,7 +24,7 @@ type syslogFunc func(string) error
 type Writer struct {
 	reportOnErr bool
 
-	logFuncs [gxlog.LevelCount]syslogFunc
+	logFuncs [iface.LevelCount]syslogFunc
 	writer   *syslog.Writer
 
 	lock sync.Mutex
@@ -40,13 +40,13 @@ func Open(cfg *Config) (*Writer, error) {
 		reportOnErr: cfg.ReportOnErr,
 		writer:      wt,
 	}
-	severityMap := map[gxlog.Level]Severity{
-		gxlog.Trace: SevDebug,
-		gxlog.Debug: SevDebug,
-		gxlog.Info:  SevInfo,
-		gxlog.Warn:  SevWarning,
-		gxlog.Error: SevErr,
-		gxlog.Fatal: SevCrit,
+	severityMap := map[iface.Level]Severity{
+		iface.Trace: SevDebug,
+		iface.Debug: SevDebug,
+		iface.Info:  SevInfo,
+		iface.Warn:  SevWarning,
+		iface.Error: SevErr,
+		iface.Fatal: SevCrit,
 	}
 	writer.updateLogFuncs(severityMap)
 	writer.updateLogFuncs(cfg.SeverityMap)
@@ -64,10 +64,10 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface gxlog.Writer. It writes logs to the syslog.
+// Write implements the interface iface.Writer. It writes logs to the syslog.
 // NOTICE: the std syslog package will get the timestamp itself which is a
 // tiny bit later than Record.Time.
-func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
@@ -95,14 +95,14 @@ func (writer *Writer) SetReportOnErr(ok bool) {
 
 // MapSeverity maps the severity of levels in the Writer by the severityMap.
 // The severity of a level is left to be unchanged if it is not in the map.
-func (writer *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {
+func (writer *Writer) MapSeverity(severityMap map[iface.Level]Severity) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
 	writer.updateLogFuncs(severityMap)
 }
 
-func (writer *Writer) updateLogFuncs(severityMap map[gxlog.Level]Severity) {
+func (writer *Writer) updateLogFuncs(severityMap map[iface.Level]Severity) {
 	for level, severity := range severityMap {
 		var fn syslogFunc
 		switch severity & severityMask {

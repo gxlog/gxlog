@@ -1,4 +1,4 @@
-// Package unix implements a unix domain socket writer which implements the gxlog.Writer.
+// Package unix implements a unix domain socket writer which implements the iface.Writer.
 //
 // The unix domain socket writer aims at log watching. For log transmission, use
 // a syslog writer instead. With a unix domain socket writer, one can use netcat
@@ -10,11 +10,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 	"github.com/gxlog/gxlog/writer/socket/internal/socket"
 )
 
-// A Writer implements the interface gxlog.Writer.
+// A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
 //
@@ -49,8 +49,8 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface gxlog.Writer. It writes logs to unix domain sockets.
-func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+// Write implements the interface iface.Writer. It writes logs to unix domain sockets.
+func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.writer.Write(bs, record)
 }
 

@@ -1,4 +1,6 @@
-package gxlog
+package logger
+
+import "github.com/gxlog/gxlog/iface"
 
 // Config returns a copy of Config of the Logger.
 func (log *Logger) Config() *Config {
@@ -37,7 +39,7 @@ func (log *Logger) UpdateConfig(fn func(Config) Config) error {
 }
 
 // Level returns the level of the Logger.
-func (log *Logger) Level() Level {
+func (log *Logger) Level() iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -45,7 +47,7 @@ func (log *Logger) Level() Level {
 }
 
 // SetLevel sets the level of the Logger.
-func (log *Logger) SetLevel(level Level) {
+func (log *Logger) SetLevel(level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -53,7 +55,7 @@ func (log *Logger) SetLevel(level Level) {
 }
 
 // TimeLevel returns the time level of the Logger.
-func (log *Logger) TimeLevel() Level {
+func (log *Logger) TimeLevel() iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -61,7 +63,7 @@ func (log *Logger) TimeLevel() Level {
 }
 
 // SetTimeLevel sets the time level of the Logger.
-func (log *Logger) SetTimeLevel(level Level) {
+func (log *Logger) SetTimeLevel(level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -69,7 +71,7 @@ func (log *Logger) SetTimeLevel(level Level) {
 }
 
 // PanicLevel returns the panic level of the Logger.
-func (log *Logger) PanicLevel() Level {
+func (log *Logger) PanicLevel() iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -77,7 +79,7 @@ func (log *Logger) PanicLevel() Level {
 }
 
 // SetPanicLevel sets the panic level of the Logger.
-func (log *Logger) SetPanicLevel(level Level) {
+func (log *Logger) SetPanicLevel(level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -85,7 +87,7 @@ func (log *Logger) SetPanicLevel(level Level) {
 }
 
 // TrackLevel returns the track level of the Logger.
-func (log *Logger) TrackLevel() Level {
+func (log *Logger) TrackLevel() iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -93,7 +95,7 @@ func (log *Logger) TrackLevel() Level {
 }
 
 // SetTrackLevel sets the track level of the Logger.
-func (log *Logger) SetTrackLevel(level Level) {
+func (log *Logger) SetTrackLevel(level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -101,7 +103,7 @@ func (log *Logger) SetTrackLevel(level Level) {
 }
 
 // ExitLevel returns the exit level of the Logger.
-func (log *Logger) ExitLevel() Level {
+func (log *Logger) ExitLevel() iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -109,7 +111,7 @@ func (log *Logger) ExitLevel() Level {
 }
 
 // SetExitLevel sets the exit level of the Logger.
-func (log *Logger) SetExitLevel(level Level) {
+func (log *Logger) SetExitLevel(level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 

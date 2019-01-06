@@ -1,20 +1,20 @@
 package writer
 
 import (
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type logData struct {
 	Bytes  []byte
-	Record *gxlog.Record
+	Record *iface.Record
 }
 
-// An Async is a wrapper to the interface gxlog.Writer.
-// All writers of gxlog.Writer it wraps switch into asynchronous mode.
+// An Async is a wrapper to the interface iface.Writer.
+// All writers of iface.Writer it wraps switch into asynchronous mode.
 //
 // All methods of an Async are concurrency safe.
 type Async struct {
-	writer    gxlog.Writer
+	writer    iface.Writer
 	chanData  chan logData
 	chanClose chan struct{}
 }
@@ -22,7 +22,7 @@ type Async struct {
 // NewAsync creates a new Async that wraps the writer. The writer must NOT be nil.
 // The cap is the capacity of the internal channel of the Async and it must NOT
 // be negative.
-func NewAsync(writer gxlog.Writer, cap int) *Async {
+func NewAsync(writer iface.Writer, cap int) *Async {
 	if writer == nil {
 		panic("writer.NewAsync: nil writer")
 	}
@@ -35,10 +35,10 @@ func NewAsync(writer gxlog.Writer, cap int) *Async {
 	return async
 }
 
-// Write implements the interface gxlog.Writer. It sends the bs and record to the
+// Write implements the interface iface.Writer. It sends the bs and record to the
 // internal channel. Another goroutine will receive them from the channel and
 // call the underlying writer to output logs. If the channel is full, it blocks.
-func (async *Async) Write(bs []byte, record *gxlog.Record) {
+func (async *Async) Write(bs []byte, record *iface.Record) {
 	async.chanData <- logData{Bytes: bs, Record: record}
 }
 

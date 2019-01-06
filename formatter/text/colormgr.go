@@ -3,7 +3,7 @@ package text
 import (
 	"fmt"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 // The Color defines the color type.
@@ -34,12 +34,12 @@ type colorMgr struct {
 
 func newColorMgr() *colorMgr {
 	colors := []Color{
-		gxlog.Trace: Green,
-		gxlog.Debug: Green,
-		gxlog.Info:  Green,
-		gxlog.Warn:  Yellow,
-		gxlog.Error: Red,
-		gxlog.Fatal: Red,
+		iface.Trace: Green,
+		iface.Debug: Green,
+		iface.Info:  Green,
+		iface.Warn:  Yellow,
+		iface.Error: Red,
+		iface.Fatal: Red,
 	}
 	mgr := &colorMgr{
 		colors:      colors,
@@ -51,16 +51,16 @@ func newColorMgr() *colorMgr {
 	return mgr
 }
 
-func (mgr *colorMgr) Color(level gxlog.Level) Color {
+func (mgr *colorMgr) Color(level iface.Level) Color {
 	return mgr.colors[level]
 }
 
-func (mgr *colorMgr) SetColor(level gxlog.Level, color Color) {
+func (mgr *colorMgr) SetColor(level iface.Level, color Color) {
 	mgr.colors[level] = color
 	mgr.colorSeqs[level] = makeSeq(color)
 }
 
-func (mgr *colorMgr) MapColors(colorMap map[gxlog.Level]Color) {
+func (mgr *colorMgr) MapColors(colorMap map[iface.Level]Color) {
 	for level, color := range colorMap {
 		mgr.SetColor(level, color)
 	}
@@ -75,7 +75,7 @@ func (mgr *colorMgr) SetMarkedColor(color Color) {
 	mgr.markedSeq = makeSeq(color)
 }
 
-func (mgr *colorMgr) ColorEars(level gxlog.Level) ([]byte, []byte) {
+func (mgr *colorMgr) ColorEars(level iface.Level) ([]byte, []byte) {
 	return mgr.colorSeqs[level], mgr.resetSeq
 }
 

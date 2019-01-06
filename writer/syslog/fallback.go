@@ -5,7 +5,7 @@ package syslog
 import (
 	"fmt"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 const generalError = "not implemented on nacl, plan9 or windows"
@@ -20,10 +20,10 @@ func (writer *Writer) Close() error {
 	return fmt.Errorf("writer/syslog.Close: %s", generalError)
 }
 
-func (writer *Writer) Write(bs []byte, record *gxlog.Record) {}
+func (writer *Writer) Write(bs []byte, record *iface.Record) {}
 
 func (writer *Writer) ReportOnErr() bool { return false }
 
 func (writer *Writer) SetReportOnErr(ok bool) {}
 
-func (writer *Writer) MapSeverity(severityMap map[gxlog.Level]Severity) {}
+func (writer *Writer) MapSeverity(severityMap map[iface.Level]Severity) {}

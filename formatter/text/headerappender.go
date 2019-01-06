@@ -1,11 +1,9 @@
 package text
 
-import (
-	"github.com/gxlog/gxlog"
-)
+import "github.com/gxlog/gxlog/iface"
 
 type elementFormatter interface {
-	FormatElement(buf []byte, record *gxlog.Record) []byte
+	FormatElement(buf []byte, record *iface.Record) []byte
 }
 
 type headerAppender struct {
@@ -41,7 +39,7 @@ func newHeaderAppender(element, property, fmtspec, staticText string) *headerApp
 	return nil
 }
 
-func (appender *headerAppender) AppendHeader(buf []byte, record *gxlog.Record) []byte {
+func (appender *headerAppender) AppendHeader(buf []byte, record *iface.Record) []byte {
 	buf = append(buf, appender.staticText...)
 	return appender.formatter.FormatElement(buf, record)
 }

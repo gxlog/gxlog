@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 // The Facility defines the facility type of syslog.
@@ -55,13 +55,13 @@ type Config struct {
 	// SeverityMap is used to remap the severity of each level.
 	// The severity of a level is left to be unchanged if it is not in the map.
 	// The default mapping is as the follows:
-	//     Trace: SevDebug
-	//     Debug: SevDebug
-	//     Info:  SevInfo
-	//     Warn:  SevWarning
-	//     Error: SevErr
-	//     Fatal: SevCrit
-	SeverityMap map[gxlog.Level]Severity
+	//     iface.Trace: SevDebug
+	//     iface.Debug: SevDebug
+	//     iface.Info:  SevInfo
+	//     iface.Warn:  SevWarning
+	//     iface.Error: SevErr
+	//     iface.Fatal: SevCrit
+	SeverityMap map[iface.Level]Severity
 	// ReportOnErr specifies whether to report errors by log.Println.
 	ReportOnErr bool
 }
@@ -92,7 +92,7 @@ func (cfg *Config) WithAddr(network, addr string) *Config {
 }
 
 // WithSeverityMap sets the SeverityMap of the Config and returns the Config.
-func (cfg *Config) WithSeverityMap(severityMap map[gxlog.Level]Severity) *Config {
+func (cfg *Config) WithSeverityMap(severityMap map[iface.Level]Severity) *Config {
 	cfg.SeverityMap = severityMap
 	return cfg
 }

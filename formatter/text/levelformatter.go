@@ -4,25 +4,25 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 var levelDesc = []string{
-	gxlog.Trace: "TRACE",
-	gxlog.Debug: "DEBUG",
-	gxlog.Info:  "INFO ",
-	gxlog.Warn:  "WARN ",
-	gxlog.Error: "ERROR",
-	gxlog.Fatal: "FATAL",
+	iface.Trace: "TRACE",
+	iface.Debug: "DEBUG",
+	iface.Info:  "INFO ",
+	iface.Warn:  "WARN ",
+	iface.Error: "ERROR",
+	iface.Fatal: "FATAL",
 }
 
 var levelDescChar = []string{
-	gxlog.Trace: "T",
-	gxlog.Debug: "D",
-	gxlog.Info:  "I",
-	gxlog.Warn:  "W",
-	gxlog.Error: "E",
-	gxlog.Fatal: "F",
+	iface.Trace: "T",
+	iface.Debug: "D",
+	iface.Info:  "I",
+	iface.Warn:  "W",
+	iface.Error: "E",
+	iface.Fatal: "F",
 }
 
 type levelFormatter struct {
@@ -40,7 +40,7 @@ func newLevelFormatter(property, fmtspec string) *levelFormatter {
 	}
 }
 
-func (formatter *levelFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *levelFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	desc := formatter.descList[record.Level]
 	if formatter.fmtspec == "%s" {
 		return append(buf, desc...)

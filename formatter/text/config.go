@@ -1,8 +1,6 @@
 package text
 
-import (
-	"github.com/gxlog/gxlog"
-)
+import "github.com/gxlog/gxlog/iface"
 
 // All predefined headers here.
 const (
@@ -44,10 +42,11 @@ type Config struct {
 	MinBufSize int
 	// ColorMap is used to remap the color of each level.
 	// The color of a level is left to be unchanged if it is not in the map.
-	// By default, the color of level Trace, Debug and Info is Green, the color
-	// of level Warn is Yellow, the color of level Error and Fatal is Red and
-	// the color of a marked log is Magenta no matter at which level it is.
-	ColorMap map[gxlog.Level]Color
+	// By default, the color of level iface.Trace, iface.Debug and iface.Info is
+	// Green, the color of level iface.Warn is Yellow, the color of level
+	// iface.Error and iface.Fatal is Red and the color of a marked log is
+	// Magenta no matter at which level it is.
+	ColorMap map[iface.Level]Color
 	// EnableColor enables colorization if it is true.
 	EnableColor bool
 }
@@ -74,7 +73,7 @@ func (cfg *Config) WithMinBufSize(size int) *Config {
 }
 
 // WithColorMap sets the ColorMap of the Config and returns the Config.
-func (cfg *Config) WithColorMap(colorMap map[gxlog.Level]Color) *Config {
+func (cfg *Config) WithColorMap(colorMap map[iface.Level]Color) *Config {
 	cfg.ColorMap = colorMap
 	return cfg
 }

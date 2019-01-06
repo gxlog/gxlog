@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type lineFormatter struct {
@@ -19,7 +19,7 @@ func newLineFormatter(property, fmtspec string) *lineFormatter {
 	return &lineFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (formatter *lineFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *lineFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	if formatter.fmtspec == "%d" {
 		return append(buf, strconv.Itoa(record.Line)...)
 	}

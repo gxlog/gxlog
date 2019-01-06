@@ -1,7 +1,9 @@
-package gxlog
+package logger
 
 import (
 	"fmt"
+
+	"github.com/gxlog/gxlog/iface"
 )
 
 // The Slot defines the slot type of Logger.
@@ -23,40 +25,42 @@ const (
 const MaxSlot = 8
 
 type slotLink struct {
-	Formatter Formatter
-	Writer    Writer
-	Level     Level
+	Formatter iface.Formatter
+	Writer    iface.Writer
+	Level     iface.Level
 	Filter    Filter
 }
 
 var nullSlotLink = slotLink{
-	Level: Off,
+	Level: iface.Off,
 }
 
 // Link sets the formatter and writer to the slot of Logger. The opts is used
 // to specify the slot level and/or the slot filter. An opt must be a value of
-// type Level, Filter or func(*Record)bool (the underlying type of the Filter).
+// type iface.Level, Filter or func(*Record)bool (the underlying type of the
+// Filter).
 //
-// If the level of the slot is not specified, it is Trace by default.
+// If the level of the slot is not specified, it is iface.Trace by default.
 // If the filter of the slot is not specified, it is nil by default.
-func (log *Logger) Link(slot Slot, formatter Formatter, writer Writer, opts ...interface{}) {
+func (log *Logger) Link(slot Slot, formatter iface.Formatter,
+	writer iface.Writer, opts ...interface{}) {
 	link := slotLink{
 		Formatter: formatter,
 		Writer:    writer,
-		Level:     Trace,
+		Level:     iface.Trace,
 	}
 	for _, opt := range opts {
 		switch opt := opt.(type) {
-		case Level:
+		case iface.Level:
 			link.Level = opt
 		case Filter:
 			link.Filter = opt
-		case func(*Record) bool:
+		case func(*iface.Record) bool:
 			link.Filter = opt
 		case nil:
 			// noop
 		default:
-			panic(fmt.Sprintf("gxlog.Link: unknown link option type: %T", opt))
+			panic(fmt.Sprintf("logger.Link: unknown link option type: %T", opt))
 		}
 	}
 
@@ -114,7 +118,7 @@ func (log *Logger) SwapSlot(left, right Slot) {
 }
 
 // SlotFormatter returns the formatter of the slot.
-func (log *Logger) SlotFormatter(slot Slot) Formatter {
+func (log *Logger) SlotFormatter(slot Slot) iface.Formatter {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -122,7 +126,7 @@ func (log *Logger) SlotFormatter(slot Slot) Formatter {
 }
 
 // SetSlotFormatter sets the formatter of the slot.
-func (log *Logger) SetSlotFormatter(slot Slot, formatter Formatter) {
+func (log *Logger) SetSlotFormatter(slot Slot, formatter iface.Formatter) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -130,7 +134,7 @@ func (log *Logger) SetSlotFormatter(slot Slot, formatter Formatter) {
 }
 
 // SlotWriter returns the writer of the slot.
-func (log *Logger) SlotWriter(slot Slot) Writer {
+func (log *Logger) SlotWriter(slot Slot) iface.Writer {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -138,7 +142,7 @@ func (log *Logger) SlotWriter(slot Slot) Writer {
 }
 
 // SetSlotWriter sets the writer of the slot.
-func (log *Logger) SetSlotWriter(slot Slot, writer Writer) {
+func (log *Logger) SetSlotWriter(slot Slot, writer iface.Writer) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -146,7 +150,7 @@ func (log *Logger) SetSlotWriter(slot Slot, writer Writer) {
 }
 
 // SlotLevel returns the level of the slot.
-func (log *Logger) SlotLevel(slot Slot) Level {
+func (log *Logger) SlotLevel(slot Slot) iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
@@ -154,7 +158,7 @@ func (log *Logger) SlotLevel(slot Slot) Level {
 }
 
 // SetSlotLevel sets the level of the slot.
-func (log *Logger) SetSlotLevel(slot Slot, level Level) {
+func (log *Logger) SetSlotLevel(slot Slot, level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 

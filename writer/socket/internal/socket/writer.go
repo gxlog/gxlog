@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type Writer struct {
@@ -49,7 +49,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-func (writer *Writer) Write(bs []byte, record *gxlog.Record) {
+func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 

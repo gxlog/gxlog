@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type contextFormatter struct {
-	formatter func([]byte, []gxlog.Context) []byte
+	formatter func([]byte, []iface.Context) []byte
 	fmtspec   string
 	buf       []byte
 }
@@ -23,7 +23,7 @@ func newContextFormatter(property, fmtspec string) *contextFormatter {
 	}
 }
 
-func (formatter *contextFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *contextFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return formatter.formatter(buf, record.Aux.Contexts)
 	}
@@ -32,14 +32,14 @@ func (formatter *contextFormatter) FormatElement(buf []byte, record *gxlog.Recor
 	return append(buf, fmt.Sprintf(formatter.fmtspec, formatter.buf)...)
 }
 
-func selectFormatter(property string) func([]byte, []gxlog.Context) []byte {
+func selectFormatter(property string) func([]byte, []iface.Context) []byte {
 	if strings.ToLower(property) == "list" {
 		return formatList
 	}
 	return formatPair
 }
 
-func formatPair(buf []byte, contexts []gxlog.Context) []byte {
+func formatPair(buf []byte, contexts []iface.Context) []byte {
 	left := "("
 	for _, ctx := range contexts {
 		buf = append(buf, left...)
@@ -52,7 +52,7 @@ func formatPair(buf []byte, contexts []gxlog.Context) []byte {
 	return buf
 }
 
-func formatList(buf []byte, contexts []gxlog.Context) []byte {
+func formatList(buf []byte, contexts []iface.Context) []byte {
 	begin := ""
 	for _, ctx := range contexts {
 		buf = append(buf, begin...)

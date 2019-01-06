@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gxlog/gxlog"
 	"github.com/gxlog/gxlog/formatter/text"
+	"github.com/gxlog/gxlog/iface"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 	tmplDate        = "2018-08-01"
 	tmplTime        = "07:12:07"
 	tmplDecimal     = "235605270"
-	tmplLevel       = gxlog.Info
+	tmplLevel       = iface.Info
 	tmplFile        = "/home/test/data/src/go/workspace/src/github.com/gxlog/gxlog/logger.go"
 	tmplLine        = 64
 	tmplPkg         = "github.com/gxlog/gxlog"
@@ -27,12 +27,12 @@ const (
 	tmplContextList = "k1: v1, k2: v2"
 )
 
-var tmplContexts = []gxlog.Context{
+var tmplContexts = []iface.Context{
 	{Key: "k1", Value: "v1"},
 	{Key: "k2", Value: "v2"},
 }
 
-var tmplRecord gxlog.Record
+var tmplRecord iface.Record
 
 func init() {
 	clock, err := time.ParseInLocation(tmplLayout, tmplDate+" "+tmplTime+
@@ -41,7 +41,7 @@ func init() {
 		panic(err)
 	}
 
-	tmplRecord = gxlog.Record{
+	tmplRecord = iface.Record{
 		Time:  clock,
 		Level: tmplLevel,
 		File:  tmplFile,
@@ -49,7 +49,7 @@ func init() {
 		Pkg:   tmplPkg,
 		Func:  tmplFunc,
 		Msg:   tmplMsg,
-		Aux: gxlog.Auxiliary{
+		Aux: iface.Auxiliary{
 			Prefix:   tmplPrefix,
 			Contexts: tmplContexts,
 			Marked:   true,
@@ -107,30 +107,30 @@ func TestColor(t *testing.T) {
 	testFormat(t, formatter, &tmplRecord, expect)
 
 	record := cloneRecord()
-	record.Level = gxlog.Warn
+	record.Level = iface.Warn
 	record.Aux.Marked = false
-	formatter.MapColors(map[gxlog.Level]text.Color{
-		gxlog.Warn: text.Blue,
+	formatter.MapColors(map[iface.Level]text.Color{
+		iface.Warn: text.Blue,
 	})
 	expect = fmt.Sprintf("\033[%dm%s\033[0m", text.Blue, tmplMsg)
 	testFormat(t, formatter, record, expect)
 
-	record.Level = gxlog.Error
-	formatter.SetColor(gxlog.Error, text.Yellow)
+	record.Level = iface.Error
+	formatter.SetColor(iface.Error, text.Yellow)
 	expect = fmt.Sprintf("\033[%dm%s\033[0m", text.Yellow, tmplMsg)
 	testFormat(t, formatter, record, expect)
 }
 
-func testFormat(t *testing.T, formatter gxlog.Formatter, record *gxlog.Record, expect string) {
+func testFormat(t *testing.T, formatter iface.Formatter, record *iface.Record, expect string) {
 	output := string(formatter.Format(record))
 	if output != expect {
 		t.Errorf("testFormat:\noutput: %q\nexpect: %q", output, expect)
 	}
 }
 
-func cloneRecord() *gxlog.Record {
+func cloneRecord() *iface.Record {
 	clone := tmplRecord
-	clone.Aux.Contexts = make([]gxlog.Context, len(tmplRecord.Aux.Contexts))
+	clone.Aux.Contexts = make([]iface.Context, len(tmplRecord.Aux.Contexts))
 	copy(clone.Aux.Contexts, tmplRecord.Aux.Contexts)
 	return &clone
 }

@@ -1,4 +1,4 @@
-// Package text implements a text formatter which implements the gxlog.Formatter.
+// Package text implements a text formatter which implements the iface.Formatter.
 package text
 
 import (
@@ -6,12 +6,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gxlog/gxlog"
+	"github.com/gxlog/gxlog/iface"
 )
 
 var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 
-// A Formatter implements the interface gxlog.Formatter.
+// A Formatter implements the interface iface.Formatter.
 //
 // All methods of a Formatter are concurrency safe.
 //
@@ -121,7 +121,7 @@ func (formatter *Formatter) DisableColor() {
 }
 
 // Color returns the color of the level in the Formatter.
-func (formatter *Formatter) Color(level gxlog.Level) Color {
+func (formatter *Formatter) Color(level iface.Level) Color {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -129,7 +129,7 @@ func (formatter *Formatter) Color(level gxlog.Level) Color {
 }
 
 // SetColor sets the color of the level in the Formatter.
-func (formatter *Formatter) SetColor(level gxlog.Level, color Color) {
+func (formatter *Formatter) SetColor(level iface.Level, color Color) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -138,7 +138,7 @@ func (formatter *Formatter) SetColor(level gxlog.Level, color Color) {
 
 // MapColors maps the color of levels in the Formatter by the colorMap.
 // The color of a level is left to be unchanged if it is not in the map.
-func (formatter *Formatter) MapColors(colorMap map[gxlog.Level]Color) {
+func (formatter *Formatter) MapColors(colorMap map[iface.Level]Color) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
@@ -161,8 +161,8 @@ func (formatter *Formatter) SetMarkedColor(color Color) {
 	formatter.colorMgr.SetMarkedColor(color)
 }
 
-// Format implements the interface gxlog.Formatter. It formats a Record.
-func (formatter *Formatter) Format(record *gxlog.Record) []byte {
+// Format implements the interface iface.Formatter. It formats a Record.
+func (formatter *Formatter) Format(record *iface.Record) []byte {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 

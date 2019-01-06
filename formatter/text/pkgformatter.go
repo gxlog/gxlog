@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gxlog/gxlog"
 	"github.com/gxlog/gxlog/formatter/internal/util"
+	"github.com/gxlog/gxlog/iface"
 )
 
 type pkgFormatter struct {
@@ -24,7 +24,7 @@ func newPkgFormatter(property, fmtspec string) *pkgFormatter {
 	}
 }
 
-func (formatter *pkgFormatter) FormatElement(buf []byte, record *gxlog.Record) []byte {
+func (formatter *pkgFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	pkg := util.LastSegments(record.Pkg, formatter.segments, '/')
 	if formatter.fmtspec == "%s" {
 		return append(buf, pkg...)

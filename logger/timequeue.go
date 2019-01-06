@@ -1,4 +1,4 @@
-package gxlog
+package logger
 
 import (
 	"time"
