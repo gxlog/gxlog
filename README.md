@@ -10,11 +10,12 @@ interface **Formatter** and **Writer**, gxlog can be extended to support any
 log formats or any log backends. In addition, with the design of **Slots**,
 logging, events or hooks can be integrated into gxlog.
 
-## Table of Contents ##
+## Contents ##
 
 - [Architecture](#architecture)
 - [Features Preview](#features-preview)
 - [Getting Started](#getting-started)
+  - [Installing](#installing)
   - [Basic](#basic)
   - [Auxiliary](#auxiliary)
   - [Slots](#slots)
@@ -88,6 +89,14 @@ logging, events or hooks can be integrated into gxlog.
     - **unix domain socket writer**
 
 ## Getting Started ##
+
+### Installing ###
+
+To install gxlog, run `go get`:
+
+``` shell
+$ go get github.com/gxlog/gxlog/...
+```
 
 ### Basic ###
 
