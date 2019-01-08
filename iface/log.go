@@ -9,7 +9,7 @@ type Level int
 
 // All available levels of logs here.
 const (
-	Trace Level = iota
+	Trace Level = iota + 1
 	Debug
 	Info
 	Warn

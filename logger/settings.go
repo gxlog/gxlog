@@ -1,41 +1,35 @@
 package logger
 
-import "github.com/gxlog/gxlog/iface"
+import (
+	"github.com/gxlog/gxlog/iface"
+)
 
-// Config returns a copy of Config of the Logger.
-func (log *Logger) Config() *Config {
+// Config returns the Config of the Logger.
+func (log *Logger) Config() Config {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	copyConfig := *log.config
-	return &copyConfig
+	return *log.config
 }
 
-// SetConfig sets the copy of config to the Logger. The config must NOT be nil.
-// If the config is invalid, it returns an error and the config of the Logger
-// is left to be unchanged.
-func (log *Logger) SetConfig(config *Config) error {
+// SetConfig sets the config to the Logger.
+func (log *Logger) SetConfig(config Config) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	copyConfig := *config
-	log.config = &copyConfig
-	return nil
+	log.config = &config
 }
 
-// UpdateConfig will call fn with copy of the config of the Logger, and then
-// sets copy of the returned config to the Logger. The fn must NOT be nil.
-// If the returned config is invalid, it returns an error and the config of
-// the Logger is left to be unchanged.
+// UpdateConfig calls the fn with the Config of the Logger, and then sets the
+// returned Config to the Logger. The fn must NOT be nil.
 //
-// Do NOT call methods of the Logger within fn, or it will deadlock.
-func (log *Logger) UpdateConfig(fn func(Config) Config) error {
+// Do NOT call any method of the Logger within the fn, or it may deadlock.
+func (log *Logger) UpdateConfig(fn func(Config) Config) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
 	config := fn(*log.config)
 	log.config = &config
-	return nil
 }
 
 // Level returns the level of the Logger.
@@ -52,38 +46,6 @@ func (log *Logger) SetLevel(level iface.Level) {
 	defer log.lock.Unlock()
 
 	log.config.Level = level
-}
-
-// TimeLevel returns the time level of the Logger.
-func (log *Logger) TimeLevel() iface.Level {
-	log.lock.Lock()
-	defer log.lock.Unlock()
-
-	return log.config.TimeLevel
-}
-
-// SetTimeLevel sets the time level of the Logger.
-func (log *Logger) SetTimeLevel(level iface.Level) {
-	log.lock.Lock()
-	defer log.lock.Unlock()
-
-	log.config.TimeLevel = level
-}
-
-// PanicLevel returns the panic level of the Logger.
-func (log *Logger) PanicLevel() iface.Level {
-	log.lock.Lock()
-	defer log.lock.Unlock()
-
-	return log.config.PanicLevel
-}
-
-// SetPanicLevel sets the panic level of the Logger.
-func (log *Logger) SetPanicLevel(level iface.Level) {
-	log.lock.Lock()
-	defer log.lock.Unlock()
-
-	log.config.PanicLevel = level
 }
 
 // TrackLevel returns the track level of the Logger.
@@ -118,6 +80,38 @@ func (log *Logger) SetExitLevel(level iface.Level) {
 	log.config.ExitLevel = level
 }
 
+// TimeLevel returns the time level of the Logger.
+func (log *Logger) TimeLevel() iface.Level {
+	log.lock.Lock()
+	defer log.lock.Unlock()
+
+	return log.config.TimeLevel
+}
+
+// SetTimeLevel sets the time level of the Logger.
+func (log *Logger) SetTimeLevel(level iface.Level) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
+
+	log.config.TimeLevel = level
+}
+
+// PanicLevel returns the panic level of the Logger.
+func (log *Logger) PanicLevel() iface.Level {
+	log.lock.Lock()
+	defer log.lock.Unlock()
+
+	return log.config.PanicLevel
+}
+
+// SetPanicLevel sets the panic level of the Logger.
+func (log *Logger) SetPanicLevel(level iface.Level) {
+	log.lock.Lock()
+	defer log.lock.Unlock()
+
+	log.config.PanicLevel = level
+}
+
 // Filter returns the filter of the Logger.
 func (log *Logger) Filter() Filter {
 	log.lock.Lock()
@@ -134,20 +128,20 @@ func (log *Logger) SetFilter(filter Filter) {
 	log.config.Filter = filter
 }
 
-// Flags returns the flags of the Logger.
-func (log *Logger) Flags() Flag {
+// Disabled returns the disabled flags of the Logger.
+func (log *Logger) Disabled() Flag {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	return log.config.Flags
+	return log.config.Disabled
 }
 
-// SetFlags sets the flags of the Logger.
-func (log *Logger) SetFlags(flags Flag) {
+// SetDisabled sets the disabled flags of the Logger.
+func (log *Logger) SetDisabled(flags Flag) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	log.config.Flags = flags
+	log.config.Disabled = flags
 }
 
 // Enable enables the flags of the Logger.
@@ -155,7 +149,7 @@ func (log *Logger) Enable(flags Flag) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	log.config.Flags |= flags
+	log.config.Disabled &^= flags
 }
 
 // Disable disables the flags of the Logger.
@@ -163,5 +157,5 @@ func (log *Logger) Disable(flags Flag) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	log.config.Flags &^= flags
+	log.config.Disabled |= flags
 }

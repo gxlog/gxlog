@@ -19,14 +19,13 @@ import (
 
 const callDepthOffset = 3
 
-// A Logger is a framework that contains EIGHT slots. Each slot has a formatter
-// and a writer. A Logger has its own level and filter, while each slot has its
-// independent level and filter. The Logger will call the formatter and the
-// writer of each slot in the order from Slot0 to Slot7 if they are not nil.
+// A Logger is a logging framework that contains EIGHT slots. Each Slot contains
+// a Formatter and a Writer. A Logger has its own level and filter while each
+// Slot has its independent level and filter. Logger calls the Formatter and
+// Writer of each Slot in the order from Slot0 to Slot7 when a log is emitted.
 //
 // All methods of A Logger are concurrency safe.
-//
-// A Logger must be created with New.
+// A Logger MUST be created with New.
 type Logger struct {
 	config *Config
 	slots  []slotLink
@@ -39,11 +38,11 @@ type Logger struct {
 	lock *sync.Mutex
 }
 
-// New creates a new Logger with the config. The config must not be nil.
-func New(config *Config) *Logger {
-	copyConfig := *config
+// New creates a new Logger with the config.
+func New(config Config) *Logger {
+	config.setDefaults()
 	logger := &Logger{
-		config:   &copyConfig,
+		config:   &config,
 		countMap: make(map[locator]int64, mapInitCap),
 		timeMap:  make(map[locator]*timeQueue, mapInitCap),
 		lock:     new(sync.Mutex),
@@ -52,96 +51,98 @@ func New(config *Config) *Logger {
 	return logger
 }
 
-// Trace calls Log with level iface.Trace to output log.
+// Trace calls Log with level Trace to emit a log.
 func (log *Logger) Trace(args ...interface{}) {
 	log.Log(1, iface.Trace, args...)
 }
 
-// Tracef calls Logf with level iface.Trace to output log.
+// Tracef calls Logf with level Trace to emit a log.
 func (log *Logger) Tracef(fmtstr string, args ...interface{}) {
 	log.Logf(1, iface.Trace, fmtstr, args...)
 }
 
-// Debug calls Log with level iface.Debug to output log.
+// Debug calls Log with level Debug to emit a log.
 func (log *Logger) Debug(args ...interface{}) {
 	log.Log(1, iface.Debug, args...)
 }
 
-// Debugf calls Logf with level iface.Debug to output log.
+// Debugf calls Logf with level Debug to emit a log.
 func (log *Logger) Debugf(fmtstr string, args ...interface{}) {
 	log.Logf(1, iface.Debug, fmtstr, args...)
 }
 
-// Info calls Log with level iface.Info to output log.
+// Info calls Log with level Info to emit a log.
 func (log *Logger) Info(args ...interface{}) {
 	log.Log(1, iface.Info, args...)
 }
 
-// Infof calls Logf with level iface.Info to output log.
+// Infof calls Logf with level Info to emit a log.
 func (log *Logger) Infof(fmtstr string, args ...interface{}) {
 	log.Logf(1, iface.Info, fmtstr, args...)
 }
 
-// Warn calls Log with level iface.Warn to output log.
+// Warn calls Log with level Warn to emit a log.
 func (log *Logger) Warn(args ...interface{}) {
 	log.Log(1, iface.Warn, args...)
 }
 
-// Warnf calls Logf with level iface.Warn to output log.
+// Warnf calls Logf with level Warn to emit a log.
 func (log *Logger) Warnf(fmtstr string, args ...interface{}) {
 	log.Logf(1, iface.Warn, fmtstr, args...)
 }
 
-// Error calls Log with level iface.Error to output log.
+// Error calls Log with level Error to emit a log.
 func (log *Logger) Error(args ...interface{}) {
 	log.Log(1, iface.Error, args...)
 }
 
-// Errorf calls Logf with level iface.Error to output log.
+// Errorf calls Logf with level Error to emit a log.
 func (log *Logger) Errorf(fmtstr string, args ...interface{}) {
 	log.Logf(1, iface.Error, fmtstr, args...)
 }
 
-// Fatal calls Log with level iface.Fatal to output log.
+// Fatal calls Log with level Fatal to emit a log.
 func (log *Logger) Fatal(args ...interface{}) {
 	log.Log(1, iface.Fatal, args...)
 }
 
-// Fatalf calls Logf with level iface.Fatal to output log.
+// Fatalf calls Logf with level Fatal to emit a log.
 func (log *Logger) Fatalf(fmtstr string, args ...interface{}) {
 	log.Logf(1, iface.Fatal, fmtstr, args...)
 }
 
-// LogError calls Log to output log and calls errors.New to return an error.
-// The level must be between iface.Trace and iface.Fatal inclusive.
+// LogError calls Log to emit a log and calls errors.New to return an error.
+// The level MUST be between Trace and Fatal inclusive.
 func (log *Logger) LogError(level iface.Level, text string) error {
 	log.Log(1, level, text)
 	return errors.New(text)
 }
 
-// LogErrorf calls Logf to output log and calls fmt.Errorf to return an error.
-// The level must be between iface.Trace and iface.Fatal inclusive.
-func (log *Logger) LogErrorf(level iface.Level, fmtstr string, args ...interface{}) error {
+// LogErrorf calls Logf to emit a log and calls fmt.Errorf to return an error.
+// The level MUST be between Trace and Fatal inclusive.
+func (log *Logger) LogErrorf(level iface.Level, fmtstr string,
+	args ...interface{}) error {
 	err := fmt.Errorf(fmtstr, args...)
 	log.Log(1, level, err.Error())
 	return err
 }
 
-// Log calls formatters and writers in slots to output log.
+// Log calls the Formatter and Writer in each Slot to format and write a log.
 //
-// The level must be between iface.Trace and iface.Fatal inclusive. If the level
-// is lower than the level of Logger, NO log will output. If the level is lower
-// than the level of a slot, the formatter and writer of the slot will NOT be
+// The level MUST be between Trace and Fatal inclusive. If the level is lower
+// than the level of Logger, the log will NOT be emitted. If the level is lower
+// than the level of a Slot, the Formatter and Writer of the Slot will NOT be
 // called. If the level is NOT lower than the track level of Logger, the stack of
 // the current goroutine will be output. If the level is NOT lower than the exit
-// level of Logger, it will call os.Exit to exit.
+// level of Logger, the Logger will call os.Exit at last.
 //
-// The calldepth is useful when you customize your own log helper functions
-// and need to specify the stack level. Otherwise, 0 is just ok.
+// The calldepth is used to set the offset of stack. It makes sense when you are
+// customizing your own log wrapper function. Otherwise, 0 is just ok.
 //
 // The args are handled in the manner of fmt.Sprint.
 //
-// ATTENTION: log may NOT be output in asynchronous mode if os.Exit has been called.
+// ATTENTION: the log may NOT be output when a Writer is in asynchronous mode and
+// os.Exit has been called.
 func (log *Logger) Log(calldepth int, level iface.Level, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
@@ -155,9 +156,10 @@ func (log *Logger) Log(calldepth int, level iface.Level, args ...interface{}) {
 	}
 }
 
-// Logf does the same with Log except that it calls fmt.Sprintf to do the format.
+// Logf does the same with Log except that it calls fmt.Sprintf to format a log.
 //
-// ATTENTION: log may NOT be output in asynchronous mode if os.Exit has been called.
+// ATTENTION: the log may NOT be output when a Writer is in asynchronous mode and
+// os.Exit has been called.
 func (log *Logger) Logf(calldepth int, level iface.Level, fmtstr string, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
@@ -172,16 +174,19 @@ func (log *Logger) Logf(calldepth int, level iface.Level, fmtstr string, args ..
 	}
 }
 
-// Panic calls formatters and writers in slots to output log and then panic.
-// It will always panic no matter at which level the Logger is.
+// Panic calls the Formatters and Writers in each Slot to format and write a log
+// and panics at last.
 //
-// The level of this call is the panic level of Logger. If the level is lower
-// than the level of Logger, NO log will output. If the level is lower than
-// the level of a slot, the formatter and writer of the slot will NOT be called.
+// The level of the emitted log is the panic level of Logger. If the level is
+// lower than the level of Logger, the log will NOT be output. If the level is
+// lower than the level of a Slot, the Formatter and Writer of the Slot will NOT
+// be called.
 //
 // The args are handled in the manner of fmt.Sprint.
 //
-// ATTENTION: log may NOT be output in asynchronous mode if there is no recovery.
+// ATTENTION: the log may NOT be output when a Writer is in asynchronous mode and
+// there is NO recovery after panicking.
+// Panic never outputs the stack with the log or calls os.Exit.
 func (log *Logger) Panic(args ...interface{}) {
 	msg := fmt.Sprint(args...)
 	logLevel, panicLevel := log.panicLevel()
@@ -191,9 +196,11 @@ func (log *Logger) Panic(args ...interface{}) {
 	panic(msg)
 }
 
-// Panicf does the same with Panic except that it calls fmt.Sprintf to do the format.
+// Panicf does the same with Panic except it calls fmt.Sprintf to format a log.
 //
-// ATTENTION: log may NOT be output in asynchronous mode if there is no recovery.
+// ATTENTION: the log may NOT be output when a Writer is in asynchronous mode and
+// there is NO recovery after panicking.
+// Panicf never outputs the stack with the log or calls os.Exit.
 func (log *Logger) Panicf(fmtstr string, args ...interface{}) {
 	msg := fmt.Sprintf(fmtstr, args...)
 	logLevel, panicLevel := log.panicLevel()
@@ -203,14 +210,17 @@ func (log *Logger) Panicf(fmtstr string, args ...interface{}) {
 	panic(msg)
 }
 
-// Time will return a function. When the function is called, it will call
-// formatters and writers in slots to output the log as well as the time cost
-// since the call of Time. It works well with defer, but do not forget the
-// last empty pair of parentheses.
+// Time returns a function. When the function is called, it outputs the log with
+// the time elapsed since the call of Time.
 //
-// The level of this call is the time level of Logger. If the level is lower
-// than the level of Logger, NO log will output. If the level is lower than
-// the level of a slot, the formatter and writer of the slot will NOT be called.
+// The level of the emitted log is the time level of Logger. If the level is
+// lower than the level of Logger, the log will NOT be output. If the level is
+// lower than the level of a Slot, the Formatter and Writer of the Slot will NOT
+// be called.
+//
+// The args are handled in the manner of fmt.Sprint.
+//
+// It works well with defer and do NOT forget the last empty pair of parentheses.
 func (log *Logger) Time(args ...interface{}) func() {
 	logLevel, timeLevel := log.timeLevel()
 	if logLevel <= timeLevel {
@@ -219,7 +229,9 @@ func (log *Logger) Time(args ...interface{}) func() {
 	return func() {}
 }
 
-// Timef does the same with Time except that it calls fmt.Sprintf to do the format.
+// Timef does the same with Time except it calls fmt.Sprintf to format a log.
+//
+// It works well with defer and do NOT forget the last empty pair of parentheses.
 func (log *Logger) Timef(fmtstr string, args ...interface{}) func() {
 	logLevel, timeLevel := log.timeLevel()
 	if logLevel <= timeLevel {
@@ -250,6 +262,10 @@ func (log *Logger) panicLevel() (iface.Level, iface.Level) {
 }
 
 func (log *Logger) write(calldepth int, level iface.Level, msg string) {
+	if level < iface.Trace || level > iface.Fatal {
+		panic("logger: invalid level")
+	}
+
 	file, line, pkg, fn := getPosInfo(calldepth + callDepthOffset)
 
 	log.lock.Lock()
@@ -290,10 +306,12 @@ func (log *Logger) filter(record *iface.Record) bool {
 	if log.config.Filter != nil && !log.config.Filter(record) {
 		return false
 	}
-	if log.config.Flags&Limit != 0 {
+	if log.config.Disabled&LimitByCount == 0 {
 		if log.attr.CountLimiter != nil && !log.attr.CountLimiter(record) {
 			return false
 		}
+	}
+	if log.config.Disabled&LimitByTime == 0 {
 		if log.attr.TimeLimiter != nil && !log.attr.TimeLimiter(record) {
 			return false
 		}
@@ -302,23 +320,21 @@ func (log *Logger) filter(record *iface.Record) bool {
 }
 
 func (log *Logger) attachAux(record *iface.Record) {
-	if log.config.Flags&Prefix != 0 {
+	if log.config.Disabled&Prefix == 0 {
 		record.Aux.Prefix = log.attr.Prefix
 	}
-	if log.config.Flags&Contexts != 0 {
-		// The len and cap of log.attr.Contexts are equal,
-		//   next appending will reallocate memory
+	if log.config.Disabled&StaticContext == 0 {
 		record.Aux.Contexts = log.attr.Contexts
-		if log.config.Flags&DynamicContexts != 0 {
-			for _, context := range log.attr.DynamicContexts {
-				record.Aux.Contexts = append(record.Aux.Contexts, iface.Context{
-					Key:   fmt.Sprint(context.Key),
-					Value: fmt.Sprint(context.Value(context.Key)),
-				})
-			}
+	}
+	if log.config.Disabled&DynamicContext == 0 {
+		for _, context := range log.attr.DynamicContexts {
+			record.Aux.Contexts = append(record.Aux.Contexts, iface.Context{
+				Key:   fmt.Sprint(context.Key),
+				Value: fmt.Sprint(context.Value(context.Key)),
+			})
 		}
 	}
-	if log.config.Flags&Mark != 0 {
+	if log.config.Disabled&Mark == 0 {
 		record.Aux.Marked = log.attr.Marked
 	}
 }

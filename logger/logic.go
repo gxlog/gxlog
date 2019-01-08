@@ -1,10 +1,12 @@
 package logger
 
-import "github.com/gxlog/gxlog/iface"
+import (
+	"github.com/gxlog/gxlog/iface"
+)
 
 // And returns a function that is the logic AND of all the filters.
 // It has the short circuit feature.
-// There must be at least one filter and any filter must NOT be nil.
+// There MUST be at least one filter and any filter must NOT be nil.
 func And(filters ...Filter) Filter {
 	if len(filters) == 0 {
 		panic("logger.And: no filters")
@@ -21,7 +23,7 @@ func And(filters ...Filter) Filter {
 
 // Or returns a function that is the logic OR of all the filters.
 // It has the short circuit feature.
-// There must be at least one filter and any filter must NOT be nil.
+// There MUST be at least one filter and any filter must NOT be nil.
 func Or(filters ...Filter) Filter {
 	if len(filters) == 0 {
 		panic("logger.Or: no filters")

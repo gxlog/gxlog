@@ -9,18 +9,20 @@ import (
 	"github.com/gxlog/gxlog/writer"
 )
 
-var defaultLogger *logger.Logger
-var defaultFormatter *text.Formatter
+var (
+	defaultLogger    *logger.Logger
+	defaultFormatter *text.Formatter
+)
 
 func init() {
-	defaultLogger = logger.New(logger.NewConfig())
+	defaultLogger = logger.New(logger.Config{})
 	defaultFormatter = text.New(text.NewConfig())
 	defaultLogger.Link(logger.Slot0, defaultFormatter, writer.Wrap(os.Stderr))
 }
 
-// Logger returns the default Logger. The default Logger has the default
-// Formatter (a text formatter) and a writer wrapper of os.Stderr linked
-// in Slot0. The rest slots are free.
+// Logger returns the default Logger which has the default Formatter (a text
+// formatter) and a writer wrapper of os.Stderr linked in Slot0.
+// The rest slots are free.
 func Logger() *logger.Logger {
 	return defaultLogger
 }
