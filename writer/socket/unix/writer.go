@@ -9,6 +9,7 @@ package unix
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/gxlog/gxlog/iface"
 	"github.com/gxlog/gxlog/writer/socket/internal/socket"
@@ -27,16 +28,19 @@ func Open(config Config) (*Writer, error) {
 	config.setDefaults()
 	if !config.NoOverwrite {
 		if err := checkAndRemove(config.Pathname); err != nil {
-			return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
+			return nil, openError(err)
 		}
+	}
+	if err := os.MkdirAll(filepath.Dir(config.Pathname), config.Perm); err != nil {
+		return nil, openError(err)
 	}
 	writer, err := socket.Open("unix", config.Pathname)
 	if err != nil {
-		return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
+		return nil, openError(err)
 	}
 	if err := os.Chmod(config.Pathname, config.Perm); err != nil {
 		writer.Close()
-		return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
+		return nil, openError(err)
 	}
 	return &Writer{writer: writer}, nil
 }
@@ -52,6 +56,10 @@ func (writer *Writer) Close() error {
 // Write implements the interface Writer. It writes logs to unix domain sockets.
 func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.writer.Write(bs, record)
+}
+
+func openError(err error) error {
+	return fmt.Errorf("writer/socket/unix.Open: %v", err)
 }
 
 func checkAndRemove(pathname string) error {
