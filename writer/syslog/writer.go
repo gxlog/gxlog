@@ -1,6 +1,6 @@
 // +build !nacl,!plan9,!windows
 
-// Package syslog implements a syslog writer which implements the iface.Writer.
+// Package syslog implements a syslog writer which implements the Writer.
 package syslog
 
 import (
@@ -19,25 +19,25 @@ type syslogFunc func(string) error
 // A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
-//
-// A Writer must be created with Open.
+// A Writer MUST be created with Open.
 type Writer struct {
 	reportOnErr bool
 
-	logFuncs [iface.LevelCount]syslogFunc
+	logFuncs [iface.LevelCount + iface.Trace]syslogFunc
 	writer   *syslog.Writer
 
 	lock sync.Mutex
 }
 
-// Open creates a new Writer with the cfg. The cfg must NOT be nil.
-func Open(cfg *Config) (*Writer, error) {
-	wt, err := syslog.Dial(cfg.Network, cfg.Addr, syslog.Priority(cfg.Facility), cfg.Tag)
+// Open creates a new Writer with the config.
+func Open(config Config) (*Writer, error) {
+	wt, err := syslog.Dial(config.Network, config.Addr,
+		syslog.Priority(config.Facility), config.Tag)
 	if err != nil {
 		return nil, fmt.Errorf("writer/syslog.Open: %v", err)
 	}
 	writer := &Writer{
-		reportOnErr: cfg.ReportOnErr,
+		reportOnErr: config.ReportOnErr,
 		writer:      wt,
 	}
 	severityMap := map[iface.Level]Severity{
@@ -49,7 +49,7 @@ func Open(cfg *Config) (*Writer, error) {
 		iface.Fatal: SevCrit,
 	}
 	writer.updateLogFuncs(severityMap)
-	writer.updateLogFuncs(cfg.SeverityMap)
+	writer.updateLogFuncs(config.SeverityMap)
 	return writer, nil
 }
 
@@ -64,8 +64,9 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface iface.Writer. It writes logs to the syslog.
-// NOTICE: the std syslog package will get the timestamp itself which is a
+// Write implements the interface Writer. It writes logs to the syslog.
+//
+// NOTICE: the standard syslog package will get the timestamp itself which is a
 // tiny bit later than Record.Time.
 func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.lock.Lock()
@@ -93,7 +94,7 @@ func (writer *Writer) SetReportOnErr(ok bool) {
 	writer.reportOnErr = ok
 }
 
-// MapSeverity maps the severity of levels in the Writer by the severityMap.
+// MapSeverity maps the severity of levels according to the severityMap.
 // The severity of a level is left to be unchanged if it is not in the map.
 func (writer *Writer) MapSeverity(severityMap map[iface.Level]Severity) {
 	writer.lock.Lock()

@@ -12,7 +12,7 @@ const generalError = "not implemented on nacl, plan9 or windows"
 
 type Writer struct{}
 
-func Open(cfg *Config) (*Writer, error) {
+func Open(config Config) (*Writer, error) {
 	return nil, fmt.Errorf("writer/syslog.Open: %s", generalError)
 }
 
