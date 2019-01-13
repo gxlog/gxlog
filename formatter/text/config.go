@@ -40,7 +40,7 @@ type Config struct {
 	//   msg     |                          |           %s |
 	// If Header is not specified, FullHeader is used.
 	Header string
-	// MinBufSize is the initial size of the internal buf of the formatter.
+	// MinBufSize is the initial size of the internal buf of a formatter.
 	// MinBufSize must NOT be negative. If it is not specified, 256 is used.
 	MinBufSize int
 	// ColorMap is used to remap the color of each level.

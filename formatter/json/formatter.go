@@ -1,8 +1,7 @@
-// Package json implements a json formatter which implements the iface.Formatter.
+// Package json implements a json formatter which implements the Formatter.
 package json
 
 import (
-	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -14,26 +13,23 @@ import (
 // A Formatter implements the interface iface.Formatter.
 //
 // All methods of a Formatter are concurrency safe.
-//
-// A Formatter must be created with New.
+// A Formatter MUST be created with New.
 type Formatter struct {
 	config Config
 
 	lock sync.Mutex
 }
 
-// New creates a new Formatter with the config. The config must not be nil.
-func New(config *Config) *Formatter {
-	if config.MinBufSize < 0 {
-		panic("formatter/json.New: Config.MinBufSize must not be negative")
-	}
+// New creates a new Formatter with the config.
+func New(config Config) *Formatter {
+	config.setDefaults()
 	formatter := &Formatter{
-		config: *config,
+		config: config,
 	}
 	return formatter
 }
 
-// Format implements the interface iface.Formatter. It formats a Record.
+// Format implements the interface Formatter. It formats a Record.
 func (formatter *Formatter) Format(record *iface.Record) []byte {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -42,7 +38,8 @@ func (formatter *Formatter) Format(record *iface.Record) []byte {
 	sep := ""
 	buf = append(buf, "{"...)
 	if formatter.config.Omit&Time == 0 {
-		buf = formatStrField(buf, sep, "Time", record.Time.Format(time.RFC3339Nano), false)
+		buf = formatStrField(buf, sep, "Time",
+			record.Time.Format(time.RFC3339Nano), false)
 		sep = ","
 	}
 	if formatter.config.Omit&Level == 0 {
@@ -77,50 +74,36 @@ func (formatter *Formatter) Format(record *iface.Record) []byte {
 	return buf
 }
 
-// Config returns a copy of config of the Formatter.
-func (formatter *Formatter) Config() *Config {
+// Config returns the Config of the Formatter.
+func (formatter *Formatter) Config() Config {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
-	copyConfig := formatter.config
-	return &copyConfig
+	return formatter.config
 }
 
-// SetConfig sets the copy of config to the Formatter. The config must NOT be nil.
-// If the config is invalid, it returns an error and the config of the Formatter
-// is left to be unchanged.
-func (formatter *Formatter) SetConfig(config *Config) error {
-	if config.MinBufSize < 0 {
-		return errors.New("formatter/json.SetConfig: Config.MinBufSize must not be negative")
-	}
-
+// SetConfig sets the config to the Formatter.
+func (formatter *Formatter) SetConfig(config Config) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
-	formatter.config = *config
-	return nil
-}
-
-// UpdateConfig will call fn with copy of the config of the Formatter, and then
-// sets copy of the returned config to the Formatter. The fn must NOT be nil.
-// If the returned config is invalid, it returns an error and the config of
-// the Formatter is left to be unchanged.
-//
-// Do NOT call methods of the Formatter within fn, or it will deadlock.
-func (formatter *Formatter) UpdateConfig(fn func(Config) Config) error {
-	formatter.lock.Lock()
-	defer formatter.lock.Unlock()
-
-	config := fn(formatter.config)
-
-	if config.MinBufSize < 0 {
-		return errors.New("formatter/json.UpdateConfig: Config.MinBufSize must not be negative")
-	}
 	formatter.config = config
-	return nil
 }
 
-func (formatter *Formatter) formatAux(buf []byte, sep string, aux *iface.Auxiliary) []byte {
+// UpdateConfig calls the fn with the Config of the Formatter, and then sets the
+// returned Config to the Formatter. The fn must NOT be nil.
+//
+// Do NOT call any method of the Formatter or the Logger within the fn,
+// or it may deadlock.
+func (formatter *Formatter) UpdateConfig(fn func(Config) Config) {
+	formatter.lock.Lock()
+	defer formatter.lock.Unlock()
+
+	formatter.config = fn(formatter.config)
+}
+
+func (formatter *Formatter) formatAux(buf []byte, sep string,
+	aux *iface.Auxiliary) []byte {
 	if formatter.config.Omit&Aux == Aux {
 		return buf
 	}
