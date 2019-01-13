@@ -70,13 +70,11 @@ func (enc *streamEncrypter) Close() error {
 }
 
 func (enc *streamEncrypter) Write(bs []byte) (int, error) {
-	var count int
 	if len(enc.iv) > 0 {
 		n, err := enc.underlying.Write(enc.iv)
-		count += n
 		enc.iv = enc.iv[n:]
 		if err != nil {
-			return count, err
+			return 0, err
 		}
 	}
 
@@ -86,8 +84,6 @@ func (enc *streamEncrypter) Write(bs []byte) (int, error) {
 	}
 	buf := enc.buf[:size]
 	enc.stream.XORKeyStream(buf, bs)
-	n, err := enc.underlying.Write(buf)
-	count += n
 
-	return count, err
+	return enc.underlying.Write(buf)
 }
