@@ -13,7 +13,7 @@ type contextFormatter struct {
 	buf       []byte
 }
 
-func newContextFormatter(property, fmtspec string) *contextFormatter {
+func newContextFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

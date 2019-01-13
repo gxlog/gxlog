@@ -13,7 +13,7 @@ type funcFormatter struct {
 	fmtspec  string
 }
 
-func newFuncFormatter(property, fmtspec string) *funcFormatter {
+func newFuncFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

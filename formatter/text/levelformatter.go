@@ -30,7 +30,7 @@ type levelFormatter struct {
 	fmtspec  string
 }
 
-func newLevelFormatter(property, fmtspec string) *levelFormatter {
+func newLevelFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

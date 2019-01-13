@@ -8,38 +8,32 @@ type elementFormatter interface {
 	FormatElement(buf []byte, record *iface.Record) []byte
 }
 
+var newFormatterFuncMap = map[string]func(property, fmtspec string) elementFormatter{
+	"time":    newTimeFormatter,
+	"level":   newLevelFormatter,
+	"file":    newFileFormatter,
+	"line":    newLineFormatter,
+	"pkg":     newPkgFormatter,
+	"func":    newFuncFormatter,
+	"msg":     newMsgFormatter,
+	"prefix":  newPrefixFormatter,
+	"context": newContextFormatter,
+}
+
 type headerAppender struct {
 	formatter  elementFormatter
 	staticText string
 }
 
-func newHeaderAppender(element, property, fmtspec,
-	staticText string) *headerAppender {
-	var formatter elementFormatter
-	switch element {
-	case "time":
-		formatter = newTimeFormatter(property, fmtspec)
-	case "level":
-		formatter = newLevelFormatter(property, fmtspec)
-	case "file":
-		formatter = newFileFormatter(property, fmtspec)
-	case "line":
-		formatter = newLineFormatter(property, fmtspec)
-	case "pkg":
-		formatter = newPkgFormatter(property, fmtspec)
-	case "func":
-		formatter = newFuncFormatter(property, fmtspec)
-	case "msg":
-		formatter = newMsgFormatter(property, fmtspec)
-	case "prefix":
-		formatter = newPrefixFormatter(property, fmtspec)
-	case "context":
-		formatter = newContextFormatter(property, fmtspec)
+func newHeaderAppender(element, property, fmtspec, staticText string) *headerAppender {
+	newFunc := newFormatterFuncMap[element]
+	if newFunc == nil {
+		return nil
 	}
-	if formatter != nil {
-		return &headerAppender{formatter: formatter, staticText: staticText}
+	return &headerAppender{
+		formatter:  newFunc(property, fmtspec),
+		staticText: staticText,
 	}
-	return nil
 }
 
 func (appender *headerAppender) AppendHeader(buf []byte,

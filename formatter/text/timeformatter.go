@@ -21,7 +21,7 @@ type timeFormatter struct {
 	fmtspec string
 }
 
-func newTimeFormatter(property, fmtspec string) *timeFormatter {
+func newTimeFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

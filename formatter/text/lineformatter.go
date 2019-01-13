@@ -12,7 +12,7 @@ type lineFormatter struct {
 	fmtspec  string
 }
 
-func newLineFormatter(property, fmtspec string) *lineFormatter {
+func newLineFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%d"
 	}

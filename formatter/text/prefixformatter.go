@@ -11,7 +11,7 @@ type prefixFormatter struct {
 	fmtspec  string
 }
 
-func newPrefixFormatter(property, fmtspec string) *prefixFormatter {
+func newPrefixFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

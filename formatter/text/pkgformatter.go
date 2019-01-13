@@ -13,7 +13,7 @@ type pkgFormatter struct {
 	fmtspec  string
 }
 
-func newPkgFormatter(property, fmtspec string) *pkgFormatter {
+func newPkgFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

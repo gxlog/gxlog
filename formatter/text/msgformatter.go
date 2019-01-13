@@ -11,7 +11,7 @@ type msgFormatter struct {
 	fmtspec  string
 }
 
-func newMsgFormatter(property, fmtspec string) *msgFormatter {
+func newMsgFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}

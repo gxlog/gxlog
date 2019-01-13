@@ -13,7 +13,7 @@ type fileFormatter struct {
 	fmtspec  string
 }
 
-func newFileFormatter(property, fmtspec string) *fileFormatter {
+func newFileFormatter(property, fmtspec string) elementFormatter {
 	if fmtspec == "" {
 		fmtspec = "%s"
 	}
