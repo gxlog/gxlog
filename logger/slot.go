@@ -3,7 +3,9 @@ package logger
 import (
 	"fmt"
 
+	"github.com/gxlog/gxlog/formatter"
 	"github.com/gxlog/gxlog/iface"
+	"github.com/gxlog/gxlog/writer"
 )
 
 // The Slot defines the slot type of Logger.
@@ -32,12 +34,15 @@ type slotLink struct {
 }
 
 var nullSlotLink = slotLink{
-	Level: iface.Off,
+	Formatter: formatter.Null(),
+	Writer:    writer.Null(),
+	Level:     iface.Off,
 }
 
 // Link sets the formatter and writer to the slot. The opts is used to specify
 // the slot Level and/or the slot Filter. An opt MUST be a value of type Level,
 // Filter or func(*Record)bool (the underlying type of Filter).
+// The formatter and the writer must NOT be nil.
 // If the Level of the slot is not specified, Trace is used.
 func (log *Logger) Link(slot Slot, formatter iface.Formatter,
 	writer iface.Writer, opts ...interface{}) {
@@ -122,7 +127,7 @@ func (log *Logger) SlotFormatter(slot Slot) iface.Formatter {
 	return log.slots[slot].Formatter
 }
 
-// SetSlotFormatter sets the Formatter of the slot.
+// SetSlotFormatter sets the Formatter of the slot. The formatter must NOT be nil.
 func (log *Logger) SetSlotFormatter(slot Slot, formatter iface.Formatter) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
@@ -138,7 +143,7 @@ func (log *Logger) SlotWriter(slot Slot) iface.Writer {
 	return log.slots[slot].Writer
 }
 
-// SetSlotWriter sets the Writer of the slot.
+// SetSlotWriter sets the Writer of the slot. The writer must NOT be nil.
 func (log *Logger) SetSlotWriter(slot Slot, writer iface.Writer) {
 	log.lock.Lock()
 	defer log.lock.Unlock()

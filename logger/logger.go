@@ -290,13 +290,7 @@ func (log *Logger) write(calldepth int, level iface.Level, msg string) {
 	for _, link := range log.slots {
 		if link.Level <= level {
 			if link.Filter == nil || link.Filter(record) {
-				var bs []byte
-				if link.Formatter != nil {
-					bs = link.Formatter.Format(record)
-				}
-				if link.Writer != nil {
-					link.Writer.Write(bs, record)
-				}
+				link.Writer.Write(link.Formatter.Format(record), record)
 			}
 		}
 	}
