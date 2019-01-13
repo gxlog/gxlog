@@ -31,6 +31,7 @@ type Writer struct {
 
 // Open creates a new Writer with the config.
 func Open(config Config) (*Writer, error) {
+	config.setDefaults()
 	wt, err := syslog.Dial(config.Network, config.Addr,
 		syslog.Priority(config.Facility), config.Tag)
 	if err != nil {

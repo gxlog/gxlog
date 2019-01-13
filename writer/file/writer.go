@@ -33,6 +33,7 @@ type Writer struct {
 
 // Open creates a new Writer with the config.
 func Open(config Config) (*Writer, error) {
+	config.setDefaults()
 	if err := config.check(); err != nil {
 		return nil, fmt.Errorf("writer/file.Open: %v", err)
 	}

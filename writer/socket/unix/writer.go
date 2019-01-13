@@ -1,8 +1,8 @@
 // Package unix implements a unix domain socket writer which implements the iface.Writer.
 //
 // The unix domain socket writer aims at log watching. For log transmission, use
-// a syslog writer instead. With a unix domain socket writer, one can use netcat
-// to receive logs rather than to tail a log file which is inconvenient because
+// a syslog writer instead. With a unix domain socket writer, you can use netcat
+// to receive and watch logs rather than the tail which is inconvenient because
 // a new log file will be created when a log file reaches the max size.
 package unix
 
@@ -17,15 +17,15 @@ import (
 // A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
-//
-// A Writer must be created with Open.
+// A Writer MUST be created with Open.
 type Writer struct {
 	writer *socket.Writer
 }
 
-// Open creates a new Writer with the config. The config must NOT be nil.
-func Open(config *Config) (*Writer, error) {
-	if config.Overwrite {
+// Open creates a new Writer with the config.
+func Open(config Config) (*Writer, error) {
+	config.setDefaults()
+	if !config.NoOverwrite {
 		if err := checkAndRemove(config.Pathname); err != nil {
 			return nil, fmt.Errorf("writer/socket/unix.Open: %v", err)
 		}
@@ -49,7 +49,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface iface.Writer. It writes logs to unix domain sockets.
+// Write implements the interface Writer. It writes logs to unix domain sockets.
 func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.writer.Write(bs, record)
 }

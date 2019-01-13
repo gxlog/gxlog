@@ -1,14 +1,13 @@
 package tcp
 
 // A Config is used to configure a tcp socket writer.
-// A Config should be created with NewConfig.
 type Config struct {
+	// If Tag is not specified, "localhost:9999" is used.
 	Addr string
 }
 
-// NewConfig creates a new Config.
-func NewConfig(addr string) *Config {
-	return &Config{
-		Addr: addr,
+func (config *Config) setDefaults() {
+	if config.Addr == "" {
+		config.Addr = "localhost:9999"
 	}
 }

@@ -51,7 +51,7 @@ type Config struct {
 	Path string
 	// Base is the first segment of the name of log files.
 	// When it is modified in a file writer, a new log file will be created.
-	// If Base is not specified, filepath.Base(os.Args[0]).pid is used.
+	// If Base is not specified, filepath.Base(os.Args[0]).<pid> is used.
 	Base string
 	// Ext is the extension name of log files.
 	// When it is modified in a file writer, a new log file will be created.
