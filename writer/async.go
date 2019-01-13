@@ -9,10 +9,11 @@ type logData struct {
 	Record *iface.Record
 }
 
-// An Async is a wrapper to the interface iface.Writer.
-// All writers of iface.Writer it wraps switch into asynchronous mode.
+// An Async is a Writer wrapper.
+// All Writers an Async wraps switch into asynchronous mode.
 //
 // All methods of an Async are concurrency safe.
+// An Async MUST be created with NewAsync.
 type Async struct {
 	writer    iface.Writer
 	chanData  chan logData
@@ -23,9 +24,6 @@ type Async struct {
 // The cap is the capacity of the internal channel of the Async and it must NOT
 // be negative.
 func NewAsync(writer iface.Writer, cap int) *Async {
-	if writer == nil {
-		panic("writer.NewAsync: nil writer")
-	}
 	async := &Async{
 		writer:    writer,
 		chanData:  make(chan logData, cap),
@@ -35,9 +33,10 @@ func NewAsync(writer iface.Writer, cap int) *Async {
 	return async
 }
 
-// Write implements the interface iface.Writer. It sends the bs and record to the
+// Write implements the interface Writer. It sends the bs and record to the
 // internal channel. Another goroutine will receive them from the channel and
-// call the underlying writer to output logs. If the channel is full, it blocks.
+// then calls the underlying Writer with them.
+// If the channel is full, it blocks.
 func (async *Async) Write(bs []byte, record *iface.Record) {
 	async.chanData <- logData{Bytes: bs, Record: record}
 }
@@ -59,7 +58,7 @@ func (async *Async) Abort() {
 	close(async.chanData)
 }
 
-// Len returns the len of the internal channel.
+// Len returns the length of the internal channel.
 func (async *Async) Len() int {
 	return len(async.chanData)
 }

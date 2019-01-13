@@ -1,11 +1,11 @@
-// Package formatter provides wrappers of the interface Formatter.
+// Package formatter provides wrappers to the interface Formatter.
 package formatter
 
 import (
 	"github.com/gxlog/gxlog/iface"
 )
 
-// The Func type is a function wrapper of the interface Formatter.
+// The Func type is a function wrapper to the interface Formatter.
 // Do NOT call any method of the Logger within the function, or it may deadlock.
 type Func func(record *iface.Record) []byte
 

@@ -1,4 +1,4 @@
-// Package file implements a file writer which implements the iface.Writer.
+// Package file implements a file writer which implements the Writer.
 package file
 
 import (
@@ -18,8 +18,7 @@ import (
 // A Writer implements the interface iface.Writer.
 //
 // All methods of a Writer are concurrency safe.
-//
-// A Writer must be created with Open.
+// A Writer MUST be created with Open.
 type Writer struct {
 	config Config
 
@@ -32,13 +31,12 @@ type Writer struct {
 	lock sync.Mutex
 }
 
-// Open creates a new Writer with the config. The config must NOT be nil.
-// Open returns an error only if the config is invalid.
-func Open(config *Config) (*Writer, error) {
-	if err := config.Check(); err != nil {
+// Open creates a new Writer with the config.
+func Open(config Config) (*Writer, error) {
+	if err := config.check(); err != nil {
 		return nil, fmt.Errorf("writer/file.Open: %v", err)
 	}
-	return &Writer{config: *config}, nil
+	return &Writer{config: config}, nil
 }
 
 // Close closes the Writer.
@@ -52,7 +50,7 @@ func (writer *Writer) Close() error {
 	return nil
 }
 
-// Write implements the interface iface.Writer. It writes logs to files.
+// Write implements the interface Writer. It writes logs to files.
 func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -68,34 +66,34 @@ func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	}
 }
 
-// Config returns a copy of config of the Writer.
-func (writer *Writer) Config() *Config {
+// Config returns the Config of the Writer.
+func (writer *Writer) Config() Config {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
-	copyConfig := writer.config
-	return &copyConfig
+	return writer.config
 }
 
-// SetConfig sets the copy of config to the Writer. The config must NOT be nil.
-// If the config is invalid, it returns an error and the config of the Writer
+// SetConfig sets the config to the Writer.
+// If the config is invalid, it returns an error and the Config of the Writer
 // is left to be unchanged.
-func (writer *Writer) SetConfig(config *Config) error {
+func (writer *Writer) SetConfig(config Config) error {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
-	if err := writer.setConfig(config); err != nil {
+	if err := writer.setConfig(&config); err != nil {
 		return fmt.Errorf("writer/file.SetConfig: %v", err)
 	}
 	return nil
 }
 
-// UpdateConfig will call fn with copy of the config of the Writer, and then
-// sets copy of the returned config to the Writer. The fn must NOT be nil.
-// If the returned config is invalid, it returns an error and the config of
+// UpdateConfig calls the fn with the Config of the Writer, and then
+// sets the returned config to the Writer. The fn must NOT be nil.
+// If the returned config is invalid, it returns an error and the Config of
 // the Writer is left to be unchanged.
 //
-// Do NOT call methods of the Writer within fn, or it will deadlock.
+// Do NOT call any method of the Writer or the Logger within the fn,
+// or it may deadlock.
 func (writer *Writer) UpdateConfig(fn func(Config) Config) error {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
@@ -176,7 +174,7 @@ func (writer *Writer) closeFile() error {
 
 func (writer *Writer) formatPath(tm time.Time) string {
 	path := writer.config.Path
-	if writer.config.NewDirEachDay {
+	if !writer.config.NoDirForDays {
 		path = filepath.Join(path, writer.formatDate(tm))
 	}
 	return path
@@ -187,7 +185,7 @@ func (writer *Writer) formatFilename(tm time.Time) string {
 	if writer.config.Base != "" {
 		elements = append(elements, writer.config.Base)
 	}
-	if !writer.config.NewDirEachDay {
+	if writer.config.NoDirForDays {
 		elements = append(elements, writer.formatDate(tm))
 	}
 	elements = append(elements, writer.formatTime(tm))
@@ -232,14 +230,14 @@ func (writer *Writer) needNewFile(config *Config) bool {
 		config.GzipLevel != writer.config.GzipLevel ||
 		config.AESKey != writer.config.AESKey ||
 		config.BlockMode != writer.config.BlockMode ||
-		config.NewDirEachDay != writer.config.NewDirEachDay {
+		config.NoDirForDays != writer.config.NoDirForDays {
 		return true
 	}
 	return false
 }
 
 func (writer *Writer) setConfig(config *Config) error {
-	if err := config.Check(); err != nil {
+	if err := config.check(); err != nil {
 		return err
 	}
 	if writer.needNewFile(config) {
