@@ -1,4 +1,4 @@
-// Package text implements a text formatter which implements the iface.Formatter.
+// Package text implements a text formatter which implements the Formatter.
 package text
 
 import (
@@ -14,8 +14,7 @@ var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 // A Formatter implements the interface iface.Formatter.
 //
 // All methods of a Formatter are concurrency safe.
-//
-// A Formatter must be created with New.
+// A Formatter MUST be created with New.
 type Formatter struct {
 	header      string
 	minBufSize  int
@@ -28,11 +27,9 @@ type Formatter struct {
 	lock sync.Mutex
 }
 
-// New creates a new Formatter with the config. The config must NOT be nil.
-func New(config *Config) *Formatter {
-	if config.MinBufSize < 0 {
-		panic("formatter/text.New: Config.MinBufSize must not be negative")
-	}
+// New creates a new Formatter with the config.
+func New(config Config) *Formatter {
+	config.setDefaults()
 	formatter := &Formatter{
 		minBufSize:  config.MinBufSize,
 		enableColor: config.EnableColor,
@@ -84,16 +81,16 @@ func (formatter *Formatter) MinBufSize() int {
 }
 
 // SetMinBufSize sets the min buf size of the Formatter.
-// The size must NOT be negative.
+// The size must NOT be negative. If the size is 0, 256 is used.
 func (formatter *Formatter) SetMinBufSize(size int) {
-	if size < 0 {
-		panic("formatter/text.SetMinBufSize: size must not be negative")
-	}
-
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
-	formatter.minBufSize = size
+	if size == 0 {
+		formatter.minBufSize = 256
+	} else {
+		formatter.minBufSize = size
+	}
 }
 
 // ColorEnabled returns whether colorization is enabled in the Formatter.
@@ -136,7 +133,7 @@ func (formatter *Formatter) SetColor(level iface.Level, color Color) {
 	formatter.colorMgr.SetColor(level, color)
 }
 
-// MapColors maps the color of levels in the Formatter by the colorMap.
+// MapColors maps the color of levels in the Formatter according to the colorMap.
 // The color of a level is left to be unchanged if it is not in the map.
 func (formatter *Formatter) MapColors(colorMap map[iface.Level]Color) {
 	formatter.lock.Lock()
@@ -161,7 +158,7 @@ func (formatter *Formatter) SetMarkedColor(color Color) {
 	formatter.colorMgr.SetMarkedColor(color)
 }
 
-// Format implements the interface iface.Formatter. It formats a Record.
+// Format implements the interface Formatter. It formats a Record.
 func (formatter *Formatter) Format(record *iface.Record) []byte {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
@@ -186,7 +183,8 @@ func (formatter *Formatter) Format(record *iface.Record) []byte {
 	return buf
 }
 
-func (formatter *Formatter) addAppender(element, property, fmtspec, staticText string) bool {
+func (formatter *Formatter) addAppender(element, property, fmtspec,
+	staticText string) bool {
 	appender := newHeaderAppender(element, property, fmtspec, staticText)
 	if appender == nil {
 		return false
@@ -195,7 +193,8 @@ func (formatter *Formatter) addAppender(element, property, fmtspec, staticText s
 	return true
 }
 
-func extractElement(indexes []int, header string) (element, property, fmtspec string) {
+func extractElement(indexes []int, header string) (element, property,
+	fmtspec string) {
 	element = strings.ToLower(getField(header, indexes[2], indexes[3]))
 	property = getField(header, indexes[4], indexes[5])
 	fmtspec = getField(header, indexes[6], indexes[7])
@@ -205,9 +204,9 @@ func extractElement(indexes []int, header string) (element, property, fmtspec st
 	return element, property, fmtspec
 }
 
-func getField(str string, begin, end int) string {
+func getField(header string, begin, end int) string {
 	if begin < end {
-		return strings.TrimSpace(str[begin:end])
+		return strings.TrimSpace(header[begin:end])
 	}
 	return ""
 }

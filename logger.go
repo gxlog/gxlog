@@ -16,7 +16,7 @@ var (
 
 func init() {
 	defaultLogger = logger.New(logger.Config{})
-	defaultFormatter = text.New(text.NewConfig())
+	defaultFormatter = text.New(text.Config{})
 	defaultLogger.Link(logger.Slot0, defaultFormatter, writer.Wrap(os.Stderr))
 }
 

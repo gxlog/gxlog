@@ -23,7 +23,8 @@ func newContextFormatter(property, fmtspec string) *contextFormatter {
 	}
 }
 
-func (formatter *contextFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
+func (formatter *contextFormatter) FormatElement(buf []byte,
+	record *iface.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return formatter.formatter(buf, record.Aux.Contexts)
 	}
