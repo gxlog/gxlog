@@ -6,12 +6,12 @@ import (
 
 // And returns a function that is the logic AND of all the filters.
 // It has the short circuit feature.
-// There MUST be at least one filter and any filter must NOT be nil.
-func And(filters ...Filter) Filter {
-	if len(filters) == 0 {
-		panic("logger.And: no filters")
-	}
+// Any filter must NOT be nil.
+func And(filter Filter, filters ...Filter) Filter {
 	return func(record *iface.Record) bool {
+		if !filter(record) {
+			return false
+		}
 		for _, filter := range filters {
 			if !filter(record) {
 				return false
@@ -23,12 +23,12 @@ func And(filters ...Filter) Filter {
 
 // Or returns a function that is the logic OR of all the filters.
 // It has the short circuit feature.
-// There MUST be at least one filter and any filter must NOT be nil.
-func Or(filters ...Filter) Filter {
-	if len(filters) == 0 {
-		panic("logger.Or: no filters")
-	}
+// Any filter must NOT be nil.
+func Or(filter Filter, filters ...Filter) Filter {
 	return func(record *iface.Record) bool {
+		if filter(record) {
+			return true
+		}
 		for _, filter := range filters {
 			if filter(record) {
 				return true
