@@ -5,11 +5,11 @@ package syslog
 
 import (
 	"fmt"
-	"log"
 	"log/syslog"
 	"sync"
 
 	"github.com/gxlog/gxlog/iface"
+	"github.com/gxlog/gxlog/writer"
 )
 
 const severityMask = 0x07
@@ -21,7 +21,7 @@ type syslogFunc func(string) error
 // All methods of a Writer are concurrency safe.
 // A Writer MUST be created with Open.
 type Writer struct {
-	reportOnErr bool
+	errorHandler writer.ErrorHandler
 
 	logFuncs [iface.LevelCount + iface.Trace]syslogFunc
 	writer   *syslog.Writer
@@ -38,8 +38,8 @@ func Open(config Config) (*Writer, error) {
 		return nil, fmt.Errorf("writer/syslog.Open: %v", err)
 	}
 	writer := &Writer{
-		reportOnErr: config.ReportOnErr,
-		writer:      wt,
+		errorHandler: config.ErrorHandler,
+		writer:       wt,
 	}
 	severityMap := map[iface.Level]Severity{
 		iface.Trace: SevDebug,
@@ -74,25 +74,25 @@ func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	defer writer.lock.Unlock()
 
 	err := writer.logFuncs[record.Level](string(bs))
-	if writer.reportOnErr && err != nil {
-		log.Println("writer/syslog.Write:", err)
+	if writer.errorHandler != nil && err != nil {
+		writer.errorHandler(bs, record, err)
 	}
 }
 
-// ReportOnErr returns the reportOnErr of the Writer.
-func (writer *Writer) ReportOnErr() bool {
+// ErrorHandler returns the error handler of the Writer.
+func (writer *Writer) ErrorHandler() writer.ErrorHandler {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
-	return writer.reportOnErr
+	return writer.errorHandler
 }
 
-// SetReportOnErr sets the reportOnErr of the Writer.
-func (writer *Writer) SetReportOnErr(ok bool) {
+// SetErrorHandler sets the error handler of the Writer.
+func (writer *Writer) SetErrorHandler(handler writer.ErrorHandler) {
 	writer.lock.Lock()
 	defer writer.lock.Unlock()
 
-	writer.reportOnErr = ok
+	writer.errorHandler = handler
 }
 
 // MapSeverity maps the severity of levels according to the severityMap.

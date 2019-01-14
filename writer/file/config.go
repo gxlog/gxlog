@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/gxlog/gxlog/writer"
 )
 
 // The DateStyle defines the type of date format style for naming log files.
@@ -103,8 +105,8 @@ type Config struct {
 	// <base><sep><date><sep><time><ext>, otherwise it is <base><sep><time><ext>.
 	// When it is modified in a file writer, a new log file will be created.
 	NoDirForDays bool
-	// ReportOnErr specifies whether to report errors by log.Println.
-	ReportOnErr bool
+	// ErrorHandler will be called when an error occurs if it is not nil.
+	ErrorHandler writer.ErrorHandler
 }
 
 func (config *Config) setDefaults() {

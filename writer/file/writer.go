@@ -5,7 +5,6 @@ import (
 	"compress/flate"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,8 +61,8 @@ func (writer *Writer) Write(bs []byte, record *iface.Record) {
 		n, err = writer.writer.Write(bs)
 		writer.fileSize += int64(n)
 	}
-	if writer.config.ReportOnErr && err != nil {
-		log.Println("writer/file.Write:", err)
+	if writer.config.ErrorHandler != nil && err != nil {
+		writer.config.ErrorHandler(bs, record, err)
 	}
 }
 

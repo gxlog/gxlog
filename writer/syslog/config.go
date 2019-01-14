@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/gxlog/gxlog/iface"
+	"github.com/gxlog/gxlog/writer"
 )
 
 // The Facility defines the facility type of syslog.
@@ -62,8 +63,8 @@ type Config struct {
 	//   Error: SevErr
 	//   Fatal: SevCrit
 	SeverityMap map[iface.Level]Severity
-	// ReportOnErr specifies whether to report errors by log.Println.
-	ReportOnErr bool
+	// ErrorHandler will be called when an error occurs if it is not nil.
+	ErrorHandler writer.ErrorHandler
 }
 
 func (config *Config) setDefaults() {
