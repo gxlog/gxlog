@@ -33,11 +33,11 @@ func newTimeFormatter(property, fmtspec string) elementFormatter {
 
 func (formatter *timeFormatter) FormatElement(buf []byte,
 	record *iface.Record) []byte {
-	desc := record.Time.Format(formatter.layout)
 	if formatter.fmtspec == "%s" {
-		return append(buf, desc...)
+		return record.Time.AppendFormat(buf, formatter.layout)
 	}
-	return append(buf, fmt.Sprintf(formatter.fmtspec, desc)...)
+	timeStr := record.Time.Format(formatter.layout)
+	return append(buf, fmt.Sprintf(formatter.fmtspec, timeStr)...)
 }
 
 func makeTimeLayout(property string) string {

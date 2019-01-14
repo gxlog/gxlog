@@ -22,7 +22,7 @@ func newLineFormatter(property, fmtspec string) elementFormatter {
 func (formatter *lineFormatter) FormatElement(buf []byte,
 	record *iface.Record) []byte {
 	if formatter.fmtspec == "%d" {
-		return append(buf, strconv.Itoa(record.Line)...)
+		return strconv.AppendInt(buf, int64(record.Line), 10)
 	}
 	return append(buf, fmt.Sprintf(formatter.fmtspec, record.Line)...)
 }

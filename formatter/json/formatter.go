@@ -70,8 +70,7 @@ func (formatter *Formatter) Format(record *iface.Record) []byte {
 		sep = ","
 	}
 	buf = formatter.formatAux(buf, sep, &record.Aux)
-	buf = append(buf, "}\n"...)
-	return buf
+	return append(buf, "}\n"...)
 }
 
 // Config returns the Config of the Formatter.
@@ -128,8 +127,7 @@ func (formatter *Formatter) formatAux(buf []byte, sep string,
 		!(formatter.config.OmitEmpty&Mark != 0 && !aux.Marked) {
 		buf = formatBoolField(buf, sep, "Marked", aux.Marked)
 	}
-	buf = append(buf, "}"...)
-	return buf
+	return append(buf, "}"...)
 }
 
 func formatContexts(buf []byte, sep string, contexts []iface.Context) []byte {
@@ -147,8 +145,7 @@ func formatContexts(buf []byte, sep string, contexts []iface.Context) []byte {
 		buf = append(buf, "}"...)
 		sep = ","
 	}
-	buf = append(buf, "]"...)
-	return buf
+	return append(buf, "]"...)
 }
 
 func formatStrField(buf []byte, sep, key, value string, esc bool) []byte {
@@ -161,8 +158,7 @@ func formatStrField(buf []byte, sep, key, value string, esc bool) []byte {
 	} else {
 		buf = append(buf, value...)
 	}
-	buf = append(buf, `"`...)
-	return buf
+	return append(buf, `"`...)
 }
 
 func formatIntField(buf []byte, sep, key string, value int) []byte {
@@ -170,8 +166,7 @@ func formatIntField(buf []byte, sep, key string, value int) []byte {
 	buf = append(buf, `"`...)
 	buf = append(buf, key...)
 	buf = append(buf, `":`...)
-	buf = append(buf, strconv.Itoa(value)...)
-	return buf
+	return strconv.AppendInt(buf, int64(value), 10)
 }
 
 func formatBoolField(buf []byte, sep, key string, value bool) []byte {
@@ -180,9 +175,7 @@ func formatBoolField(buf []byte, sep, key string, value bool) []byte {
 	buf = append(buf, key...)
 	buf = append(buf, `":`...)
 	if value {
-		buf = append(buf, "true"...)
-	} else {
-		buf = append(buf, "false"...)
+		return append(buf, "true"...)
 	}
-	return buf
+	return append(buf, "false"...)
 }
