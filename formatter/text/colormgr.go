@@ -9,7 +9,7 @@ import (
 // The Color defines the color type.
 type Color int
 
-// All available colors here.
+// Basic colors here.
 const (
 	Black Color = iota + 30
 	Red
@@ -19,6 +19,18 @@ const (
 	Magenta
 	Cyan
 	White
+)
+
+// Bright colors here.
+const (
+	BrightBlack Color = iota + 90
+	BrightRed
+	BrightGreen
+	BrightYellow
+	BrightBlue
+	BrightMagenta
+	BrightCyan
+	BrightWhite
 )
 
 const escSeqFmt = "\033[%dm"
