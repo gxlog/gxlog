@@ -125,7 +125,7 @@ func (writer *Writer) createFile(record *iface.Record) error {
 	}
 
 	path := writer.formatPath(record.Time)
-	if err := os.MkdirAll(path, 0700); err != nil {
+	if err := os.MkdirAll(path, writer.config.DirPerm); err != nil {
 		return err
 	}
 

@@ -100,13 +100,16 @@ type Config struct {
 	// When it is modified in a file writer, a new log file will be created.
 	// If BlockMode is not specified, CFB is used.
 	BlockMode BlockCipherMode
+	// ErrorHandler will be called when an error occurs if it is not nil.
+	ErrorHandler writer.ErrorHandler
+	// DirPerm represents the permission bits of created directories.
+	// If DirPerm is not specified, 0700 is used.
+	DirPerm os.FileMode
 	// NoDirForDays specifies NOT to create a new directory each day.
 	// If NoDirForDays is true, the pattern of name of log files is
 	// <base><sep><date><sep><time><ext>, otherwise it is <base><sep><time><ext>.
 	// When it is modified in a file writer, a new log file will be created.
 	NoDirForDays bool
-	// ErrorHandler will be called when an error occurs if it is not nil.
-	ErrorHandler writer.ErrorHandler
 }
 
 func (config *Config) setDefaults() {
@@ -127,6 +130,9 @@ func (config *Config) setDefaults() {
 	}
 	if config.CheckInterval == 0 {
 		config.CheckInterval = time.Second * 5
+	}
+	if config.DirPerm == 0 {
+		config.DirPerm = 0700
 	}
 }
 
