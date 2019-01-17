@@ -46,7 +46,7 @@ type Config struct {
 	// ColorMap is used to remap the color of each level.
 	// By default, the color of Trace, Debug and Info is Green, the color of Warn
 	// is Yellow, the color of Error and Fatal is Red. The color of a marked log
-	// is Magenta no matter at which level it is.
+	// is Magenta despite of its level.
 	// The color of a level is left to be unchanged if it is not in the map.
 	ColorMap map[iface.Level]Color
 	// EnableColor enables colorization if it is true.

@@ -6,8 +6,9 @@ import (
 	"os"
 
 	"github.com/gxlog/gxlog"
-	"github.com/gxlog/gxlog/defaults"
 	"github.com/gxlog/gxlog/formatter/text"
+	"github.com/gxlog/gxlog/iface"
+	"github.com/gxlog/gxlog/logger"
 	"github.com/gxlog/gxlog/writer"
 	"github.com/gxlog/gxlog/writer/file"
 	"github.com/gxlog/gxlog/writer/socket/tcp"
@@ -15,81 +16,91 @@ import (
 	"github.com/gxlog/gxlog/writer/syslog"
 )
 
-var log = defaults.Logger()
+// gxlog.Logger returns the default Logger.
+var log = gxlog.Logger()
 
 func main() {
-	// Only supported on systems that ANSI escape sequences are supported.
-	defaults.Formatter().EnableColor()
+	// gxlog.Formatter returns the default Formatter in Slot0.
+	// Coloring is only supported on systems that ANSI escape sequences
+	// are supported.
+	gxlog.Formatter().EnableColor()
 
 	testWrappers()
 	testSocketWriters()
 
-	defaults.Formatter().DisableColor()
+	gxlog.Formatter().DisableColor()
 
-	defaults.Formatter().SetHeader(text.CompactHeader)
 	testFileWriter()
-
-	defaults.Formatter().SetHeader(text.SyslogHeader)
 	testSyslogWriter()
 }
 
 func testWrappers() {
 	// custom writer function
-	fn := writer.Func(func(bs []byte, _ *gxlog.Record) {
+	fn := writer.Func(func(bs []byte, _ *iface.Record) {
 		os.Stderr.Write(bs)
 	})
-	log.SetSlotWriter(gxlog.Slot0, fn)
+	log.SetSlotWriter(logger.Slot0, fn)
 	log.Info("a simple writer that just writes to os.Stderr")
 
-	// use wrapper of io.Writer as another equivalent way
-	wt := writer.Wrap(os.Stderr)
-	log.SetSlotWriter(gxlog.Slot0, wt)
+	// another equivalent way
+	log.SetSlotWriter(logger.Slot0, writer.Wrap(os.Stderr))
 	log.Info("writer wrapper of os.Stderr")
 
-	// asynchronous writer wrapper which uses a internal channel to buffer logs
-	// when the channel is full, the Write method of the wrapper blocks
-	// ATTENTION: some logs may NOT be output in asynchronous mode if os.Exit
-	//   is called, panicking without recovery or ...
-	async := writer.NewAsync(wt, 1024)
-	// Close waits until all logs have been output.
+	// multi-writer
+	multi := writer.Multi(writer.Wrap(os.Stdout), writer.Wrap(os.Stderr))
+	log.SetSlotWriter(logger.Slot0, multi)
+	log.Info("multi-writer: this will be printed twice")
+
+	// Asynchronous writer wrapper uses a internal channel to buffer logs.
+	// When the channel is full, the Write method of the wrapper blocks.
+	// ATTENTION: Some logs may NOT be output in asynchronous mode if os.Exit
+	// is called, panicking without recovery and so on.
+	async := writer.NewAsync(writer.Wrap(os.Stderr), 1024)
+	// Close waits until all logs in the channel have been output.
 	// It does NOT close the underlying writer.
 	// To ignore all logs that have not been output, use Abort instead.
 	defer async.Close()
 
-	log.SetSlotWriter(gxlog.Slot0, async)
+	log.SetSlotWriter(logger.Slot0, async)
 	log.Info("asynchronous writer wrapper")
 }
 
 func testSocketWriters() {
 	// tcp socket writer
-	// For performance and security, use a unix writer instead as long as the
-	// system has support for unix domain socket.
-	tcpWriter, err := tcp.Open(tcp.NewConfig(":9999"))
+	// For performance and security, use a unix domain socket writer instead as
+	// long as the system has support for unix domain socket.
+	// The default address is "localhost:9999".
+	tcpWriter, err := tcp.Open(tcp.Config{})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer tcpWriter.Close()
 
-	log.SetSlotWriter(gxlog.Slot0, tcpWriter)
+	log.SetSlotWriter(logger.Slot0, tcpWriter)
 
-	// use "netcat localhost 9999" to watch logs
+	// Use `netcat localhost 9999' to watch logs.
 	// for i := 0; i < 1024; i++ {
 	// 	log.Info(i)
 	// 	time.Sleep(time.Second)
 	// }
 
-	// shell expansion is NOT supported, so ~, $var and so on will not be expanded
-	unixWriter, err := unix.Open(unix.NewConfig("/tmp/gxlog/unixdomain"))
+	// unix domain socket writer
+	// Shell expansion is NOT supported. Thus, ~, $var and so on will NOT
+	// be expanded.
+	// The default pathname is "/tmp/gxlog/<pid>".
+	unixWriter, err := unix.Open(unix.Config{
+		Pathname: "/tmp/gxlog/unixdomain",
+	})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer unixWriter.Close()
 
-	log.SetSlotWriter(gxlog.Slot0, unixWriter)
+	log.SetSlotWriter(logger.Slot0, unixWriter)
 
-	// use "netcat -U /tmp/gxlog/unixdomain" to watch logs
+	// Use "netcat -U /tmp/gxlog/unixdomain" to watch logs.
 	// for i := 0; i < 1024; i++ {
 	// 	log.Info(i)
 	// 	time.Sleep(time.Second)
@@ -97,25 +108,33 @@ func testSocketWriters() {
 }
 
 func testFileWriter() {
-	// shell expansion is NOT supported, so ~, $var and so on will not be expanded
-	wt, err := file.Open(file.NewConfig("/tmp/gxlog", "test").
-		WithDateStyle(file.DateUnderscore).
-		WithTimeStyle(file.TimeDot))
+	gxlog.Formatter().SetHeader(text.CompactHeader)
+
+	// Shell expansion is NOT supported. Thus, ~, $var and so on will NOT
+	// be expanded.
+	wt, err := file.Open(file.Config{
+		Path:      "/tmp/gxlog",
+		Base:      "test",
+		DateStyle: file.DateUnderscore,
+		TimeStyle: file.TimeDot,
+	})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer wt.Close()
 
-	log.SetSlotWriter(gxlog.Slot0, wt)
+	log.SetSlotWriter(logger.Slot0, wt)
 	log.Info("this will be output to a file")
 
 	wt.UpdateConfig(func(config file.Config) file.Config {
-		// Do NOT call methods of the file writer, or it will deadlock.
+		// Do NOT call any method of the Writer or the Logger in the function,
+		// or it may deadlock.
 		config.Ext = ".bin"
 		// enable gzip compression
 		config.GzipLevel = flate.DefaultCompression
-		// enable AES encryption. the key must be hexadecimal encoded.
+		// enable AES encryption.
+		// The key MUST be hexadecimal encoded without the prefix 0X or 0x.
 		config.AESKey = "70856575b161fbcca8fc12e1f70fc1c8"
 		return config
 	})
@@ -123,23 +142,28 @@ func testFileWriter() {
 }
 
 func testSyslogWriter() {
-	// connect to the local syslog server
-	wt, err := syslog.Open(syslog.NewConfig("gxlog"))
+	gxlog.Formatter().SetHeader(text.SyslogHeader)
+
+	// Leave the Network to be empty to connect to the local syslog server
+	// with unix domain socket.
+	wt, err := syslog.Open(syslog.Config{
+		Tag: "gxlog",
+	})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer wt.Close()
 
-	log.SetSlotWriter(gxlog.Slot0, wt)
-	// NOTICE: the std syslog package will get the timestamp itself which is
+	log.SetSlotWriter(logger.Slot0, wt)
+	// NOTICE: The standard syslog package will get the timestamp itself which is
 	// a tiny bit later than Record.Time.
 	log.Info("this will be output to syslog")
 
 	// update level mapping
-	// the severity of a level is left to be unchanged if it is not in the map
-	wt.MapSeverity(map[gxlog.Level]syslog.Severity{
-		gxlog.Info: syslog.SevErr,
+	// The severity of a level is left to be unchanged if it is not in the map.
+	wt.MapSeverity(map[iface.Level]syslog.Severity{
+		iface.Info: syslog.SevErr,
 	})
 	log.Info("this will be severity err")
 }
