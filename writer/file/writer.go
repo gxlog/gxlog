@@ -61,7 +61,7 @@ func (writer *Writer) Write(bs []byte, record *iface.Record) {
 		n, err = writer.writer.Write(bs)
 		writer.fileSize += int64(n)
 	}
-	if writer.config.ErrorHandler != nil && err != nil {
+	if err != nil && writer.config.ErrorHandler != nil {
 		writer.config.ErrorHandler(bs, record, err)
 	}
 }

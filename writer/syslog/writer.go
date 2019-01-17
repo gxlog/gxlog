@@ -74,7 +74,7 @@ func (writer *Writer) Write(bs []byte, record *iface.Record) {
 	defer writer.lock.Unlock()
 
 	err := writer.logFuncs[record.Level](string(bs))
-	if writer.errorHandler != nil && err != nil {
+	if err != nil && writer.errorHandler != nil {
 		writer.errorHandler(bs, record, err)
 	}
 }
