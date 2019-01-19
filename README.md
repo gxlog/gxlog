@@ -23,6 +23,7 @@ eventing or hooking can be integrated into gxlog.
   - [New Logger](#new-logger)
   - [Formatters](#formatters)
   - [Writers](#writers)
+- [Contributing](#contributing)
 
 ## Architecture ##
 
@@ -803,3 +804,21 @@ func testSyslogWriter() {
     log.Info("this will be severity err")
 }
 ```
+
+## Contributing ##
+
+Thank you for considering to make a contribution. Please adhere to the following
+guidelines:
+
+- Fork this repo and create a feature branch based on the master or develop branch
+- Follow Golang conventions while coding
+- Try to break long lines that are much longer than 80 columns
+- Refer to the format below for commit messages. For more details,
+  click [here](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines)
+  ```
+  <type>(<scope>): <subject>
+  <BLANK LINE>
+  <body>
+  <BLANK LINE>
+  <footer>
+  ```
