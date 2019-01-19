@@ -86,6 +86,7 @@ func (formatter *Formatter) SetConfig(config Config) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
+	config.setDefaults()
 	formatter.config = config
 }
 

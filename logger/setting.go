@@ -17,6 +17,7 @@ func (log *Logger) SetConfig(config Config) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
+	config.setDefaults()
 	log.config = &config
 }
 

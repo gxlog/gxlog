@@ -237,6 +237,7 @@ func (writer *Writer) needNewFile(config *Config) bool {
 }
 
 func (writer *Writer) setConfig(config *Config) error {
+	config.setDefaults()
 	if err := config.check(); err != nil {
 		return err
 	}
