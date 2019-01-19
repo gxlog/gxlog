@@ -48,8 +48,8 @@ type Config struct {
 	Tag string
 	// If Facility is not specified, FacKern is used.
 	Facility Facility
-	// If Network is not specified, it will connect to the local syslog server.
-	// Otherwise, it will be passed to net.Dial.
+	// If Network is not specified, it will connect to the local syslog server
+	// with unix domain socket. Otherwise, Network will be passed to net.Dial.
 	Network string
 	// Addr will be passed to net.Dial if Network is not empty.
 	Addr string

@@ -1,12 +1,13 @@
 // Package tcp implements a tcp socket writer which implements the Writer.
 //
 // The tcp socket writer aims at log watching. For log transmission, use a syslog
-// writer instead. With a tcp socket writer, you can use netcat to receive and
-// watch logs rather than the tail which is inconvenient because a new log file
-// will be created when a log file reaches the max size.
+// writer instead. With a tcp socket writer, you can use 'netcat' to receive and
+// watch logs rather than the 'tail' which is inconvenient because a new log file
+// will be created when a log file reaches its max size.
 //
 // For performance and security, use a unix writer instead as long as the system
-// has support for unix domain socket.
+// has support for unix domain socket. Otherwise, bind the address to localhost
+// only.
 package tcp
 
 import (

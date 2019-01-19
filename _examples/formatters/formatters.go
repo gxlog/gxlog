@@ -53,6 +53,7 @@ func testTextFormatter() {
 	log.Error("magenta")
 	log.WithMark(true).Error("white")
 
+	// For details of all supported fields, see the comment of text.Config.
 	header := "{{time:time}} {{level:char}} {{file:2%q}}:{{line:%05d}} {{msg:%20s}}\n"
 	textFmt.SetHeader(header)
 	textFmt.DisableColor()

@@ -1,6 +1,9 @@
 // +build !nacl,!plan9,!windows
 
 // Package syslog implements a syslog writer which implements the Writer.
+//
+// For performance and security, connect to the local syslog server and configure
+// the local syslog server for log transmission if it is possible.
 package syslog
 
 import (
@@ -29,7 +32,9 @@ type Writer struct {
 	lock sync.Mutex
 }
 
-// Open creates a new Writer with the config.
+// Open creates a new Writer with the config. If the Network field of the config
+// is not specified, it will connect to the local syslog server with unix domain
+// socket.
 func Open(config Config) (*Writer, error) {
 	config.setDefaults()
 	wt, err := syslog.Dial(config.Network, config.Addr,

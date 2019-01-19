@@ -21,6 +21,8 @@ func main() {
 	fileWriter, err := file.Open(file.Config{
 		Path: "/tmp/gxlog",
 		Base: "test",
+		// ErrorHandler will be called when an error occurs.
+		ErrorHandler: writer.Report,
 	})
 	if err != nil {
 		fmt.Println(err)

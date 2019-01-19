@@ -1,9 +1,9 @@
-// Package unix implements a unix domain socket writer which implements the iface.Writer.
+// Package unix implements a unix domain socket writer which implements the Writer.
 //
 // The unix domain socket writer aims at log watching. For log transmission, use
-// a syslog writer instead. With a unix domain socket writer, you can use netcat
-// to receive and watch logs rather than the tail which is inconvenient because
-// a new log file will be created when a log file reaches the max size.
+// a syslog writer instead. With a unix domain socket writer, you can use `netcat'
+// to receive and watch logs rather than the `tail' which is inconvenient because
+// a new log file will be created when a log file reaches its max size.
 package unix
 
 import (

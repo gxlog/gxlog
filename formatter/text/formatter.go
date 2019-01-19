@@ -49,6 +49,7 @@ func (formatter *Formatter) Header() string {
 }
 
 // SetHeader sets the header of the Formatter.
+// For details of all supported fields in a header, see the comment of Config.
 func (formatter *Formatter) SetHeader(header string) {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()

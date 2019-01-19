@@ -67,8 +67,6 @@ func testWrappers() {
 
 func testSocketWriters() {
 	// tcp socket writer
-	// For performance and security, use a unix domain socket writer instead as
-	// long as the system has support for unix domain socket.
 	// The default address is "localhost:9999".
 	tcpWriter, err := tcp.Open(tcp.Config{})
 	if err != nil {
@@ -117,6 +115,8 @@ func testFileWriter() {
 		Base:      "test",
 		DateStyle: file.DateUnderscore,
 		TimeStyle: file.TimeDot,
+		// ErrorHandler will be called when an error occurs.
+		ErrorHandler: writer.Report,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -144,10 +144,13 @@ func testFileWriter() {
 func testSyslogWriter() {
 	gxlog.Formatter().SetHeader(text.SyslogHeader)
 
-	// Leave the Network to be empty to connect to the local syslog server
-	// with unix domain socket.
+	// Leave the Network field of the config to be empty, it will connect to the
+	// local syslog server with unix domain socket.
 	wt, err := syslog.Open(syslog.Config{
-		Tag: "gxlog",
+		Tag:      "gxlog",
+		Facility: syslog.FacUser,
+		// ErrorHandler will be called when an error occurs.
+		ErrorHandler: writer.Report,
 	})
 	if err != nil {
 		fmt.Println(err)
