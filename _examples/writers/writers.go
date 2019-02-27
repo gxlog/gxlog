@@ -159,13 +159,11 @@ func testSyslogWriter() {
 	defer wt.Close()
 
 	log.SetSlotWriter(logger.Slot0, wt)
-	// NOTICE: The standard syslog package will get the timestamp itself which is
-	// a tiny bit later than Record.Time.
 	log.Info("this will be output to syslog")
 
 	// update level mapping
 	// The severity of a level is left to be unchanged if it is not in the map.
-	wt.MapSeverity(map[iface.Level]syslog.Severity{
+	wt.MapSeverities(map[iface.Level]syslog.Severity{
 		iface.Info: syslog.SevErr,
 	})
 	log.Info("this will be severity err")
