@@ -136,20 +136,20 @@ func (log *Logger) LogErrorf(level iface.Level, fmtstr string,
 // the current goroutine will be output. If the level is NOT lower than the exit
 // level of Logger, the Logger will call os.Exit at last.
 //
-// The calldepth is used to set the offset of stack. It makes sense when you are
+// The callDepth is used to set the offset of stack. It makes sense when you are
 // customizing your own log wrapper function. Otherwise, 0 is just ok.
 //
 // The args are handled in the manner of fmt.Sprint.
 //
 // ATTENTION: the log may NOT be output when a Writer is in asynchronous mode and
 // os.Exit has been called.
-func (log *Logger) Log(calldepth int, level iface.Level, args ...interface{}) {
+func (log *Logger) Log(callDepth int, level iface.Level, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
 			args = append(args, "\n", string(debug.Stack()))
 		}
-		log.write(calldepth, level, fmt.Sprint(args...))
+		log.write(callDepth, level, fmt.Sprint(args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
@@ -160,14 +160,14 @@ func (log *Logger) Log(calldepth int, level iface.Level, args ...interface{}) {
 //
 // ATTENTION: the log may NOT be output when a Writer is in asynchronous mode and
 // os.Exit has been called.
-func (log *Logger) Logf(calldepth int, level iface.Level, fmtstr string, args ...interface{}) {
+func (log *Logger) Logf(callDepth int, level iface.Level, fmtstr string, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
 			fmtstr += "\n%s"
 			args = append(args, debug.Stack())
 		}
-		log.write(calldepth, level, fmt.Sprintf(fmtstr, args...))
+		log.write(callDepth, level, fmt.Sprintf(fmtstr, args...))
 		if exitLevel <= level {
 			os.Exit(1)
 		}
@@ -261,12 +261,15 @@ func (log *Logger) panicLevel() (iface.Level, iface.Level) {
 	return log.config.Level, log.config.PanicLevel
 }
 
-func (log *Logger) write(calldepth int, level iface.Level, msg string) {
+func (log *Logger) write(callDepth int, level iface.Level, msg string) {
 	if level < iface.Trace || level > iface.Fatal {
 		panic("logger: invalid level")
 	}
 
-	file, line, pkg, fn := getPosInfo(calldepth + callDepthOffset)
+	file, line, pkg, fn := "", 0, "", ""
+	if log.config.Disabled&Runtime == 0 {
+		file, line, pkg, fn = getPosInfo(callDepth + callDepthOffset)
+	}
 
 	log.lock.Lock()
 	defer log.lock.Unlock()
@@ -355,10 +358,10 @@ func (log *Logger) genDone(msg string) func() {
 	}
 }
 
-func getPosInfo(calldepth int) (file string, line int, pkg, fn string) {
+func getPosInfo(callDepth int) (file string, line int, pkg, fn string) {
 	var pc uintptr
 	var ok bool
-	pc, file, line, ok = runtime.Caller(calldepth)
+	pc, file, line, ok = runtime.Caller(callDepth)
 	if ok {
 		name := runtime.FuncForPC(pc).Name()
 		pkg, fn = splitPkgAndFunc(name)

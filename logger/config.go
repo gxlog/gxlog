@@ -15,6 +15,7 @@ const (
 	Mark
 	LimitByCount
 	LimitByTime
+	Runtime
 )
 
 // The Filter type defines a function type which is used to filter logs.
