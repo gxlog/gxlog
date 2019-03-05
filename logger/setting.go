@@ -81,20 +81,20 @@ func (log *Logger) SetExitLevel(level iface.Level) {
 	log.config.ExitLevel = level
 }
 
-// TimeLevel returns the time level of the Logger.
-func (log *Logger) TimeLevel() iface.Level {
+// TimingLevel returns the timing level of the Logger.
+func (log *Logger) TimingLevel() iface.Level {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	return log.config.TimeLevel
+	return log.config.TimingLevel
 }
 
-// SetTimeLevel sets the time level of the Logger.
-func (log *Logger) SetTimeLevel(level iface.Level) {
+// SetTimingLevel sets the timing level of the Logger.
+func (log *Logger) SetTimingLevel(level iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	log.config.TimeLevel = level
+	log.config.TimingLevel = level
 }
 
 // PanicLevel returns the panic level of the Logger.

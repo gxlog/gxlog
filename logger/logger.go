@@ -210,31 +210,31 @@ func (log *Logger) Panicf(fmtstr string, args ...interface{}) {
 	panic(msg)
 }
 
-// Time returns a function. When the function is called, it outputs the log with
-// the time elapsed since the call of Time.
+// Timing returns a function. When the function is called, it outputs the log with
+// the time elapsed since the call of Timing.
 //
-// The level of the emitted log is the time level of Logger. If the level is
+// The level of the emitted log is the timing level of Logger. If the level is
 // lower than the level of Logger, the log will NOT be output. If the level is
 // lower than the level of a Slot, the Formatter and Writer of the Slot will NOT
 // be called.
 //
 // The args are handled in the manner of fmt.Sprint.
 //
-// It works well with defer and do NOT forget the last empty pair of parentheses.
-func (log *Logger) Time(args ...interface{}) func() {
-	logLevel, timeLevel := log.timeLevel()
-	if logLevel <= timeLevel {
+// It works well with `defer' and do NOT forget the last empty pair of parentheses.
+func (log *Logger) Timing(args ...interface{}) func() {
+	logLevel, timingLevel := log.timingLevel()
+	if logLevel <= timingLevel {
 		return log.genDone(fmt.Sprint(args...))
 	}
 	return func() {}
 }
 
-// Timef does the same with Time except it calls fmt.Sprintf to format a log.
+// Timingf does the same with Timing except it calls fmt.Sprintf to format a log.
 //
-// It works well with defer and do NOT forget the last empty pair of parentheses.
-func (log *Logger) Timef(fmtstr string, args ...interface{}) func() {
-	logLevel, timeLevel := log.timeLevel()
-	if logLevel <= timeLevel {
+// It works well with `defer' and do NOT forget the last empty pair of parentheses.
+func (log *Logger) Timingf(fmtstr string, args ...interface{}) func() {
+	logLevel, timingLevel := log.timingLevel()
+	if logLevel <= timingLevel {
 		return log.genDone(fmt.Sprintf(fmtstr, args...))
 	}
 	return func() {}
@@ -247,11 +247,11 @@ func (log *Logger) levels() (iface.Level, iface.Level, iface.Level) {
 	return log.config.Level, log.config.TrackLevel, log.config.ExitLevel
 }
 
-func (log *Logger) timeLevel() (iface.Level, iface.Level) {
+func (log *Logger) timingLevel() (iface.Level, iface.Level) {
 	log.lock.Lock()
 	defer log.lock.Unlock()
 
-	return log.config.Level, log.config.TimeLevel
+	return log.config.Level, log.config.TimingLevel
 }
 
 func (log *Logger) panicLevel() (iface.Level, iface.Level) {
@@ -348,9 +348,9 @@ func (log *Logger) genDone(msg string) func() {
 	now := time.Now()
 	return func() {
 		cost := time.Since(now)
-		logLevel, timeLevel := log.timeLevel()
-		if logLevel <= timeLevel {
-			log.write(0, timeLevel, fmt.Sprintf("%s (cost: %v)", msg, cost))
+		logLevel, timingLevel := log.timingLevel()
+		if logLevel <= timingLevel {
+			log.write(0, timingLevel, fmt.Sprintf("%s (cost: %v)", msg, cost))
 		}
 	}
 }

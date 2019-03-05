@@ -40,11 +40,11 @@ type Config struct {
 	// If it is not specified, Off is used. Otherwise, its value MUST be
 	// between Trace and Off inclusive.
 	ExitLevel iface.Level
-	// TimeLevel is the level of a emitted log when Logger.Time or Logger.Timef
-	// is called.
+	// TimingLevel is the level of a emitted log when Logger.Timing or
+	// Logger.Timingf is called.
 	// If it is not specified, Trace is used. Otherwise, its value MUST be
 	// between Trace and Fatal inclusive.
-	TimeLevel iface.Level
+	TimingLevel iface.Level
 	// PanicLevel is the level of a emitted log when Logger.Panic or
 	// Logger.Panicf is called.
 	// If it is not specified, Fatal is used. Otherwise, its value MUST be
@@ -68,8 +68,8 @@ func (config *Config) setDefaults() {
 	if config.ExitLevel == 0 {
 		config.ExitLevel = iface.Off
 	}
-	if config.TimeLevel == 0 {
-		config.TimeLevel = iface.Trace
+	if config.TimingLevel == 0 {
+		config.TimingLevel = iface.Trace
 	}
 	if config.PanicLevel == 0 {
 		config.PanicLevel = iface.Fatal
