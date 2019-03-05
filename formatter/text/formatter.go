@@ -16,9 +16,9 @@ var headerRegexp = regexp.MustCompile("{{([^:%]*?)(?::([^%]*?))?(%.*?)?}}")
 // All methods of a Formatter are concurrency safe.
 // A Formatter MUST be created with New.
 type Formatter struct {
-	header      string
-	minBufSize  int
-	enableColor bool
+	header     string
+	minBufSize int
+	coloring   bool
 
 	colorMgr  *colorMgr
 	appenders []*headerAppender
@@ -31,9 +31,9 @@ type Formatter struct {
 func New(config Config) *Formatter {
 	config.setDefaults()
 	formatter := &Formatter{
-		minBufSize:  config.MinBufSize,
-		enableColor: config.EnableColor,
-		colorMgr:    newColorMgr(),
+		minBufSize: config.MinBufSize,
+		coloring:   config.Coloring,
+		colorMgr:   newColorMgr(),
 	}
 	formatter.SetHeader(config.Header)
 	formatter.MapColors(config.ColorMap)
@@ -94,28 +94,28 @@ func (formatter *Formatter) SetMinBufSize(size int) {
 	}
 }
 
-// ColorEnabled returns whether colorization is enabled in the Formatter.
-func (formatter *Formatter) ColorEnabled() bool {
+// Coloring returns whether colorization is enabled in the Formatter.
+func (formatter *Formatter) Coloring() bool {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
-	return formatter.enableColor
+	return formatter.coloring
 }
 
-// EnableColor enables colorization in the Formatter.
-func (formatter *Formatter) EnableColor() {
+// EnableColoring enables colorization in the Formatter.
+func (formatter *Formatter) EnableColoring() {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
-	formatter.enableColor = true
+	formatter.coloring = true
 }
 
-// DisableColor disables colorization in the Formatter.
-func (formatter *Formatter) DisableColor() {
+// DisableColoring disables colorization in the Formatter.
+func (formatter *Formatter) DisableColoring() {
 	formatter.lock.Lock()
 	defer formatter.lock.Unlock()
 
-	formatter.enableColor = false
+	formatter.coloring = false
 }
 
 // Color returns the color of the level in the Formatter.
@@ -165,7 +165,7 @@ func (formatter *Formatter) Format(record *iface.Record) []byte {
 	defer formatter.lock.Unlock()
 
 	var left, right []byte
-	if formatter.enableColor {
+	if formatter.coloring {
 		if record.Aux.Marked {
 			left, right = formatter.colorMgr.MarkedColorEars()
 		} else {

@@ -49,8 +49,8 @@ type Config struct {
 	// is Magenta despite of its level.
 	// The color of a level is left to be unchanged if it is not in the map.
 	ColorMap map[iface.Level]Color
-	// EnableColor enables colorization if it is true.
-	EnableColor bool
+	// Coloring specifies whether colorization is enabled.
+	Coloring bool
 }
 
 func (config *Config) setDefaults() {
