@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/gxlog/gxlog/formatter"
 	"github.com/gxlog/gxlog/iface"
@@ -70,6 +71,7 @@ func (log *Logger) Link(slot Slot, formatter iface.Formatter,
 	defer log.lock.Unlock()
 
 	log.slots[slot] = link
+	log.updateEquivalents()
 }
 
 // Unlink sets the Formatter, Writer and Filter of the slot to nil and
@@ -79,6 +81,7 @@ func (log *Logger) Unlink(slot Slot) {
 	defer log.lock.Unlock()
 
 	log.slots[slot] = nullSlotLink
+	log.updateEquivalents()
 }
 
 // UnlinkAll sets the Formatter, Writer and Filter of all slots to nil and
@@ -90,6 +93,7 @@ func (log *Logger) UnlinkAll() {
 	for i := range log.slots {
 		log.slots[i] = nullSlotLink
 	}
+	log.updateEquivalents()
 }
 
 // CopySlot copies the Formatter, Writer, Level and Filter of Slot src
@@ -99,6 +103,7 @@ func (log *Logger) CopySlot(dst, src Slot) {
 	defer log.lock.Unlock()
 
 	log.slots[dst] = log.slots[src]
+	log.updateEquivalents()
 }
 
 // MoveSlot copies the Formatter, Writer, Level and Filter of Slot from
@@ -109,6 +114,7 @@ func (log *Logger) MoveSlot(to, from Slot) {
 
 	log.slots[to] = log.slots[from]
 	log.slots[from] = nullSlotLink
+	log.updateEquivalents()
 }
 
 // SwapSlot swaps the Formatter, Writer, Level and Filter of the slots.
@@ -117,6 +123,7 @@ func (log *Logger) SwapSlot(left, right Slot) {
 	defer log.lock.Unlock()
 
 	log.slots[left], log.slots[right] = log.slots[right], log.slots[left]
+	log.updateEquivalents()
 }
 
 // SlotFormatter returns the Formatter of the slot.
@@ -133,6 +140,7 @@ func (log *Logger) SetSlotFormatter(slot Slot, formatter iface.Formatter) {
 	defer log.lock.Unlock()
 
 	log.slots[slot].Formatter = formatter
+	log.updateEquivalents()
 }
 
 // SlotWriter returns the Writer of the slot.
@@ -184,8 +192,23 @@ func (log *Logger) SetSlotFilter(slot Slot, filter Filter) {
 }
 
 func (log *Logger) initSlots() {
-	log.slots = make([]slotLink, MaxSlot)
-	for i := range log.slots {
-		log.slots[i] = nullSlotLink
+	for slot := 0; slot < MaxSlot; slot++ {
+		log.slots = append(log.slots, nullSlotLink)
+	}
+}
+
+func (log *Logger) updateEquivalents() {
+	for i := 0; i < MaxSlot; i++ {
+		log.equivalents[i] = log.equivalents[i][:0]
+		if !reflect.ValueOf(log.slots[i].Formatter).Type().Comparable() {
+			continue
+		}
+		for j := i + 1; j < MaxSlot; j++ {
+			if !reflect.ValueOf(log.slots[j].Formatter).Type().Comparable() ||
+				log.slots[i].Formatter != log.slots[j].Formatter {
+				continue
+			}
+			log.equivalents[i] = append(log.equivalents[i], j)
+		}
 	}
 }

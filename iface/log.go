@@ -48,7 +48,7 @@ type Record struct {
 
 // Formatter is the interface that a formatter of a Logger needs to implement.
 // A Formatter must NOT modify the record. In case of asynchrony, a Formatter
-// needs to make a new byte slice each time.
+// needs to make and return a new byte slice each time.
 //
 // Do NOT call any method of the Logger within Format, or it may deadlock.
 type Formatter interface {
@@ -56,7 +56,7 @@ type Formatter interface {
 }
 
 // Writer is the interface that a writer of a Logger needs to implement.
-// A Writer must NOT modify the record.
+// A Writer must NOT modify the bs and record.
 //
 // Do NOT call any method of the Logger within Write, or it may deadlock.
 type Writer interface {

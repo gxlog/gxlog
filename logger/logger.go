@@ -29,23 +29,23 @@ const callDepthOffset = 3
 type Logger struct {
 	config *Config
 	slots  []slotLink
-
-	countMap map[locator]int64
-	timeMap  map[locator]*timeQueue
-
-	attr copyOnWrite
-
-	lock *sync.Mutex
+	// store indexes of equivalent formatters, used to avoid redundant formatting
+	equivalents [][]int
+	countMap    map[locator]int64
+	timeMap     map[locator]*timeQueue
+	attr        copyOnWrite
+	lock        *sync.Mutex
 }
 
 // New creates a new Logger with the config.
 func New(config Config) *Logger {
 	config.setDefaults()
 	logger := &Logger{
-		config:   &config,
-		countMap: make(map[locator]int64, mapInitCap),
-		timeMap:  make(map[locator]*timeQueue, mapInitCap),
-		lock:     new(sync.Mutex),
+		config:      &config,
+		equivalents: make([][]int, MaxSlot),
+		countMap:    make(map[locator]int64, mapInitCap),
+		timeMap:     make(map[locator]*timeQueue, mapInitCap),
+		lock:        new(sync.Mutex),
 	}
 	logger.initSlots()
 	return logger
@@ -287,12 +287,23 @@ func (log *Logger) write(calldepth int, level iface.Level, msg string) {
 
 	log.attachAux(record)
 
-	for _, link := range log.slots {
-		if link.Level <= level {
-			if link.Filter == nil || link.Filter(record) {
-				link.Writer.Write(link.Formatter.Format(record), record)
+	var formats [MaxSlot][]byte
+	for slot := 0; slot < MaxSlot; slot++ {
+		link := &log.slots[slot]
+		if link.Level > level {
+			continue
+		}
+		if link.Filter != nil && !link.Filter(record) {
+			continue
+		}
+		format := formats[slot]
+		if format == nil {
+			format = link.Formatter.Format(record)
+			for _, id := range log.equivalents[slot] {
+				formats[id] = format
 			}
 		}
+		link.Writer.Write(format, record)
 	}
 }
 
