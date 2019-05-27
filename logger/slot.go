@@ -200,11 +200,11 @@ func (log *Logger) initSlots() {
 func (log *Logger) updateEquivalents() {
 	for i := 0; i < MaxSlot; i++ {
 		log.equivalents[i] = log.equivalents[i][:0]
-		if !reflect.ValueOf(log.slots[i].Formatter).Type().Comparable() {
+		if !reflect.TypeOf(log.slots[i].Formatter).Comparable() {
 			continue
 		}
 		for j := i + 1; j < MaxSlot; j++ {
-			if !reflect.ValueOf(log.slots[j].Formatter).Type().Comparable() ||
+			if !reflect.TypeOf(log.slots[j].Formatter).Comparable() ||
 				log.slots[i].Formatter != log.slots[j].Formatter {
 				continue
 			}
