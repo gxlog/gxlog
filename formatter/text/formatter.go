@@ -186,6 +186,7 @@ func (formatter *Formatter) Format(record *iface.Record) []byte {
 
 func (formatter *Formatter) addAppender(element, property, fmtspec,
 	staticText string) bool {
+
 	appender := newHeaderAppender(element, property, fmtspec, staticText)
 	if appender == nil {
 		return false
@@ -194,8 +195,7 @@ func (formatter *Formatter) addAppender(element, property, fmtspec,
 	return true
 }
 
-func extractElement(indexes []int, header string) (element, property,
-	fmtspec string) {
+func extractElement(indexes []int, header string) (element, property, fmtspec string) {
 	element = strings.ToLower(getField(header, indexes[2], indexes[3]))
 	property = getField(header, indexes[4], indexes[5])
 	fmtspec = getField(header, indexes[6], indexes[7])

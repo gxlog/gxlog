@@ -21,7 +21,9 @@ const (
 
 const bufInitCap = 256
 
-func newAESWriter(wt io.WriteCloser, key string, mode BlockCipherMode) (io.WriteCloser, error) {
+func newAESWriter(wt io.WriteCloser, key string, mode BlockCipherMode) (
+	io.WriteCloser, error) {
+
 	keyBytes, err := hex.DecodeString(key)
 	if err != nil {
 		return wt, err
@@ -39,6 +41,7 @@ func newAESWriter(wt io.WriteCloser, key string, mode BlockCipherMode) (io.Write
 
 func newStreamEncrypter(wt io.WriteCloser, block cipher.Block, iv []byte,
 	mode BlockCipherMode) (io.WriteCloser, error) {
+
 	var stream cipher.Stream
 	switch mode {
 	case CFB:

@@ -104,6 +104,7 @@ func (formatter *Formatter) UpdateConfig(fn func(Config) Config) {
 
 func (formatter *Formatter) formatAux(buf []byte, sep string,
 	aux *iface.Auxiliary) []byte {
+
 	if formatter.config.Omit&Aux == Aux {
 		return buf
 	}

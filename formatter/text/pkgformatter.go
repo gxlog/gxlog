@@ -24,8 +24,7 @@ func newPkgFormatter(property, fmtspec string) elementFormatter {
 	}
 }
 
-func (formatter *pkgFormatter) FormatElement(buf []byte,
-	record *iface.Record) []byte {
+func (formatter *pkgFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	pkg := util.LastSegments(record.Pkg, formatter.segments, '/')
 	if formatter.fmtspec == "%s" {
 		return append(buf, pkg...)

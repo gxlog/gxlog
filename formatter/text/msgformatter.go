@@ -18,8 +18,7 @@ func newMsgFormatter(property, fmtspec string) elementFormatter {
 	return &msgFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (formatter *msgFormatter) FormatElement(buf []byte,
-	record *iface.Record) []byte {
+func (formatter *msgFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return append(buf, record.Msg...)
 	}

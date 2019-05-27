@@ -19,8 +19,7 @@ func newLineFormatter(property, fmtspec string) elementFormatter {
 	return &lineFormatter{property: property, fmtspec: fmtspec}
 }
 
-func (formatter *lineFormatter) FormatElement(buf []byte,
-	record *iface.Record) []byte {
+func (formatter *lineFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	if formatter.fmtspec == "%d" {
 		return strconv.AppendInt(buf, int64(record.Line), 10)
 	}

@@ -143,6 +143,7 @@ func (log *Logger) WithTimeLimit(duration time.Duration, limit int) *Logger {
 
 func appendContexts(contexts []iface.Context, dynamicContexts []dynamicContext,
 	kvs []interface{}) ([]iface.Context, []dynamicContext) {
+
 	for len(kvs) >= 2 {
 		dynamic, ok := kvs[1].(Dynamic)
 		if ok {

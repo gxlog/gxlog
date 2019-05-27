@@ -31,8 +31,7 @@ func newTimeFormatter(property, fmtspec string) elementFormatter {
 	}
 }
 
-func (formatter *timeFormatter) FormatElement(buf []byte,
-	record *iface.Record) []byte {
+func (formatter *timeFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	if formatter.fmtspec == "%s" {
 		return record.Time.AppendFormat(buf, formatter.layout)
 	}

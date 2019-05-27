@@ -24,8 +24,7 @@ func newFileFormatter(property, fmtspec string) elementFormatter {
 	}
 }
 
-func (formatter *fileFormatter) FormatElement(buf []byte,
-	record *iface.Record) []byte {
+func (formatter *fileFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	file := util.LastSegments(record.File, formatter.segments, '/')
 	if formatter.fmtspec == "%s" {
 		return append(buf, file...)

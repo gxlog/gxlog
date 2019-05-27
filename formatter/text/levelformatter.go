@@ -40,8 +40,7 @@ func newLevelFormatter(property, fmtspec string) elementFormatter {
 	}
 }
 
-func (formatter *levelFormatter) FormatElement(buf []byte,
-	record *iface.Record) []byte {
+func (formatter *levelFormatter) FormatElement(buf []byte, record *iface.Record) []byte {
 	desc := formatter.descList[record.Level]
 	if formatter.fmtspec == "%s" {
 		return append(buf, desc...)

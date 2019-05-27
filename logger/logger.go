@@ -120,8 +120,7 @@ func (log *Logger) LogError(level iface.Level, text string) error {
 
 // LogErrorf calls Logf to emit a log and calls fmt.Errorf to return an error.
 // The level MUST be between Trace and Fatal inclusive.
-func (log *Logger) LogErrorf(level iface.Level, fmtstr string,
-	args ...interface{}) error {
+func (log *Logger) LogErrorf(level iface.Level, fmtstr string, args ...interface{}) error {
 	err := fmt.Errorf(fmtstr, args...)
 	log.Log(1, level, err.Error())
 	return err

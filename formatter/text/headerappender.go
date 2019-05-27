@@ -36,8 +36,7 @@ func newHeaderAppender(element, property, fmtspec, staticText string) *headerApp
 	}
 }
 
-func (appender *headerAppender) AppendHeader(buf []byte,
-	record *iface.Record) []byte {
+func (appender *headerAppender) AppendHeader(buf []byte, record *iface.Record) []byte {
 	buf = append(buf, appender.staticText...)
 	return appender.formatter.FormatElement(buf, record)
 }

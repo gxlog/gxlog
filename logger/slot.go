@@ -47,11 +47,13 @@ var nullSlotLink = slotLink{
 // If the Level of the slot is not specified, Trace is used.
 func (log *Logger) Link(slot Slot, formatter iface.Formatter,
 	writer iface.Writer, opts ...interface{}) {
+
 	link := slotLink{
 		Formatter: formatter,
 		Writer:    writer,
 		Level:     iface.Trace,
 	}
+
 	for _, opt := range opts {
 		switch opt := opt.(type) {
 		case iface.Level:

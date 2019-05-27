@@ -132,6 +132,7 @@ func TestColor(t *testing.T) {
 
 func testFormat(t *testing.T, formatter iface.Formatter, record *iface.Record,
 	expect string) {
+
 	output := string(formatter.Format(record))
 	if output != expect {
 		t.Errorf("testFormat:\noutput: %q\nexpect: %q", output, expect)
