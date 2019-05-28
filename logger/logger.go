@@ -146,7 +146,8 @@ func (log *Logger) Log(callDepth int, level iface.Level, args ...interface{}) {
 	logLevel, trackLevel, exitLevel := log.levels()
 	if logLevel <= level {
 		if trackLevel <= level {
-			args = append(args, "\n", string(debug.Stack()))
+			stack := debug.Stack()
+			args = append(args, "\n", string(stack[:len(stack)-1]))
 		}
 		log.write(callDepth, level, fmt.Sprint(args...))
 		if exitLevel <= level {
@@ -164,7 +165,8 @@ func (log *Logger) Logf(callDepth int, level iface.Level, fmtstr string, args ..
 	if logLevel <= level {
 		if trackLevel <= level {
 			fmtstr += "\n%s"
-			args = append(args, debug.Stack())
+			stack := debug.Stack()
+			args = append(args, stack[:len(stack)-1])
 		}
 		log.write(callDepth, level, fmt.Sprintf(fmtstr, args...))
 		if exitLevel <= level {
