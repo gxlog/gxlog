@@ -18,7 +18,7 @@ func main() {
 	// gxlog.Formatter returns the default Formatter in Slot0.
 	// Coloring is only supported on systems that ANSI escape sequences
 	// are supported.
-	gxlog.Formatter().EnableColor()
+	gxlog.Formatter().EnableColoring()
 
 	testSlots()
 	testSlotsLevel()

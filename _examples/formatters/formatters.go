@@ -31,8 +31,8 @@ func testTextFormatter() {
 	textFmt := text.New(text.Config{
 		// Coloring is only supported on systems that ANSI escape sequences
 		// are supported.
-		EnableColor: true,
-		Header:      text.CompactHeader,
+		Coloring: true,
+		Header:   text.CompactHeader,
 	})
 	log.SetSlotFormatter(logger.Slot0, textFmt)
 	log.Trace("green")
@@ -56,7 +56,7 @@ func testTextFormatter() {
 	// For details of all supported fields, see the comment of text.Config.
 	header := "{{time:time}} {{level:char}} {{file:2%q}}:{{line:%05d}} {{msg:%20s}}\n"
 	textFmt.SetHeader(header)
-	textFmt.DisableColor()
+	textFmt.DisableColoring()
 	log.Trace("default color")
 }
 

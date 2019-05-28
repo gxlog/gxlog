@@ -33,8 +33,8 @@ func main() {
 	// Logs will be formatted to text format and output to os.Stderr, then
 	// formatted to json format and output to log files in /tmp/gxlog.
 	log.Link(logger.Slot0, text.New(text.Config{
-		EnableColor: true,
-	}), writer.Wrap(os.Stderr))
+		Coloring: true,
+	}), writer.Wrap(os.Stderr, nil))
 	log.Link(logger.Slot1, json.New(json.Config{}), fileWriter)
 
 	log.Info("test")

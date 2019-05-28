@@ -14,7 +14,7 @@ func main() {
 	// gxlog.Formatter returns the default Formatter in Slot0.
 	// Coloring is only supported on systems that ANSI escape sequences
 	// are supported.
-	gxlog.Formatter().EnableColor()
+	gxlog.Formatter().EnableColoring()
 
 	testLevel()
 	// testPanic()
@@ -52,12 +52,12 @@ func testTime() {
 	// Time or Timef returns a function. When the function is called, it outputs
 	// the log as well as the time cost since the call of Time or Timef.
 	// The default Level of Time or Timef is Trace.
-	done := log.Time("test Time")
+	done := log.Timing("test Time")
 	time.Sleep(200 * time.Millisecond)
 	done()
 	// Time or Timef works well with defer.
 	// Notice the last empty pair of parentheses.
-	defer log.Timef("%s", "test Timef")()
+	defer log.Timingf("%s", "test Timef")()
 	time.Sleep(400 * time.Millisecond)
 }
 

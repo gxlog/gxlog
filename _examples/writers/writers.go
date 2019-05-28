@@ -23,12 +23,12 @@ func main() {
 	// gxlog.Formatter returns the default Formatter in Slot0.
 	// Coloring is only supported on systems that ANSI escape sequences
 	// are supported.
-	gxlog.Formatter().EnableColor()
+	gxlog.Formatter().EnableColoring()
 
 	testWrappers()
 	testSocketWriters()
 
-	gxlog.Formatter().DisableColor()
+	gxlog.Formatter().DisableColoring()
 
 	testFileWriter()
 	testSyslogWriter()
@@ -43,19 +43,14 @@ func testWrappers() {
 	log.Info("a simple writer that just writes to os.Stderr")
 
 	// another equivalent way
-	log.SetSlotWriter(logger.Slot0, writer.Wrap(os.Stderr))
+	log.SetSlotWriter(logger.Slot0, writer.Wrap(os.Stderr, nil))
 	log.Info("writer wrapper of os.Stderr")
-
-	// multi-writer
-	multi := writer.Multi(writer.Wrap(os.Stdout), writer.Wrap(os.Stderr))
-	log.SetSlotWriter(logger.Slot0, multi)
-	log.Info("multi-writer: this will be printed twice")
 
 	// Asynchronous writer wrapper uses a internal channel to buffer logs.
 	// When the channel is full, the Write method of the wrapper blocks.
 	// ATTENTION: Some logs may NOT be output in asynchronous mode if os.Exit
 	// is called, panicking without recovery and so on.
-	async := writer.NewAsync(writer.Wrap(os.Stderr), 1024)
+	async := writer.NewAsync(writer.Wrap(os.Stderr, nil), 1024)
 	// Close waits until all logs in the channel have been output.
 	// It does NOT close the underlying writer.
 	// To ignore all logs that have not been output, use Abort instead.
