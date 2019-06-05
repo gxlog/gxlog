@@ -76,7 +76,6 @@ the log.
       - custom omission of empty fields
   - **writer**
     - writer function wrapper
-    - multi-writer wrapper
     - io.Writer wrapper
     - asynchronous wrapper
     - null writer
@@ -135,7 +134,7 @@ func main() {
     // gxlog.Formatter returns the default Formatter in Slot0.
     // Coloring is only supported on systems that ANSI escape sequences
     // are supported.
-    gxlog.Formatter().EnableColor()
+    gxlog.Formatter().EnableColoring()
 
     testLevel()
     // testPanic()
@@ -173,12 +172,12 @@ func testTime() {
     // Time or Timef returns a function. When the function is called, it outputs
     // the log as well as the time cost since the call of Time or Timef.
     // The default Level of Time or Timef is Trace.
-    done := log.Time("test Time")
+    done := log.Timing("test Time")
     time.Sleep(200 * time.Millisecond)
     done()
     // Time or Timef works well with defer.
     // Notice the last empty pair of parentheses.
-    defer log.Timef("%s", "test Timef")()
+    defer log.Timingf("%s", "test Timef")()
     time.Sleep(400 * time.Millisecond)
 }
 
@@ -235,7 +234,7 @@ func main() {
     // gxlog.Formatter returns the default Formatter in Slot0.
     // Coloring is only supported on systems that ANSI escape sequences
     // are supported.
-    gxlog.Formatter().EnableColor()
+    gxlog.Formatter().EnableColoring()
 
     testAuxiliary()
     testDynamicContext()
@@ -336,7 +335,7 @@ func main() {
     // gxlog.Formatter returns the default Formatter in Slot0.
     // Coloring is only supported on systems that ANSI escape sequences
     // are supported.
-    gxlog.Formatter().EnableColor()
+    gxlog.Formatter().EnableColoring()
 
     testSlots()
     testSlotsLevel()
@@ -416,7 +415,7 @@ func main() {
     // gxlog.Formatter returns the default Formatter in Slot0.
     // Coloring is only supported on systems that ANSI escape sequences
     // are supported.
-    gxlog.Formatter().EnableColor()
+    gxlog.Formatter().EnableColoring()
 
     testConfig()
     testFilterLogic()
@@ -502,8 +501,8 @@ func main() {
     // Logs will be formatted to text format and output to os.Stderr, then
     // formatted to json format and output to log files in /tmp/gxlog.
     log.Link(logger.Slot0, text.New(text.Config{
-        EnableColor: true,
-    }), writer.Wrap(os.Stderr))
+        Coloring: true,
+    }), writer.Wrap(os.Stderr, nil))
     log.Link(logger.Slot1, json.New(json.Config{}), fileWriter)
 
     log.Info("test")
@@ -553,8 +552,8 @@ func testTextFormatter() {
     textFmt := text.New(text.Config{
         // Coloring is only supported on systems that ANSI escape sequences
         // are supported.
-        EnableColor: true,
-        Header:      text.CompactHeader,
+        Coloring: true,
+        Header:   text.CompactHeader,
     })
     log.SetSlotFormatter(logger.Slot0, textFmt)
     log.Trace("green")
@@ -578,7 +577,7 @@ func testTextFormatter() {
     // For details of all supported fields, see the comment of text.Config.
     header := "{{time:time}} {{level:char}} {{file:2%q}}:{{line:%05d}} {{msg:%20s}}\n"
     textFmt.SetHeader(header)
-    textFmt.DisableColor()
+    textFmt.DisableColoring()
     log.Trace("default color")
 }
 
@@ -608,9 +607,8 @@ func testJSONFormatter() {
 Gxlog provides several writer wrappers to gxlog.Writer and several writers.
 
 Gxlog provides several writer wrappers, including function wrapper, io.Writer
-wrapper, multi-writer wrapper and asynchronous wrapper. The multi-writer wrapper
-can combine several writers into one if they are writing logs with the same
-format. The asynchronous wrapper can make a writer switch into asynchronous mode.
+wrapper and asynchronous wrapper. The asynchronous wrapper can make a writer
+switch into asynchronous mode.
 
 Gxlog also provides several writers including tcp socket writer, unix domain
 socket writer, file writer and syslog writer. Both the tcp socket writer and the
@@ -656,12 +654,12 @@ func main() {
     // gxlog.Formatter returns the default Formatter in Slot0.
     // Coloring is only supported on systems that ANSI escape sequences
     // are supported.
-    gxlog.Formatter().EnableColor()
+    gxlog.Formatter().EnableColoring()
 
     testWrappers()
     testSocketWriters()
 
-    gxlog.Formatter().DisableColor()
+    gxlog.Formatter().DisableColoring()
 
     testFileWriter()
     testSyslogWriter()
@@ -676,19 +674,14 @@ func testWrappers() {
     log.Info("a simple writer that just writes to os.Stderr")
 
     // another equivalent way
-    log.SetSlotWriter(logger.Slot0, writer.Wrap(os.Stderr))
+    log.SetSlotWriter(logger.Slot0, writer.Wrap(os.Stderr, nil))
     log.Info("writer wrapper of os.Stderr")
-
-    // multi-writer
-    multi := writer.Multi(writer.Wrap(os.Stdout), writer.Wrap(os.Stderr))
-    log.SetSlotWriter(logger.Slot0, multi)
-    log.Info("multi-writer: this will be printed twice")
 
     // Asynchronous writer wrapper uses a internal channel to buffer logs.
     // When the channel is full, the Write method of the wrapper blocks.
     // ATTENTION: Some logs may NOT be output in asynchronous mode if os.Exit
     // is called, panicking without recovery and so on.
-    async := writer.NewAsync(writer.Wrap(os.Stderr), 1024)
+    async := writer.NewAsync(writer.Wrap(os.Stderr, nil), 1024)
     // Close waits until all logs in the channel have been output.
     // It does NOT close the underlying writer.
     // To ignore all logs that have not been output, use Abort instead.
